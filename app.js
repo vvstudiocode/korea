@@ -461,47 +461,46 @@ async function handleOrderSubmit(e) {
             }
         };
 
-        // 使用 fetch 發送 POST 請求 (取代原本的 Image GET 方式)
-        // mode: 'no-cors' 允許跨域發送，雖然無法讀取回應，但能確保資料送達
-        await fetch(GAS_API_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: {
-                'Content-Type': 'text/plain;charset=utf-8', // 避免觸發 CORS 預檢
-            },
-            body: JSON.stringify(payload)
-        });
+        // 使用 GET 請求發送資料 (避免 POST CORS 問題)
+        // 將資料編碼放入 URL
+        const queryString = `?action=submitOrder&payload=${encodeURIComponent(JSON.stringify(payload))}`;
+        const response = await fetch(GAS_API_URL + queryString);
+        const result = await response.json();
 
-        // 不等待回應，直接顯示成功（訂單已發送到後端）
-        setTimeout(() => {
-            hideLoadingOverlay(); // 隱藏 Loading
+        if (result.success) {
+            // 成功
+            setTimeout(() => {
+                hideLoadingOverlay(); // 隱藏 Loading
 
-            // 顯示成功訊息
-            document.getElementById('orderNumber').textContent = orderId;
-            closeModal('checkoutModal');
-            showModal('successModal');
+                // 顯示成功訊息
+                document.getElementById('orderNumber').textContent = orderId;
+                closeModal('checkoutModal');
+                showModal('successModal');
 
-            // 重新載入商品資料以同步庫存顯示
-            loadProducts();
+                // 重新載入商品資料以同步庫存顯示
+                loadProducts();
 
-            // 清空購物車
-            cart = [];
-            saveCartToLocalStorage();
-            updateCartUI();
+                // 清空購物車
+                cart = [];
+                saveCartToLocalStorage();
+                updateCartUI();
 
-            // 重置表單
-            document.getElementById('orderForm').reset();
+                // 重置表單
+                document.getElementById('orderForm').reset();
 
-            submitBtn.textContent = '確認送出訂單';
-            submitBtn.disabled = false;
-        }, 1500);
+                submitBtn.textContent = '確認送出訂單';
+                submitBtn.disabled = false;
+            }, 1000);
+        } else {
+            throw new Error(result.error || 'Unknown error');
+        }
 
     } catch (error) {
         console.error('送出訂單失敗:', error);
         hideLoadingOverlay();
         submitBtn.textContent = '確認送出訂單';
         submitBtn.disabled = false;
-        alert('訂單送出失敗，請稍後再試');
+        alert('訂單送出失敗，請稍後再試\n錯誤: ' + error.message);
     }
 }
 
