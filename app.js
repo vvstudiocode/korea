@@ -268,6 +268,13 @@ function addToCart(product, quantity) {
     saveCartToLocalStorage();
     updateCartUI();
 
+    // 更新本地商品庫存並重新渲染商品卡片
+    const prod = products.find(p => p.id === product.id);
+    if (prod) {
+        prod.stock = Math.max(0, prod.stock - quantity);
+        displayProducts();
+    }
+
     // 顯示提示
     showNotification('已加入購物車！');
 }
@@ -473,6 +480,9 @@ async function handleOrderSubmit(e) {
             document.getElementById('orderNumber').textContent = orderId;
             closeModal('checkoutModal');
             showModal('successModal');
+
+            // 重新載入商品資料以同步庫存顯示
+            loadProducts();
 
             // 清空購物車
             cart = [];
