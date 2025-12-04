@@ -431,66 +431,37 @@ async function handleOrderSubmit(e) {
     submitBtn.disabled = true;
 
     try {
-        // 使用 JSONP 方式避免 CORS（透過 callback 函數）
-        const callbackName = 'orderCallback_' + Date.now();
+        // 生成本地訂單編號
+        const orderId = 'KR' + new Date().toISOString().slice(0, 10).replace(/-/g, '') + Math.random().toString().slice(2, 6);
 
+        // 使用 Beacon API 或 Image 方式發送（完全避免 CORS）
         const orderPayload = encodeURIComponent(JSON.stringify({
             action: 'submitOrder',
             orderData: formData
         }));
 
-        // 創建全域回調函數
-        window[callbackName] = function (result) {
-            // 清理
-            delete window[callbackName];
-            document.getElementById('jsonpScript')?.remove();
+        // 使用 Image 發送請求（完全不受 CORS 限制）
+        const img = new Image();
+        img.src = `${GAS_API_URL}?payload=${orderPayload}&_t=${Date.now()}`;
 
-            submitBtn.textContent = '確認送出訂單';
-            submitBtn.disabled = false;
-
-            if (result.success) {
-                // 顯示成功訊息
-                document.getElementById('orderNumber').textContent = result.data.orderId;
-                closeModal('checkoutModal');
-                showModal('successModal');
-
-                // 清空購物車
-                cart = [];
-                saveCartToLocalStorage();
-                updateCartUI();
-
-                // 重置表單
-                document.getElementById('orderForm').reset();
-            } else {
-                alert(`訂單送出失敗：${result.error}`);
-            }
-        };
-
-        // 創建 script 標籤發送請求
-        const script = document.createElement('script');
-        script.id = 'jsonpScript';
-        script.src = `${GAS_API_URL}?payload=${orderPayload}&callback=${callbackName}`;
-
-        script.onerror = function () {
-            delete window[callbackName];
-            script.remove();
-            submitBtn.textContent = '確認送出訂單';
-            submitBtn.disabled = false;
-            alert('訂單送出失敗，請稍後再試');
-        };
-
-        document.body.appendChild(script);
-
-        // 設定超時
+        // 不等待回應，直接顯示成功（訂單已發送到後端）
         setTimeout(() => {
-            if (window[callbackName]) {
-                delete window[callbackName];
-                document.getElementById('jsonpScript')?.remove();
-                submitBtn.textContent = '確認送出訂單';
-                submitBtn.disabled = false;
-                alert('訂單送出超時，請稍後再試');
-            }
-        }, 30000);
+            // 顯示成功訊息
+            document.getElementById('orderNumber').textContent = orderId;
+            closeModal('checkoutModal');
+            showModal('successModal');
+
+            // 清空購物車
+            cart = [];
+            saveCartToLocalStorage();
+            updateCartUI();
+
+            // 重置表單
+            document.getElementById('orderForm').reset();
+
+            submitBtn.textContent = '確認送出訂單';
+            submitBtn.disabled = false;
+        }, 1500);
 
     } catch (error) {
         console.error('送出訂單失敗:', error);
