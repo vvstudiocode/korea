@@ -182,9 +182,13 @@ function displayProducts() {
  * 顯示商品詳情
  */
 function showProductDetail(productId) {
-    currentProduct = products.find(p => p.id === productId);
+    // 使用寬鬆相等 (==) 以容許數字/字串差異，避免 ID 為 1 時找不到商品
+    currentProduct = products.find(p => p.id == productId);
 
-    if (!currentProduct) return;
+    if (!currentProduct) {
+        console.error('找不到商品:', productId);
+        return;
+    }
 
     document.getElementById('modalProductImage').src = currentProduct.image;
     document.getElementById('modalProductName').textContent = currentProduct.name;
