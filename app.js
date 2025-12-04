@@ -434,6 +434,7 @@ async function handleOrderSubmit(e) {
 
         // 精簡 items 資料，只傳送後端需要的欄位
         const simplifiedItems = cart.map(item => ({
+            id: item.id, // 新增 ID 以便後端準確扣庫存
             name: item.name,
             quantity: item.quantity,
             price: item.price
