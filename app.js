@@ -434,15 +434,33 @@ async function handleOrderSubmit(e) {
         // 生成本地訂單編號
         const orderId = 'KR' + new Date().toISOString().slice(0, 10).replace(/-/g, '') + Math.random().toString().slice(2, 6);
 
-        // 使用 Beacon API 或 Image 方式發送（完全避免 CORS）
-        const orderPayload = encodeURIComponent(JSON.stringify({
-            action: 'submitOrder',
-            orderData: formData
+        // 精簡 items 資料，只傳送後端需要的欄位
+        const simplifiedItems = cart.map(item => ({
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price
         }));
 
-        // 使用 Image 發送請求（完全不受 CORS 限制）
-        const img = new Image();
-        img.src = `${GAS_API_URL}?payload=${orderPayload}&_t=${Date.now()}`;
+        // 準備傳送給後端的資料
+        const payload = {
+            action: 'submitOrder',
+            orderData: {
+                ...formData,
+                items: simplifiedItems,
+                orderId: orderId // 傳送前端生成的訂單編號
+            }
+        };
+
+        // 使用 fetch 發送 POST 請求 (取代原本的 Image GET 方式)
+        // mode: 'no-cors' 允許跨域發送，雖然無法讀取回應，但能確保資料送達
+        await fetch(GAS_API_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: {
+                'Content-Type': 'text/plain;charset=utf-8', // 避免觸發 CORS 預檢
+            },
+            body: JSON.stringify(payload)
+        });
 
         // 不等待回應，直接顯示成功（訂單已發送到後端）
         setTimeout(() => {
