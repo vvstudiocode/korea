@@ -461,10 +461,16 @@ async function handleOrderSubmit(e) {
             }
         };
 
-        // 使用 GET 請求發送資料 (避免 POST CORS 問題)
-        // 將資料編碼放入 URL
-        const queryString = `?action=submitOrder&payload=${encodeURIComponent(JSON.stringify(payload))}`;
-        const response = await fetch(GAS_API_URL + queryString);
+        // 使用 POST 請求發送資料
+        // 使用 text/plain 避免觸發 CORS Preflight (Google Apps Script 的限制)
+        const response = await fetch(GAS_API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'text/plain;charset=utf-8',
+            },
+            body: JSON.stringify(payload)
+        });
+
         const result = await response.json();
 
         if (result.success) {
