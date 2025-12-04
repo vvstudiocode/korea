@@ -873,6 +873,46 @@ body {
     display: block;
 }
 
+/* ===== Loading 覆蓋層 ===== */
+.loading-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+}
+
+.loading-overlay.active {
+    display: flex;
+}
+
+/* Spinner 動畫 */
+.spinner {
+    width: 60px;
+    height: 60px;
+    border: 6px solid var(--light-gray);
+    border-top: 6px solid var(--primary-pink);
+    border-right: 6px solid var(--primary-rose);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
 /* ===== 響應式設計 ===== */
 @media (max-width: 768px) {
     .hero-title {
