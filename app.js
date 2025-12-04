@@ -206,6 +206,7 @@ function showProductDetail(productId) {
  * 增加數量
  */
 function increaseQuantity() {
+    const input = document.getElementById('modalQuantity');
     // 不再限制最大數量
     // const max = parseInt(input.max);
     const current = parseInt(input.value);
