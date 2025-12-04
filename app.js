@@ -426,8 +426,8 @@ async function handleOrderSubmit(e) {
         total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
     };
 
-    // 顯示全螢幕 Loading
-    showLoadingOverlay('訂單處理中...');
+    // 顯示全螢幕 Loading (不帶文字)
+    showLoadingOverlay();
 
     const submitBtn = e.target.querySelector('.submit-order-btn');
     submitBtn.disabled = true;
@@ -586,9 +586,9 @@ style.textContent = `
 document.head.appendChild(style);
 
 /**
- * 顯示全螢幕 Loading
+ * 顯示全螢幕 Loading (僅動畫)
  */
-function showLoadingOverlay(message = '載入中...') {
+function showLoadingOverlay() {
     let loadingOverlay = document.getElementById('loadingOverlay');
     if (!loadingOverlay) {
         loadingOverlay = document.createElement('div');
@@ -596,11 +596,8 @@ function showLoadingOverlay(message = '載入中...') {
         loadingOverlay.className = 'loading-overlay';
         loadingOverlay.innerHTML = `
             <div class="spinner"></div>
-            <div class="loading-text">${message}</div>
         `;
         document.body.appendChild(loadingOverlay);
-    } else {
-        loadingOverlay.querySelector('.loading-text').textContent = message;
     }
     loadingOverlay.classList.add('active');
 }
