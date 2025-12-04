@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Poppins:wght@300;400;600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Playfair+Display:wght@400;600;700&family=Poppins:wght@300;400;600&display=swap"
         rel="stylesheet">
 </head>
 
@@ -87,9 +87,11 @@
                     </div>
                     <div class="quantity-selector">
                         <label>數量：</label>
-                        <button class="qty-btn" onclick="decreaseQuantity()">-</button>
-                        <input type="number" id="modalQuantity" value="1" min="1" readonly>
-                        <button class="qty-btn" onclick="increaseQuantity()">+</button>
+                        <div class="qty-group">
+                            <button class="qty-btn" onclick="decreaseQuantity()">-</button>
+                            <input type="number" id="modalQuantity" value="1" min="1" readonly>
+                            <button class="qty-btn" onclick="increaseQuantity()">+</button>
+                        </div>
                     </div>
                     <button class="add-to-cart-btn" onclick="addToCartFromModal()">
                         加入購物車
