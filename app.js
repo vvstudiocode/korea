@@ -172,7 +172,7 @@ function displayProducts() {
                 <p class="product-description">${product.description}</p>
                 <div class="product-footer">
                     <span class="product-price">NT$ ${product.price}</span>
-                    <span class="product-stock">庫存 ${product.stock}</span>
+                    <!-- <span class="product-stock">庫存 ${product.stock}</span> -->
                 </div>
             </div>
         </div>
@@ -195,9 +195,9 @@ function showProductDetail(productId) {
     document.getElementById('modalProductName').textContent = currentProduct.name;
     document.getElementById('modalProductPrice').textContent = `NT$ ${currentProduct.price}`;
     document.getElementById('modalProductDescription').textContent = currentProduct.description;
-    document.getElementById('modalProductStock').textContent = currentProduct.stock;
+    // document.getElementById('modalProductStock').textContent = currentProduct.stock;
     document.getElementById('modalQuantity').value = 1;
-    document.getElementById('modalQuantity').max = currentProduct.stock;
+    // document.getElementById('modalQuantity').max = currentProduct.stock;
 
     showModal('productModal');
 }
@@ -206,13 +206,11 @@ function showProductDetail(productId) {
  * 增加數量
  */
 function increaseQuantity() {
-    const input = document.getElementById('modalQuantity');
-    const max = parseInt(input.max);
+    // 不再限制最大數量
+    // const max = parseInt(input.max);
     const current = parseInt(input.value);
 
-    if (current < max) {
-        input.value = current + 1;
-    }
+    input.value = current + 1;
 }
 
 /**
@@ -253,12 +251,9 @@ function addToCart(product, quantity) {
     const existingItem = cart.find(item => String(item.id) === String(product.id));
 
     if (existingItem) {
-        // 檢查庫存
+        // 不再檢查庫存
         const newQuantity = existingItem.quantity + quantity;
-        if (newQuantity > product.stock) {
-            alert(`庫存不足！目前庫存僅剩 ${product.stock} 件`);
-            return;
-        }
+        // if (newQuantity > product.stock) { ... }
         existingItem.quantity = newQuantity;
     } else {
         cart.push({
@@ -270,12 +265,9 @@ function addToCart(product, quantity) {
     saveCartToLocalStorage();
     updateCartUI();
 
-    // 更新本地商品庫存並重新渲染商品卡片
-    const prod = products.find(p => String(p.id) === String(product.id));
-    if (prod) {
-        prod.stock = Math.max(0, prod.stock - quantity);
-        displayProducts();
-    }
+    // 不再更新本地庫存
+    // const prod = products.find(p => String(p.id) === String(product.id));
+    // if (prod) { ... }
 
     // 顯示提示
     showNotification('已加入購物車！');
@@ -337,12 +329,9 @@ function updateCartQuantity(productId, change) {
 
     const newQuantity = item.quantity + change;
 
-    // 檢查庫存
-    const product = products.find(p => String(p.id) === String(productId));
-    if (newQuantity > product.stock) {
-        alert(`庫存不足！目前庫存僅剩 ${product.stock} 件`);
-        return;
-    }
+    // 不再檢查庫存
+    // const product = products.find(p => String(p.id) === String(productId));
+    // if (newQuantity > product.stock) { ... }
 
     if (newQuantity <= 0) {
         removeFromCart(productId);
