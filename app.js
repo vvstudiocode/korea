@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
  * 初始化應用程式
  */
 function initializeApp() {
+    console.log('App Version: 2.0 (POST Request)'); // 版本標記
     loadProducts();
     loadCartFromLocalStorage();
     updateCartUI();
@@ -248,7 +249,8 @@ function closeProductModal() {
  * 加入購物車
  */
 function addToCart(product, quantity) {
-    const existingItem = cart.find(item => item.id === product.id);
+    // 使用 String() 確保 ID 比對正確 (避免數字 vs 字串問題)
+    const existingItem = cart.find(item => String(item.id) === String(product.id));
 
     if (existingItem) {
         // 檢查庫存
@@ -269,7 +271,7 @@ function addToCart(product, quantity) {
     updateCartUI();
 
     // 更新本地商品庫存並重新渲染商品卡片
-    const prod = products.find(p => p.id === product.id);
+    const prod = products.find(p => String(p.id) === String(product.id));
     if (prod) {
         prod.stock = Math.max(0, prod.stock - quantity);
         displayProducts();
@@ -329,13 +331,14 @@ function updateCartUI() {
  * 更新購物車商品數量
  */
 function updateCartQuantity(productId, change) {
-    const item = cart.find(i => i.id === productId);
+    // 使用 String() 確保 ID 比對正確
+    const item = cart.find(i => String(i.id) === String(productId));
     if (!item) return;
 
     const newQuantity = item.quantity + change;
 
     // 檢查庫存
-    const product = products.find(p => p.id === productId);
+    const product = products.find(p => String(p.id) === String(productId));
     if (newQuantity > product.stock) {
         alert(`庫存不足！目前庫存僅剩 ${product.stock} 件`);
         return;
@@ -355,7 +358,8 @@ function updateCartQuantity(productId, change) {
  * 移除購物車商品
  */
 function removeFromCart(productId) {
-    cart = cart.filter(item => item.id !== productId);
+    // 使用 String() 確保 ID 比對正確
+    cart = cart.filter(item => String(item.id) !== String(productId));
     saveCartToLocalStorage();
     updateCartUI();
 }
@@ -472,6 +476,7 @@ async function handleOrderSubmit(e) {
         });
 
         const result = await response.json();
+        console.log('Backend Version:', result.version); // 檢查後端版本
 
         if (result.success) {
             // 成功
