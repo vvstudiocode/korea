@@ -431,15 +431,15 @@ async function handleOrderSubmit(e) {
         submitBtn.textContent = '送出中...';
         submitBtn.disabled = true;
 
-        const response = await fetch(GAS_API_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                action: 'submitOrder',
-                orderData: formData
-            })
+        // 使用 URL 編碼的方式發送資料，避免 CORS preflight
+        const orderPayload = encodeURIComponent(JSON.stringify({
+            action: 'submitOrder',
+            orderData: formData
+        }));
+
+        const response = await fetch(`${GAS_API_URL}?payload=${orderPayload}`, {
+            method: 'GET',
+            redirect: 'follow'
         });
 
         const result = await response.json();
