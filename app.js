@@ -41,15 +41,11 @@ function setupEventListeners() {
     // 訂單表單
     document.getElementById('orderForm').addEventListener('submit', handleOrderSubmit);
 
-    // 分類篩選
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            e.target.classList.add('active');
-            currentCategory = e.target.dataset.category;
-            displayProducts();
-        });
-    });
+    // 訂單表單
+    document.getElementById('orderForm').addEventListener('submit', handleOrderSubmit);
+
+    // 移除分類篩選監聽器
+    // document.querySelectorAll('.filter-btn').forEach(...)
 
     // 遮罩層點擊關閉
     document.getElementById('overlay').addEventListener('click', closeAllModals);
@@ -154,11 +150,11 @@ function loadDemoProducts() {
 function displayProducts() {
     const productsGrid = document.getElementById('productsGrid');
 
-    // 篩選商品
+    // 移除分類篩選邏輯，直接顯示所有商品
     let filteredProducts = products;
-    if (currentCategory !== 'all') {
-        filteredProducts = products.filter(p => p.category === currentCategory);
-    }
+    // if (currentCategory !== 'all') {
+    //     filteredProducts = products.filter(p => p.category === currentCategory);
+    // }
 
     if (filteredProducts.length === 0) {
         productsGrid.innerHTML = '<div class="loading">此分類暫無商品</div>';
@@ -419,15 +415,17 @@ async function handleOrderSubmit(e) {
     const formData = {
         customerName: document.getElementById('customerName').value,
         customerPhone: document.getElementById('customerPhone').value,
+        customerLineId: document.getElementById('customerLineId').value, // 取得 Line ID
         customerEmail: document.getElementById('customerEmail').value,
         customerAddress: document.getElementById('customerAddress').value,
         items: cart,
         total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
     };
 
-    // 顯示載入中
+    // 顯示全螢幕 Loading
+    showLoadingOverlay('訂單處理中...');
+
     const submitBtn = e.target.querySelector('.submit-order-btn');
-    submitBtn.textContent = '送出中...';
     submitBtn.disabled = true;
 
     try {
@@ -464,6 +462,8 @@ async function handleOrderSubmit(e) {
 
         // 不等待回應，直接顯示成功（訂單已發送到後端）
         setTimeout(() => {
+            hideLoadingOverlay(); // 隱藏 Loading
+
             // 顯示成功訊息
             document.getElementById('orderNumber').textContent = orderId;
             closeModal('checkoutModal');
@@ -483,6 +483,7 @@ async function handleOrderSubmit(e) {
 
     } catch (error) {
         console.error('送出訂單失敗:', error);
+        hideLoadingOverlay();
         submitBtn.textContent = '確認送出訂單';
         submitBtn.disabled = false;
         alert('訂單送出失敗，請稍後再試');
@@ -571,9 +572,40 @@ style.textContent = `
         from { transform: translateX(400px); opacity: 0; }
         to { transform: translateX(0); opacity: 1; }
     }
+    }
     @keyframes slideOut {
         from { transform: translateX(0); opacity: 1; }
         to { transform: translateX(400px); opacity: 0; }
     }
 `;
 document.head.appendChild(style);
+
+/**
+ * 顯示全螢幕 Loading
+ */
+function showLoadingOverlay(message = '載入中...') {
+    let loadingOverlay = document.getElementById('loadingOverlay');
+    if (!loadingOverlay) {
+        loadingOverlay = document.createElement('div');
+        loadingOverlay.id = 'loadingOverlay';
+        loadingOverlay.className = 'loading-overlay';
+        loadingOverlay.innerHTML = `
+            <div class="spinner"></div>
+            <div class="loading-text">${message}</div>
+        `;
+        document.body.appendChild(loadingOverlay);
+    } else {
+        loadingOverlay.querySelector('.loading-text').textContent = message;
+    }
+    loadingOverlay.classList.add('active');
+}
+
+/**
+ * 隱藏全螢幕 Loading
+ */
+function hideLoadingOverlay() {
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    if (loadingOverlay) {
+        loadingOverlay.classList.remove('active');
+    }
+}
