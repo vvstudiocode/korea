@@ -1,15 +1,19 @@
 /* ===== 全域設定 ===== */
 :root {
-    /* 韓系色彩方案 */
-    --primary-pink: #FF6B9D;
-    --primary-purple: #C44569;
-    --accent-lavender: #A8E6CF;
-    --accent-peach: #FFD3B6;
+    /* 韓系色彩方案 - 白粉色系 */
+    --primary-pink: #FFB7C5;
+    /* 櫻花粉 */
+    --primary-rose: #FF9EAA;
+    /* 玫瑰粉 */
+    --accent-gold: #D4AF37;
+    /* 金色點綴 */
+    --soft-white: #FFFCF9;
+    /* 柔白 */
 
     /* 漸層 */
-    --gradient-main: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --gradient-pink: linear-gradient(135deg, #FFD3B6 0%, #FF6B9D 100%);
-    --gradient-card: linear-gradient(145deg, #ffffff 0%, #f8f9ff 100%);
+    --gradient-main: linear-gradient(135deg, #FFB7C5 0%, #FF9EAA 100%);
+    --gradient-pink: linear-gradient(135deg, #FFD1DC 0%, #FFB7C5 100%);
+    --gradient-card: linear-gradient(145deg, #ffffff 0%, #FFF0F5 100%);
 
     /* 中性色 */
     --white: #FFFFFF;
@@ -51,7 +55,8 @@
 
 body {
     font-family: 'Noto Sans TC', 'Poppins', sans-serif;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    background: #FFF5F7;
+    /* 淺粉背景 */
     color: var(--text-dark);
     line-height: 1.6;
     min-height: 100vh;
@@ -188,8 +193,8 @@ body {
 }
 
 .filter-btn:hover {
-    border-color: #667eea;
-    color: #667eea;
+    border-color: var(--primary-pink);
+    color: var(--primary-pink);
     transform: translateY(-2px);
 }
 
@@ -402,7 +407,7 @@ body {
 }
 
 .cart-item-price {
-    color: #667eea;
+    color: var(--primary-rose);
     font-weight: 600;
     font-size: 1.1rem;
 }
@@ -426,9 +431,9 @@ body {
 }
 
 .qty-btn-small:hover {
-    background: #667eea;
+    background: var(--primary-pink);
     color: var(--white);
-    border-color: #667eea;
+    border-color: var(--primary-pink);
 }
 
 .remove-item {
@@ -682,8 +687,8 @@ body {
 .form-group input:focus,
 .form-group textarea:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: var(--primary-pink);
+    box-shadow: 0 0 0 3px rgba(255, 183, 197, 0.2);
 }
 
 .order-summary {
@@ -709,20 +714,20 @@ body {
     font-weight: 700;
     text-align: right;
     margin-top: var(--spacing-sm);
-    color: #667eea;
+    color: var(--primary-rose);
 }
 
 /* 匯款資訊 */
 .payment-info {
-    background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
-    border: 2px solid #667eea;
+    background: linear-gradient(135deg, #FFB7C515 0%, #FF9EAA15 100%);
+    border: 2px solid var(--primary-pink);
     border-radius: var(--radius-md);
     padding: var(--spacing-md);
     margin: var(--spacing-lg) 0;
 }
 
 .payment-info h3 {
-    color: #667eea;
+    color: var(--primary-rose);
     margin-bottom: var(--spacing-sm);
     font-size: 1.2rem;
 }
@@ -760,7 +765,7 @@ body {
     background: var(--light-gray);
     padding: 4px 8px;
     border-radius: 4px;
-    color: #667eea;
+    color: var(--primary-rose);
     font-size: 1.05rem;
 }
 
@@ -769,7 +774,7 @@ body {
     color: var(--dark-gray);
     margin: var(--spacing-sm) 0 0 0;
     padding: var(--spacing-xs);
-    background: rgba(102, 126, 234, 0.05);
+    background: rgba(255, 183, 197, 0.1);
     border-radius: var(--radius-sm);
 }
 
