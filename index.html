@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>韓國代購精品店 | Korean Shopping</title>
+    <meta name="description" content="提供最新韓國熱門商品代購服務，美妝保養、零食食品、生活用品應有盡有">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Poppins:wght@300;400;600;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <!-- 導航列 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="logo">🇰🇷 韓國代購</h1>
+            <div class="nav-actions">
+                <button class="cart-btn" id="cartBtn">
+                    🛒 購物車
+                    <span class="cart-badge" id="cartBadge">0</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要內容 -->
+    <main class="main-container">
+        <!-- 橫幅 -->
+        <section class="hero-banner">
+            <div class="hero-content">
+                <h2 class="hero-title">韓國精品代購</h2>
+                <p class="hero-subtitle">直送台灣 · 品質保證 · 價格實惠</p>
+            </div>
+        </section>
+
+        <!-- 分類篩選 -->
+        <section class="filter-section">
+            <div class="filter-container">
+                <button class="filter-btn active" data-category="all">全部商品</button>
+                <button class="filter-btn" data-category="美妝保養">美妝保養</button>
+                <button class="filter-btn" data-category="零食食品">零食食品</button>
+                <button class="filter-btn" data-category="生活用品">生活用品</button>
+                <button class="filter-btn" data-category="服飾配件">服飾配件</button>
+            </div>
+        </section>
+
+        <!-- 商品展示區 -->
+        <section class="products-section">
+            <div class="products-grid" id="productsGrid">
+                <!-- 商品卡片會動態載入 -->
+                <div class="loading">載入商品中...</div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 購物車側邊欄 -->
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h3>購物車</h3>
+            <button class="close-cart" id="closeCart">✕</button>
+        </div>
+
+        <div class="cart-items" id="cartItems">
+            <div class="empty-cart">
+                <p>購物車是空的</p>
+                <p class="empty-cart-hint">快去挑選喜歡的商品吧！</p>
+            </div>
+        </div>
+
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>總計：</span>
+                <span class="total-amount" id="totalAmount">NT$ 0</span>
+            </div>
+            <button class="checkout-btn" id="checkoutBtn">前往結帳</button>
+        </div>
+    </div>
+
+    <!-- 商品詳情模態框 -->
+    <div class="modal" id="productModal">
+        <div class="modal-content product-detail">
+            <button class="modal-close" onclick="closeProductModal()">✕</button>
+            <div class="product-detail-grid">
+                <div class="product-detail-image">
+                    <img id="modalProductImage" src="" alt="">
+                </div>
+                <div class="product-detail-info">
+                    <h2 id="modalProductName"></h2>
+                    <p class="product-detail-price" id="modalProductPrice"></p>
+                    <p class="product-detail-description" id="modalProductDescription"></p>
+                    <div class="product-detail-stock">
+                        庫存：<span id="modalProductStock"></span> 件
+                    </div>
+                    <div class="quantity-selector">
+                        <label>數量：</label>
+                        <button class="qty-btn" onclick="decreaseQuantity()">-</button>
+                        <input type="number" id="modalQuantity" value="1" min="1" readonly>
+                        <button class="qty-btn" onclick="increaseQuantity()">+</button>
+                    </div>
+                    <button class="add-to-cart-btn" onclick="addToCartFromModal()">
+                        加入購物車
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 結帳模態框 -->
+    <div class="modal" id="checkoutModal">
+        <div class="modal-content checkout-form">
+            <button class="modal-close" onclick="closeCheckoutModal()">✕</button>
+            <h2>填寫收件資訊</h2>
+
+            <form id="orderForm">
+                <div class="form-group">
+                    <label for="customerName">姓名 *</label>
+                    <input type="text" id="customerName" required placeholder="請輸入您的姓名">
+                </div>
+
+                <div class="form-group">
+                    <label for="customerPhone">電話 *</label>
+                    <input type="tel" id="customerPhone" required placeholder="0912-345-678">
+                </div>
+
+                <div class="form-group">
+                    <label for="customerEmail">Email *</label>
+                    <input type="email" id="customerEmail" required placeholder="example@email.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="customerAddress">收件地址 *</label>
+                    <textarea id="customerAddress" required rows="3" placeholder="請輸入完整收件地址"></textarea>
+                </div>
+
+                <div class="order-summary">
+                    <h3>訂單摘要</h3>
+                    <div id="orderSummary"></div>
+                    <div class="order-total">
+                        總金額：<span id="orderTotal">NT$ 0</span>
+                    </div>
+                </div>
+
+                <div class="payment-info">
+                    <h3>💳 匯款資訊</h3>
+                    <div class="payment-details">
+                        <div class="payment-item">
+                            <span class="payment-label">銀行名稱：</span>
+                            <span class="payment-value">台灣銀行（代碼 004）</span>
+                        </div>
+                        <div class="payment-item">
+                            <span class="payment-label">分行名稱：</span>
+                            <span class="payment-value">信義分行</span>
+                        </div>
+                        <div class="payment-item">
+                            <span class="payment-label">帳號：</span>
+                            <span class="payment-value account-number">123-456-789012</span>
+                        </div>
+                        <div class="payment-item">
+                            <span class="payment-label">戶名：</span>
+                            <span class="payment-value">韓國代購有限公司</span>
+                        </div>
+                    </div>
+                    <p class="payment-note">💡 請於下單後 3 天內完成匯款，並保留匯款收據供查詢</p>
+                </div>
+
+                <button type="submit" class="submit-order-btn">
+                    確認送出訂單
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 成功提示模態框 -->
+    <div class="modal" id="successModal">
+        <div class="modal-content success-message">
+            <div class="success-icon">✓</div>
+            <h2>訂單送出成功！</h2>
+            <p>您的訂單編號：<strong id="orderNumber"></strong></p>
+            <p class="success-hint">我們會盡快與您聯繫確認訂單</p>
+            <button class="continue-btn" onclick="closeSuccessModal()">繼續購物</button>
+        </div>
+    </div>
+
+    <!-- 遮罩層 -->
+    <div class="overlay" id="overlay"></div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
