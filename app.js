@@ -425,48 +425,78 @@ async function handleOrderSubmit(e) {
         total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
     };
 
-    try {
-        // 顯示載入中
-        const submitBtn = e.target.querySelector('.submit-order-btn');
-        submitBtn.textContent = '送出中...';
-        submitBtn.disabled = true;
+    // 顯示載入中
+    const submitBtn = e.target.querySelector('.submit-order-btn');
+    submitBtn.textContent = '送出中...';
+    submitBtn.disabled = true;
 
-        // 使用 URL 編碼的方式發送資料，避免 CORS preflight
+    try {
+        // 使用 JSONP 方式避免 CORS（透過 callback 函數）
+        const callbackName = 'orderCallback_' + Date.now();
+
         const orderPayload = encodeURIComponent(JSON.stringify({
             action: 'submitOrder',
             orderData: formData
         }));
 
-        const response = await fetch(`${GAS_API_URL}?payload=${orderPayload}`, {
-            method: 'GET',
-            redirect: 'follow'
-        });
+        // 創建全域回調函數
+        window[callbackName] = function (result) {
+            // 清理
+            delete window[callbackName];
+            document.getElementById('jsonpScript')?.remove();
 
-        const result = await response.json();
+            submitBtn.textContent = '確認送出訂單';
+            submitBtn.disabled = false;
 
-        if (result.success) {
-            // 顯示成功訊息
-            document.getElementById('orderNumber').textContent = result.data.orderId;
-            closeModal('checkoutModal');
-            showModal('successModal');
+            if (result.success) {
+                // 顯示成功訊息
+                document.getElementById('orderNumber').textContent = result.data.orderId;
+                closeModal('checkoutModal');
+                showModal('successModal');
 
-            // 清空購物車
-            cart = [];
-            saveCartToLocalStorage();
-            updateCartUI();
+                // 清空購物車
+                cart = [];
+                saveCartToLocalStorage();
+                updateCartUI();
 
-            // 重置表單
-            document.getElementById('orderForm').reset();
-        } else {
-            alert(`訂單送出失敗：${result.error}`);
-        }
+                // 重置表單
+                document.getElementById('orderForm').reset();
+            } else {
+                alert(`訂單送出失敗：${result.error}`);
+            }
+        };
+
+        // 創建 script 標籤發送請求
+        const script = document.createElement('script');
+        script.id = 'jsonpScript';
+        script.src = `${GAS_API_URL}?payload=${orderPayload}&callback=${callbackName}`;
+
+        script.onerror = function () {
+            delete window[callbackName];
+            script.remove();
+            submitBtn.textContent = '確認送出訂單';
+            submitBtn.disabled = false;
+            alert('訂單送出失敗，請稍後再試');
+        };
+
+        document.body.appendChild(script);
+
+        // 設定超時
+        setTimeout(() => {
+            if (window[callbackName]) {
+                delete window[callbackName];
+                document.getElementById('jsonpScript')?.remove();
+                submitBtn.textContent = '確認送出訂單';
+                submitBtn.disabled = false;
+                alert('訂單送出超時，請稍後再試');
+            }
+        }, 30000);
+
     } catch (error) {
         console.error('送出訂單失敗:', error);
-        alert('訂單送出失敗，請稍後再試');
-    } finally {
-        const submitBtn = e.target.querySelector('.submit-order-btn');
         submitBtn.textContent = '確認送出訂單';
         submitBtn.disabled = false;
+        alert('訂單送出失敗，請稍後再試');
     }
 }
 
