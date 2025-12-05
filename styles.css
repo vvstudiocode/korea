@@ -287,12 +287,6 @@ h4 {
     -webkit-text-fill-color: initial;
 }
 
-.logo img {
-    height: 50px; /* 設定固定高度 */
-    width: auto;  /* 寬度自動調整 */
-    object-fit: contain; /* 保持比例 */
-    display: block; /* 避免 inline 元素的間隙 */
-}
 .card-add-btn {
     width: 100%;
     background: #D68C94;
@@ -618,12 +612,10 @@ body.no-scroll {
 
 /* RWD 調整 */
 @media (max-width: 768px) {
-    /* ... (previous styles) ... */
 
     .footer-container {
         grid-template-columns: 1fr;
         padding: 0 2rem;
-        /* 增加更多左右內距 */
     }
 
     .site-footer {
@@ -663,6 +655,8 @@ body.no-scroll {
     color: var(--secondary-text);
     line-height: 1.8;
     margin-bottom: 2rem;
+    white-space: pre-line;
+    /* 保留換行符號 */
 }
 
 .product-detail-stock {
@@ -848,9 +842,27 @@ body.no-scroll {
 .footer-section ul {
     list-style: none;
     /* 移除圓點 */
-    padding: 0;
+    padding: 0 0rem;
     margin: 0;
     /* 移除預設邊距 */
+}
+
+.footer-section li {
+    margin-bottom: 0rem;
+    /* 每一行都有一點距離 */
+    color: var(--secondary-text);
+}
+
+.footer-section li.section-header {
+    margin-top: 2rem;
+    /* 大項目上方增加更多距離 */
+    color: var(--primary-text);
+    font-size: 1.1rem;
+}
+
+.footer-section li.section-header:first-child {
+    margin-top: 0;
+    /* 第一個項目不需要上方距離 */
 }
 
 /* 圖片輪播樣式 */
@@ -966,11 +978,6 @@ body.no-scroll {
     .checkout-form {
         padding: 1.5rem;
         width: 100%;
-    }
-
-    .footer-container {
-        grid-template-columns: 1fr;
-        padding: 0 2rem;
     }
 
     .footer-section ul {
