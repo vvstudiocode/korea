@@ -4,7 +4,7 @@
  */
 
 // ===== 設定 =====
-const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbyVwUTAG0nRLEQqoCA49Q-6Pyycejkxkz1Eb5XQ86xXW-DBdYPPeH7BomWUHD69Y6-j/exec'; // 請替換成您的 GAS Web App URL
+const GAS_API_URL = 'https://script.google.com/macros/s/AKfycby7V5VwHfn_Tb-wpg_SSrme2c2P5bin6qjhxEkr80RDLg6p5TPn2EXySkpG9qnyvfNF/exec'; // 請替換成您的 GAS Web App URL
 
 // ===== 全域變數 =====
 let products = [];
