@@ -287,6 +287,17 @@ h4 {
     -webkit-text-fill-color: initial;
 }
 
+.logo img {
+    height: 50px;
+    /* 設定固定高度 */
+    width: auto;
+    /* 寬度自動調整 */
+    object-fit: contain;
+    /* 保持比例 */
+    display: block;
+    /* 避免 inline 元素的間隙 */
+}
+
 .card-add-btn {
     width: 100%;
     background: #D68C94;
