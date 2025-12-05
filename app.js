@@ -332,30 +332,6 @@ function addToCart(product, quantity) {
 }
 
 /**
- * 更新訂單摘要 UI
- */
-function updateOrderSummary() {
-    const orderSummary = document.getElementById('orderSummary');
-    const orderTotal = document.getElementById('orderTotal');
-
-    if (cart.length === 0) {
-        orderSummary.innerHTML = '<p>購物車是空的</p>';
-        orderTotal.textContent = 'NT$ 0';
-        return;
-    }
-
-    orderSummary.innerHTML = cart.map(item => `
-        <div class="summary-item">
-            <div class="summary-name">${item.name}</div>
-            <div class="summary-details">x ${item.quantity} <span>NT$ ${(item.price * item.quantity).toLocaleString()}</span></div>
-        </div>
-    `).join('');
-
-    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    orderTotal.textContent = `NT$ ${total.toLocaleString()}`;
-}
-
-/**
  * 更新購物車 UI
  */
 function updateCartUI() {
