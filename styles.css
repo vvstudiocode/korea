@@ -615,7 +615,6 @@ body.no-scroll {
 
     .footer-container {
         grid-template-columns: 1fr;
-        padding: 0 2rem;
     }
 
     .site-footer {
