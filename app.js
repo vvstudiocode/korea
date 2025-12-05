@@ -152,52 +152,102 @@ function displayProducts() {
     const productsGrid = document.getElementById('productsGrid');
 
     // 移除分類篩選邏輯，直接顯示所有商品
-    let filteredProducts = products;
-    // if (currentCategory !== 'all') {
-    //     filteredProducts = products.filter(p => p.category === currentCategory);
-    // }
+    const grid = document.getElementById('productsGrid');
+    grid.innerHTML = products.map(product => {
+        // 處理多張圖片
+        const images = product.image ? product.image.split(',').map(url => url.trim()) : [];
+        const mainImage = images.length > 0 ? images[0] : 'https://via.placeholder.com/300';
 
-    if (filteredProducts.length === 0) {
-        productsGrid.innerHTML = '<div class="loading">此分類暫無商品</div>';
-        return;
-    }
+        // 產生輪播 HTML
+        let imageHtml = '';
+        if (images.length > 1) {
+            imageHtml = `
+                <div class="image-slider-container">
+                    <div class="image-slider">
+                        ${images.map(img => `<img src="${img}" class="slider-image" loading="lazy">`).join('')}
+                    </div>
+                    <div class="slider-dots">
+                        ${images.map((_, i) => `<div class="slider-dot ${i === 0 ? 'active' : ''}"></div>`).join('')}
+                    </div>
+                </div>
+            `;
+        } else {
+            imageHtml = `
+                <div class="image-slider-container">
+                    <img src="${mainImage}" class="slider-image" loading="lazy">
+                </div>
+            `;
+        }
 
-    // 渲染商品卡片
-    productsGrid.innerHTML = filteredProducts.map(product => `
+        return `
         <div class="product-card" onclick="showProductDetail('${product.id}')">
-            <img src="${product.image}" alt="${product.name}" class="product-image">
+            ${imageHtml}
             <div class="product-info">
-                <span class="product-category">${product.category}</span>
                 <h3 class="product-name">${product.name}</h3>
-                <p class="product-description">${product.description}</p>
                 <div class="product-footer">
                     <span class="product-price">NT$ ${product.price}</span>
-                    <!-- <span class="product-stock">庫存 ${product.stock}</span> -->
+                    <button class="card-add-btn" onclick="event.stopPropagation(); addToCartById('${product.id}')">
+                        加入購物車
+                    </button>
                 </div>
             </div>
         </div>
-    `).join('');
+    `}).join('');
+}
+
+/**
+ * 直接從卡片加入購物車
+ */
+function addToCartById(productId) {
+    // 使用 String() 確保 ID 比對正確
+    const product = products.find(p => String(p.id) === String(productId));
+    if (product) {
+        addToCart(product, 1);
+    }
 }
 
 /**
  * 顯示商品詳情
  */
 function showProductDetail(productId) {
-    // 使用寬鬆相等 (==) 以容許數字/字串差異，避免 ID 為 1 時找不到商品
-    currentProduct = products.find(p => p.id == productId);
+    // 使用 String() 確保 ID 比對正確
+    const product = products.find(p => String(p.id) === String(productId));
+    if (!product) return;
 
-    if (!currentProduct) {
-        console.error('找不到商品:', productId);
-        return;
+    currentProduct = product;
+
+    // 處理多張圖片
+    const images = product.image ? product.image.split(',').map(url => url.trim()) : [];
+
+    // 產生 Modal 輪播 HTML
+    let imageHtml = '';
+    if (images.length > 1) {
+        imageHtml = `
+            <div class="image-slider-container">
+                <div class="image-slider">
+                    ${images.map(img => `<img src="${img}" class="slider-image">`).join('')}
+                </div>
+                <div class="slider-dots">
+                    ${images.map((_, i) => `<div class="slider-dot ${i === 0 ? 'active' : ''}"></div>`).join('')}
+                </div>
+            </div>
+        `;
+    } else {
+        const mainImage = images.length > 0 ? images[0] : 'https://via.placeholder.com/300';
+        imageHtml = `
+            <div class="image-slider-container">
+                <img src="${mainImage}" class="slider-image">
+            </div>
+        `;
     }
 
-    document.getElementById('modalProductImage').src = currentProduct.image;
-    document.getElementById('modalProductName').textContent = currentProduct.name;
-    document.getElementById('modalProductPrice').textContent = `NT$ ${currentProduct.price}`;
-    document.getElementById('modalProductDescription').textContent = currentProduct.description;
-    // document.getElementById('modalProductStock').textContent = currentProduct.stock;
+    const modalImageContainer = document.querySelector('.product-detail-image');
+    modalImageContainer.innerHTML = imageHtml;
+
+    document.getElementById('modalProductName').textContent = product.name;
+    document.getElementById('modalProductPrice').textContent = `NT$ ${product.price}`;
+    document.getElementById('modalProductDescription').textContent = product.description || '暫無描述';
     document.getElementById('modalQuantity').value = 1;
-    // document.getElementById('modalQuantity').max = currentProduct.stock;
 
     showModal('productModal');
 }
@@ -525,18 +575,31 @@ function closeSuccessModal() {
  * 顯示模態框
  */
 function showModal(modalId) {
-    document.getElementById(modalId).classList.add('active');
-    document.getElementById('overlay').classList.add('active');
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.add('active');
+        document.body.classList.add('no-scroll'); // 禁止背景捲動
+    }
 }
 
 /**
  * 關閉模態框
  */
 function closeModal(modalId) {
-    document.getElementById(modalId).classList.remove('active');
-    document.getElementById('overlay').classList.remove('active');
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.classList.remove('no-scroll'); // 恢復背景捲動
+    }
 }
 
+// 點擊 Modal 外部關閉
+window.onclick = function (event) {
+    if (event.target.classList.contains('modal')) {
+        event.target.classList.remove('active');
+        document.body.classList.remove('no-scroll'); // 恢復背景捲動
+    }
+}
 /**
  * 關閉所有模態框
  */
@@ -545,6 +608,7 @@ function closeAllModals() {
         modal.classList.remove('active');
     });
     document.getElementById('overlay').classList.remove('active');
+    document.body.classList.remove('no-scroll'); // 恢復背景捲動
 
     // 同時關閉購物車
     document.getElementById('cartSidebar').classList.remove('active');
