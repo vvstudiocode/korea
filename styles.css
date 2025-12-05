@@ -221,7 +221,7 @@ h4 {
 }
 
 .product-card:hover {
-    transform: translateY(-10px);
+    /* transform: translateY(-10px); 移除上浮效果 */
     box-shadow: none;
 }
 
@@ -739,23 +739,44 @@ body.no-scroll {
 
 /* 結帳表單 */
 .checkout-form {
-    width: 700px;
-    padding: 4rem;
+    width: 600px;
+    /* 稍微縮窄一點，比較精緻 */
+    padding: 3rem;
+    max-width: 100%;
 }
 
 .checkout-form h2 {
-    margin-bottom: 3rem;
+    margin-bottom: 2rem;
     text-align: center;
-    font-size: 2rem;
+    font-size: 1.8rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    /* 改為垂直排列 */
+    gap: 0.5rem;
+}
+
+.form-group label {
+    font-size: 0.95rem;
+    color: var(--secondary-text);
+    font-weight: 500;
 }
 
 .form-group input,
 .form-group textarea {
+    width: 100%;
     border: none;
-    border-bottom: 1px solid var(--secondary-text);
+    border-bottom: 1px solid #ddd;
+    /* 淺一點的線條 */
     border-radius: 0;
     background: transparent;
-    padding: 1rem 0;
+    padding: 0.8rem 0;
+    font-size: 1.1rem;
+    color: var(--primary-text);
+    transition: border-color 0.3s;
 }
 
 .form-group input:focus,
@@ -770,6 +791,37 @@ body.no-scroll {
     padding: 2rem;
     border-radius: 0;
     margin: 3rem 0;
+}
+
+.summary-item {
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.summary-item:last-child {
+    border-bottom: none;
+}
+
+.summary-name {
+    font-weight: 500;
+    color: var(--primary-text);
+}
+
+.summary-details {
+    align-self: flex-end;
+    /* 靠右對齊 */
+    color: var(--secondary-text);
+    font-size: 0.95rem;
+}
+
+.summary-details span {
+    color: var(--primary-text);
+    font-weight: 500;
+    margin-left: 0.5rem;
 }
 
 .payment-info {
@@ -863,6 +915,17 @@ body.no-scroll {
 .footer-section li.section-header:first-child {
     margin-top: 0;
     /* 第一個項目不需要上方距離 */
+}
+
+.footer-copyright {
+    text-align: center;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    /* 淡淡的分隔線 */
+    color: var(--secondary-text);
+    font-size: 0.9rem;
+    font-family: var(--font-body);
 }
 
 /* 圖片輪播樣式 */
