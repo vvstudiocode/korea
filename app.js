@@ -307,8 +307,15 @@ function addToCart(product, quantity) {
         // if (newQuantity > product.stock) { ... }
         existingItem.quantity = newQuantity;
     } else {
+        // 處理圖片網址：如果是多張圖片（逗號分隔），只取第一張
+        const images = product.image ? product.image.split(',').map(url => url.trim()) : [];
+        const mainImage = images.length > 0 ? images[0] : 'https://via.placeholder.com/300';
+
         cart.push({
-            ...product,
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            image: mainImage, // 確保只存入單張圖片網址
             quantity: quantity
         });
     }
@@ -322,6 +329,30 @@ function addToCart(product, quantity) {
 
     // 顯示提示
     showNotification('已加入購物車！');
+}
+
+/**
+ * 更新訂單摘要 UI
+ */
+function updateOrderSummary() {
+    const orderSummary = document.getElementById('orderSummary');
+    const orderTotal = document.getElementById('orderTotal');
+
+    if (cart.length === 0) {
+        orderSummary.innerHTML = '<p>購物車是空的</p>';
+        orderTotal.textContent = 'NT$ 0';
+        return;
+    }
+
+    orderSummary.innerHTML = cart.map(item => `
+        <div class="summary-item">
+            <div class="summary-name">${item.name}</div>
+            <div class="summary-details">x ${item.quantity} <span>NT$ ${(item.price * item.quantity).toLocaleString()}</span></div>
+        </div>
+    `).join('');
+
+    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    orderTotal.textContent = `NT$ ${total.toLocaleString()}`;
 }
 
 /**
@@ -600,6 +631,26 @@ window.onclick = function (event) {
         document.body.classList.remove('no-scroll'); // 恢復背景捲動
     }
 }
+
+/**
+ * 開啟購物車
+ */
+function openCart() {
+    document.getElementById('cartSidebar').classList.add('active');
+    document.getElementById('overlay').classList.add('active');
+    document.body.classList.add('no-scroll'); // 禁止背景捲動
+    renderCart();
+}
+
+/**
+ * 關閉購物車
+ */
+function closeCart() {
+    document.getElementById('cartSidebar').classList.remove('active');
+    document.getElementById('overlay').classList.remove('active');
+    document.body.classList.remove('no-scroll'); // 恢復背景捲動
+}
+
 /**
  * 關閉所有模態框
  */
