@@ -93,6 +93,9 @@ h4 {
     -webkit-text-fill-color: initial;
     color: var(--primary-text);
     text-transform: uppercase;
+    /* white-space: nowrap; 移除此行，讓標題可以自然換行 */
+    line-height: 1.2;
+    /* 調整行高讓換行後好看 */
 }
 
 .cart-btn {
@@ -108,6 +111,7 @@ h4 {
     display: flex;
     align-items: center;
     gap: 8px;
+    /* white-space: nowrap; 移除此行 */
 }
 
 .cart-btn:hover {
@@ -213,6 +217,8 @@ h4 {
     margin-bottom: 1.5rem;
     background: #f0f0f0;
     /* 圖片載入前的佔位色 */
+    border-radius: 12px;
+    /* 圓角 */
 }
 
 .product-info {
@@ -335,7 +341,8 @@ h4 {
     width: 90px;
     height: 110px;
     object-fit: cover;
-    border-radius: 0;
+    border-radius: 8px;
+    /* 圓角 */
 }
 
 .cart-item-info {
@@ -517,7 +524,8 @@ h4 {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    border-radius: 0;
+    border-radius: 12px;
+    /* 圓角 */
     box-shadow: none;
 }
 
@@ -556,10 +564,23 @@ h4 {
 .quantity-selector {
     display: flex;
     align-items: center;
-    gap: 0;
+    gap: 1rem;
     margin-bottom: 2rem;
-    border: 1px solid var(--secondary-text);
     width: fit-content;
+    border: none;
+    /* 移除外框 */
+}
+
+.quantity-selector label {
+    font-weight: 500;
+    color: var(--secondary-text);
+    white-space: nowrap;
+}
+
+.qty-group {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--secondary-text);
 }
 
 .qty-btn {
@@ -715,25 +736,56 @@ h4 {
 
 /* RWD 調整 */
 @media (max-width: 768px) {
+    .nav-container {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .logo {
+        font-size: 1.5rem;
+        text-align: center;
+    }
+
     .hero-title {
         font-size: 2.5rem;
+    }
+
+    .products-grid {
+        grid-template-columns: 1fr 1fr;
+        /* 手機版強制兩欄 */
+        gap: 1rem;
+    }
+
+    .product-image {
+        height: 200px;
     }
 
     .product-detail {
         flex-direction: column;
         width: 100%;
+        height: auto;
+        max-height: 85vh;
     }
 
     .product-detail-info {
-        padding: 2rem;
+        padding: 1.5rem;
     }
 
     .product-detail-image {
-        height: 300px;
+        height: 250px;
     }
 
     .checkout-form {
-        padding: 2rem;
+        padding: 1.5rem;
         width: 100%;
+    }
+
+    .cart-sidebar {
+        width: 100%;
+        right: -100%;
+    }
+
+    .cart-sidebar.active {
+        right: 0;
     }
 }
