@@ -737,6 +737,64 @@ body.no-scroll {
     box-shadow: none;
 }
 
+/* ===== 商品選項樣式 ===== */
+.product-options-container {
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.product-option {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.product-option label {
+    font-size: 0.95rem;
+    color: var(--secondary-text);
+    font-weight: 500;
+}
+
+.option-select {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: var(--bg-white);
+    font-size: 1rem;
+    color: var(--primary-text);
+    cursor: pointer;
+    transition: border-color 0.3s;
+}
+
+.option-select:hover {
+    border-color: var(--accent-rose);
+}
+
+.option-select:focus {
+    outline: none;
+    border-color: var(--accent-dark-pink);
+    box-shadow: 0 0 0 2px rgba(214, 140, 148, 0.1);
+}
+
+/* ===== 購物車商品選項樣式 ===== */
+.cart-item-options {
+    margin-top: 0.3rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.cart-item-options span {
+    font-size: 0.85rem;
+    color: var(--secondary-text);
+    background: var(--bg-pink);
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+}
+
 /* 結帳表單 */
 .checkout-form {
     width: 600px;
