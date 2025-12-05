@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
  * 初始化應用程式
  */
 function initializeApp() {
-    console.log('App Version: 2.0 (POST Request)'); // 版本標記
+    console.log('App Version: 2.1 (Product Options)'); // 版本標記
     loadProducts();
     loadCartFromLocalStorage();
     updateCartUI();
@@ -41,12 +41,6 @@ function setupEventListeners() {
 
     // 訂單表單
     document.getElementById('orderForm').addEventListener('submit', handleOrderSubmit);
-
-    // 訂單表單
-    document.getElementById('orderForm').addEventListener('submit', handleOrderSubmit);
-
-    // 移除分類篩選監聽器
-    // document.querySelectorAll('.filter-btn').forEach(...)
 
     // 遮罩層點擊關閉
     document.getElementById('overlay').addEventListener('click', closeAllModals);
@@ -86,98 +80,43 @@ async function loadProducts() {
  */
 function loadDemoProducts() {
     products = [
-        {
-            id: 'P001',
-            name: '韓國保濕面膜 10片裝',
-            description: '超人氣保濕面膜，含玻尿酸精華，深層保濕鎖水',
-            price: 350,
-            stock: 50,
-            image: 'https://picsum.photos/400/300?random=1',
-            category: '美妝保養'
-        },
-        {
-            id: 'P002',
-            name: '韓國海苔禮盒組',
-            description: '經典海苔禮盒，送禮自用兩相宜，香脆美味',
-            price: 280,
-            stock: 30,
-            image: 'https://picsum.photos/400/300?random=2',
-            category: '零食食品'
-        },
-        {
-            id: 'P003',
-            name: '韓國泡麵組合包',
-            description: '5種口味各2包，共10包，辛拉麵、安城湯麵等熱門口味',
-            price: 450,
-            stock: 20,
-            image: 'https://picsum.photos/400/300?random=3',
-            category: '零食食品'
-        },
-        {
-            id: 'P004',
-            name: '韓國氣墊粉餅',
-            description: '輕盈服貼，自然裸妝感，SPF50+ PA+++防曬',
-            price: 680,
-            stock: 15,
-            image: 'https://picsum.photos/400/300?random=4',
-            category: '美妝保養'
-        },
-        {
-            id: 'P005',
-            name: '韓國蜂蜜柚子茶',
-            description: '天然蜂蜜與柚子完美結合，冷熱皆宜',
-            price: 320,
-            stock: 40,
-            image: 'https://picsum.photos/400/300?random=5',
-            category: '零食食品'
-        },
-        {
-            id: 'P006',
-            name: '韓國口紅套組',
-            description: '熱門色號3支組，霧面絲絨質地，顯色持久',
-            price: 890,
-            stock: 12,
-            image: 'https://picsum.photos/400/300?random=6',
-            category: '美妝保養'
-        }
+        { id: 'P001', name: '韓國保濕面膜', description: '超人氣保濕面膜', price: 350, stock: 50, image: 'https://picsum.photos/400/300?random=1', category: '美妝保養', options: { '類型': ['保濕', '美白'] } },
+        { id: 'P002', name: '韓國海苔禮盒', description: '經典海苔禮盒', price: 280, stock: 30, image: 'https://picsum.photos/400/300?random=2', category: '零食食品', options: {} },
+        { id: 'P003', name: '韓國泡麵組合包', description: '5種口味各2包', price: 450, stock: 20, image: 'https://picsum.photos/400/300?random=3', category: '零食食品', options: { '辣度': ['辛辣', '微辣', '不辣'] } },
+        { id: 'P004', name: '韓國氣墊粉餅', description: '輕盈服貼，自然裸妝感', price: 680, stock: 15, image: 'https://picsum.photos/400/300?random=4', category: '美妝保養', options: { '色號': ['21象牙白', '23自然色'] } },
+        { id: 'P005', name: '韓國蜂蜜柚子茶', description: '天然蜂蜜與柚子完美結合', price: 320, stock: 40, image: 'https://picsum.photos/400/300?random=5', category: '零食食品', options: {} },
+        { id: 'P006', name: '簡約LOGO T-shirt', description: '熱門百搭單品', price: 890, stock: 12, image: 'https://picsum.photos/400/300?random=6', category: '流行服飾', options: { '顏色': ['黑色', '白色'], '尺寸': ['S', 'M', 'L'] } }
     ];
 
     displayProducts();
 }
 
+
 /**
  * 顯示商品清單
  */
 function displayProducts() {
-    const productsGrid = document.getElementById('productsGrid');
-
-    // 移除分類篩選邏輯，直接顯示所有商品
     const grid = document.getElementById('productsGrid');
     grid.innerHTML = products.map(product => {
-        // 處理多張圖片
         const images = product.image ? product.image.split(',').map(url => url.trim()) : [];
         const mainImage = images.length > 0 ? images[0] : 'https://via.placeholder.com/300';
+        
+        let imageHtml = images.length > 1 ? `
+            <div class="image-slider-container">
+                <div class="image-slider">${images.map(img => `<img src="${img}" class="slider-image" loading="lazy">`).join('')}</div>
+                <div class="slider-dots">${images.map((_, i) => `<div class="slider-dot ${i === 0 ? 'active' : ''}"></div>`).join('')}</div>
+            </div>` : `
+            <div class="image-slider-container"><img src="${mainImage}" class="slider-image" loading="lazy"></div>`;
 
-        // 產生輪播 HTML
-        let imageHtml = '';
-        if (images.length > 1) {
-            imageHtml = `
-                <div class="image-slider-container">
-                    <div class="image-slider">
-                        ${images.map(img => `<img src="${img}" class="slider-image" loading="lazy">`).join('')}
-                    </div>
-                    <div class="slider-dots">
-                        ${images.map((_, i) => `<div class="slider-dot ${i === 0 ? 'active' : ''}"></div>`).join('')}
-                    </div>
-                </div>
-            `;
-        } else {
-            imageHtml = `
-                <div class="image-slider-container">
-                    <img src="${mainImage}" class="slider-image" loading="lazy">
-                </div>
-            `;
-        }
+        // **修改**：根據商品是否有選項，決定按鈕功能
+        const hasOptions = product.options && Object.keys(product.options).length > 0;
+        const buttonHtml = hasOptions ? `
+            <button class="card-add-btn" onclick="event.stopPropagation(); showProductDetail('${product.id}')">
+                選擇規格
+            </button>` : `
+            <button class="card-add-btn" onclick="event.stopPropagation(); addToCartById('${product.id}')">
+                加入購物車
+            </button>`;
 
         return `
         <div class="product-card" onclick="showProductDetail('${product.id}')">
@@ -186,23 +125,22 @@ function displayProducts() {
                 <h3 class="product-name">${product.name}</h3>
                 <div class="product-footer">
                     <span class="product-price">NT$ ${product.price}</span>
-                    <button class="card-add-btn" onclick="event.stopPropagation(); addToCartById('${product.id}')">
-                        加入購物車
-                    </button>
+                    ${buttonHtml}
                 </div>
             </div>
-        </div>
-    `}).join('');
+        </div>`;
+    }).join('');
 }
 
+
 /**
- * 直接從卡片加入購物車
+ * 直接從卡片加入購物車 (僅限無規格商品)
  */
 function addToCartById(productId) {
-    // 使用 String() 確保 ID 比對正確
     const product = products.find(p => String(p.id) === String(productId));
     if (product) {
-        addToCart(product, 1);
+        // **修改**：無規格商品傳入空的 selectedOptions
+        addToCart(product, 1, {});
     }
 }
 
@@ -210,69 +148,56 @@ function addToCartById(productId) {
  * 顯示商品詳情
  */
 function showProductDetail(productId) {
-    // 使用 String() 確保 ID 比對正確
     const product = products.find(p => String(p.id) === String(productId));
     if (!product) return;
 
     currentProduct = product;
 
-    // 處理多張圖片
     const images = product.image ? product.image.split(',').map(url => url.trim()) : [];
-
-    // 產生 Modal 輪播 HTML
-    let imageHtml = '';
-    if (images.length > 1) {
-        imageHtml = `
-            <div class="image-slider-container">
-                <div class="image-slider">
-                    ${images.map(img => `<img src="${img}" class="slider-image">`).join('')}
-                </div>
-                <div class="slider-dots">
-                    ${images.map((_, i) => `<div class="slider-dot ${i === 0 ? 'active' : ''}"></div>`).join('')}
-                </div>
-            </div>
-        `;
-    } else {
-        const mainImage = images.length > 0 ? images[0] : 'https://via.placeholder.com/300';
-        imageHtml = `
-            <div class="image-slider-container">
-                <img src="${mainImage}" class="slider-image">
-            </div>
-        `;
-    }
-
-    const modalImageContainer = document.querySelector('.product-detail-image');
-    modalImageContainer.innerHTML = imageHtml;
-
+    let imageHtml = images.length > 1 ? `
+        <div class="image-slider-container">
+            <div class="image-slider">${images.map(img => `<img src="${img}" class="slider-image">`).join('')}</div>
+            <div class="slider-dots">${images.map((_, i) => `<div class="slider-dot ${i === 0 ? 'active' : ''}"></div>`).join('')}</div>
+        </div>` : `
+        <div class="image-slider-container"><img src="${images.length > 0 ? images[0] : 'https://via.placeholder.com/300'}" class="slider-image"></div>`;
+    
+    document.querySelector('.product-detail-image').innerHTML = imageHtml;
     document.getElementById('modalProductName').textContent = product.name;
     document.getElementById('modalProductPrice').textContent = `NT$ ${product.price}`;
     document.getElementById('modalProductDescription').textContent = product.description || '暫無描述';
     document.getElementById('modalQuantity').value = 1;
 
+    // **新增**：動態產生商品選項
+    const optionsContainer = document.getElementById('modalProductOptions');
+    optionsContainer.innerHTML = ''; // 清空舊選項
+    const hasOptions = product.options && Object.keys(product.options).length > 0;
+
+    if (hasOptions) {
+        Object.entries(product.options).forEach(([key, values]) => {
+            const optionEl = document.createElement('div');
+            optionEl.className = 'product-option';
+            optionEl.innerHTML = `
+                <label>${key}:</label>
+                <select class="option-select" data-option-key="${key}">
+                    ${values.map(value => `<option value="${value}">${value}</option>`).join('')}
+                </select>
+            `;
+            optionsContainer.appendChild(optionEl);
+        });
+    }
+
     showModal('productModal');
 }
 
-/**
- * 增加數量
- */
 function increaseQuantity() {
     const input = document.getElementById('modalQuantity');
-    // 不再限制最大數量
-    // const max = parseInt(input.max);
-    const current = parseInt(input.value);
-
-    input.value = current + 1;
+    input.value = parseInt(input.value) + 1;
 }
 
-/**
- * 減少數量
- */
 function decreaseQuantity() {
     const input = document.getElementById('modalQuantity');
-    const current = parseInt(input.value);
-
-    if (current > 1) {
-        input.value = current - 1;
+    if (parseInt(input.value) > 1) {
+        input.value = parseInt(input.value) - 1;
     }
 }
 
@@ -281,13 +206,19 @@ function decreaseQuantity() {
  */
 function addToCartFromModal() {
     const quantity = parseInt(document.getElementById('modalQuantity').value);
-    addToCart(currentProduct, quantity);
+    
+    // **新增**：獲取選擇的選項
+    const selectedOptions = {};
+    document.querySelectorAll('#modalProductOptions .option-select').forEach(select => {
+        const key = select.dataset.optionKey;
+        const value = select.value;
+        selectedOptions[key] = value;
+    });
+
+    addToCart(currentProduct, quantity, selectedOptions);
     closeProductModal();
 }
 
-/**
- * 關閉商品詳情模態框
- */
 function closeProductModal() {
     closeModal('productModal');
 }
@@ -295,44 +226,53 @@ function closeProductModal() {
 // ===== 購物車管理 =====
 
 /**
- * 加入購物車
+ * **核心修改**：產生購物車內唯一ID
  */
-function addToCart(product, quantity) {
-    // 使用 String() 確保 ID 比對正確 (避免數字 vs 字串問題)
-    const existingItem = cart.find(item => String(item.id) === String(product.id));
+function getCartItemId(productId, options) {
+    if (!options || Object.keys(options).length === 0) {
+        return productId;
+    }
+    // 排序 key 以確保順序一致，例如 {b:1, a:2} 和 {a:2, b:1} 視為相同
+    const sortedOptions = Object.keys(options).sort().reduce((obj, key) => {
+        obj[key] = options[key];
+        return obj;
+    }, {});
+    return productId + '-' + JSON.stringify(sortedOptions);
+}
+
+
+/**
+ * **核心修改**：加入購物車
+ */
+function addToCart(product, quantity, selectedOptions) {
+    const cartItemId = getCartItemId(product.id, selectedOptions);
+    const existingItem = cart.find(item => item.cartItemId === cartItemId);
 
     if (existingItem) {
-        // 不再檢查庫存
-        const newQuantity = existingItem.quantity + quantity;
-        // if (newQuantity > product.stock) { ... }
-        existingItem.quantity = newQuantity;
+        existingItem.quantity += quantity;
     } else {
-        // 處理圖片網址：如果是多張圖片（逗號分隔），只取第一張
         const images = product.image ? product.image.split(',').map(url => url.trim()) : [];
         const mainImage = images.length > 0 ? images[0] : 'https://via.placeholder.com/300';
 
         cart.push({
+            cartItemId: cartItemId, // 使用新的唯一 ID
             id: product.id,
             name: product.name,
             price: product.price,
-            image: mainImage, // 確保只存入單張圖片網址
-            quantity: quantity
+            image: mainImage,
+            quantity: quantity,
+            selectedOptions: selectedOptions // 儲存選項
         });
     }
 
     saveCartToLocalStorage();
     updateCartUI();
-
-    // 不再更新本地庫存
-    // const prod = products.find(p => String(p.id) === String(product.id));
-    // if (prod) { ... }
-
-    // 顯示提示
     showNotification('已加入購物車！');
 }
 
+
 /**
- * 更新購物車 UI
+ * **核心修改**：更新購物車 UI
  */
 function updateCartUI() {
     const cartItems = document.getElementById('cartItems');
@@ -340,59 +280,57 @@ function updateCartUI() {
     const totalAmount = document.getElementById('totalAmount');
     const checkoutBtn = document.getElementById('checkoutBtn');
 
-    // 更新徽章
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
     cartBadge.textContent = totalItems;
 
-    // 計算總金額
     const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     totalAmount.textContent = `NT$ ${total.toLocaleString()}`;
 
-    // 更新購物車內容
     if (cart.length === 0) {
-        cartItems.innerHTML = `
-            <div class="empty-cart">
-                <p>購物車是空的</p>
-                <p class="empty-cart-hint">快去挑選喜歡的商品吧！</p>
-            </div>
-        `;
+        cartItems.innerHTML = `<div class="empty-cart"><p>購物車是空的</p><p class="empty-cart-hint">快去挑選喜歡的商品吧！</p></div>`;
         checkoutBtn.disabled = true;
     } else {
-        cartItems.innerHTML = cart.map(item => `
+        cartItems.innerHTML = cart.map(item => {
+            // **新增**：顯示選項
+            let optionsHtml = '';
+            if (item.selectedOptions && Object.keys(item.selectedOptions).length > 0) {
+                optionsHtml = '<div class="cart-item-options">' +
+                    Object.entries(item.selectedOptions)
+                    .map(([key, value]) => `<span>${key}: ${value}</span>`)
+                    .join(' ') +
+                    '</div>';
+            }
+
+            return `
             <div class="cart-item">
                 <img src="${item.image}" alt="${item.name}" class="cart-item-image">
                 <div class="cart-item-info">
                     <div class="cart-item-name">${item.name}</div>
+                    ${optionsHtml}
                     <div class="cart-item-price">NT$ ${item.price}</div>
                     <div class="cart-item-quantity">
-                        <button class="qty-btn-small" onclick="updateCartQuantity('${item.id}', -1)">-</button>
+                        <button class="qty-btn-small" onclick="updateCartQuantity('${item.cartItemId}', -1)">-</button>
                         <span>${item.quantity}</span>
-                        <button class="qty-btn-small" onclick="updateCartQuantity('${item.id}', 1)">+</button>
+                        <button class="qty-btn-small" onclick="updateCartQuantity('${item.cartItemId}', 1)">+</button>
                     </div>
                 </div>
-                <button class="remove-item" onclick="removeFromCart('${item.id}')">🗑️</button>
+                <button class="remove-item" onclick="removeFromCart('${item.cartItemId}')">🗑️</button>
             </div>
-        `).join('');
+        `}).join('');
         checkoutBtn.disabled = false;
     }
 }
 
 /**
- * 更新購物車商品數量
+ * **核心修改**：更新購物車商品數量
  */
-function updateCartQuantity(productId, change) {
-    // 使用 String() 確保 ID 比對正確
-    const item = cart.find(i => String(i.id) === String(productId));
+function updateCartQuantity(cartItemId, change) {
+    const item = cart.find(i => i.cartItemId === cartItemId);
     if (!item) return;
 
     const newQuantity = item.quantity + change;
-
-    // 不再檢查庫存
-    // const product = products.find(p => String(p.id) === String(productId));
-    // if (newQuantity > product.stock) { ... }
-
     if (newQuantity <= 0) {
-        removeFromCart(productId);
+        removeFromCart(cartItemId);
         return;
     }
 
@@ -402,36 +340,23 @@ function updateCartQuantity(productId, change) {
 }
 
 /**
- * 移除購物車商品
+ * **核心修改**：移除購物車商品
  */
-function removeFromCart(productId) {
-    // 使用 String() 確保 ID 比對正確
-    cart = cart.filter(item => String(item.id) !== String(productId));
+function removeFromCart(cartItemId) {
+    cart = cart.filter(item => item.cartItemId !== cartItemId);
     saveCartToLocalStorage();
     updateCartUI();
 }
 
-/**
- * 切換購物車顯示
- */
 function toggleCart() {
-    const cartSidebar = document.getElementById('cartSidebar');
-    const overlay = document.getElementById('overlay');
-
-    cartSidebar.classList.toggle('active');
-    overlay.classList.toggle('active');
+    document.getElementById('cartSidebar').classList.toggle('active');
+    document.getElementById('overlay').classList.toggle('active');
 }
 
-/**
- * 儲存購物車到 LocalStorage
- */
 function saveCartToLocalStorage() {
     localStorage.setItem('koreanShoppingCart', JSON.stringify(cart));
 }
 
-/**
- * 從 LocalStorage 載入購物車
- */
 function loadCartFromLocalStorage() {
     const savedCart = localStorage.getItem('koreanShoppingCart');
     if (savedCart) {
@@ -441,112 +366,90 @@ function loadCartFromLocalStorage() {
 
 // ===== 結帳流程 =====
 
-/**
- * 顯示結帳表單
- */
 function showCheckout() {
     if (cart.length === 0) return;
-
-    // 關閉購物車
     toggleCart();
 
-    // 更新訂單摘要
     const orderSummary = document.getElementById('orderSummary');
     const orderTotal = document.getElementById('orderTotal');
-
     const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
-    orderSummary.innerHTML = cart.map(item => `
+    orderSummary.innerHTML = cart.map(item => {
+        // **新增**：顯示選項於訂單摘要
+        let optionText = '';
+        if (item.selectedOptions && Object.keys(item.selectedOptions).length > 0) {
+            optionText = ` <small>(${Object.values(item.selectedOptions).join(', ')})</small>`;
+        }
+        return `
         <div class="summary-item">
-            <span>${item.name} x ${item.quantity}</span>
+            <span>${item.name}${optionText} x ${item.quantity}</span>
             <span>NT$ ${(item.price * item.quantity).toLocaleString()}</span>
-        </div>
-    `).join('');
+        </div>`;
+    }).join('');
 
     orderTotal.textContent = `NT$ ${total.toLocaleString()}`;
-
     showModal('checkoutModal');
 }
 
-/**
- * 處理訂單提交
- */
+
 async function handleOrderSubmit(e) {
     e.preventDefault();
 
     const formData = {
         customerName: document.getElementById('customerName').value,
         customerPhone: document.getElementById('customerPhone').value,
-        customerLineId: document.getElementById('customerLineId').value, // 取得 Line ID
+        customerLineId: document.getElementById('customerLineId').value,
         customerEmail: document.getElementById('customerEmail').value,
         customerAddress: document.getElementById('customerAddress').value,
-        items: cart,
-        total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
     };
-
-    // 顯示全螢幕 Loading (不帶文字)
+    
     showLoadingOverlay();
-
     const submitBtn = e.target.querySelector('.submit-order-btn');
     submitBtn.disabled = true;
 
     try {
-        // 生成本地訂單編號
         const orderId = 'KR' + new Date().toISOString().slice(0, 10).replace(/-/g, '') + Math.random().toString().slice(2, 6);
 
-        // 精簡 items 資料，只傳送後端需要的欄位
+        // **核心修改**：確保 selectedOptions 被傳送到後端
         const simplifiedItems = cart.map(item => ({
-            id: item.id, // 新增 ID 以便後端準確扣庫存
+            id: item.id,
             name: item.name,
             quantity: item.quantity,
-            price: item.price
+            price: item.price,
+            selectedOptions: item.selectedOptions // 包含選項資訊
         }));
 
-        // 準備傳送給後端的資料
         const payload = {
             action: 'submitOrder',
             orderData: {
                 ...formData,
                 items: simplifiedItems,
-                orderId: orderId // 傳送前端生成的訂單編號
+                total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+                orderId: orderId
             }
         };
 
-        // 使用 POST 請求發送資料
-        // 使用 text/plain 避免觸發 CORS Preflight (Google Apps Script 的限制)
         const response = await fetch(GAS_API_URL, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'text/plain;charset=utf-8',
-            },
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify(payload)
         });
 
         const result = await response.json();
-        console.log('Backend Version:', result.version); // 檢查後端版本
+        console.log('Backend Version:', result.version);
 
         if (result.success) {
-            // 成功
             setTimeout(() => {
-                hideLoadingOverlay(); // 隱藏 Loading
-
-                // 顯示成功訊息
+                hideLoadingOverlay();
                 document.getElementById('orderNumber').textContent = orderId;
                 closeModal('checkoutModal');
                 showModal('successModal');
-
-                // 重新載入商品資料以同步庫存顯示
-                loadProducts();
-
-                // 清空購物車
+                
+                loadProducts(); // 重新載入商品 (未來可同步庫存)
                 cart = [];
                 saveCartToLocalStorage();
                 updateCartUI();
-
-                // 重置表單
                 document.getElementById('orderForm').reset();
-
-                submitBtn.textContent = '確認送出訂單';
                 submitBtn.disabled = false;
             }, 1000);
         } else {
@@ -556,156 +459,146 @@ async function handleOrderSubmit(e) {
     } catch (error) {
         console.error('送出訂單失敗:', error);
         hideLoadingOverlay();
-        submitBtn.textContent = '確認送出訂單';
         submitBtn.disabled = false;
         alert('訂單送出失敗，請稍後再試\n錯誤: ' + error.message);
     }
 }
 
-/**
- * 關閉結帳模態框
- */
+
 function closeCheckoutModal() {
     closeModal('checkoutModal');
 }
 
-/**
- * 關閉成功訊息模態框
- */
 function closeSuccessModal() {
     closeModal('successModal');
 }
 
 // ===== 模態框控制 =====
 
-/**
- * 顯示模態框
- */
 function showModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
         modal.classList.add('active');
-        document.body.classList.add('no-scroll'); // 禁止背景捲動
+        document.body.classList.add('no-scroll');
     }
 }
 
-/**
- * 關閉模態框
- */
 function closeModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
         modal.classList.remove('active');
-        document.body.classList.remove('no-scroll'); // 恢復背景捲動
+        document.body.classList.remove('no-scroll');
     }
 }
 
-// 點擊 Modal 外部關閉
 window.onclick = function (event) {
     if (event.target.classList.contains('modal')) {
         event.target.classList.remove('active');
-        document.body.classList.remove('no-scroll'); // 恢復背景捲動
+        document.body.classList.remove('no-scroll');
     }
 }
 
-/**
- * 開啟購物車
- */
 function openCart() {
     document.getElementById('cartSidebar').classList.add('active');
     document.getElementById('overlay').classList.add('active');
-    document.body.classList.add('no-scroll'); // 禁止背景捲動
-    renderCart();
+    document.body.classList.add('no-scroll');
 }
 
-/**
- * 關閉購物車
- */
 function closeCart() {
     document.getElementById('cartSidebar').classList.remove('active');
     document.getElementById('overlay').classList.remove('active');
-    document.body.classList.remove('no-scroll'); // 恢復背景捲動
+    document.body.classList.remove('no-scroll');
 }
 
-/**
- * 關閉所有模態框
- */
 function closeAllModals() {
-    document.querySelectorAll('.modal').forEach(modal => {
-        modal.classList.remove('active');
+    document.querySelectorAll('.modal, #cartSidebar, #overlay').forEach(el => {
+        el.classList.remove('active');
     });
-    document.getElementById('overlay').classList.remove('active');
-    document.body.classList.remove('no-scroll'); // 恢復背景捲動
-
-    // 同時關閉購物車
-    document.getElementById('cartSidebar').classList.remove('active');
+    document.body.classList.remove('no-scroll');
 }
 
 // ===== 輔助功能 =====
 
-/**
- * 顯示通知
- */
 function showNotification(message) {
-    // 簡單的通知實作
     const notification = document.createElement('div');
-    notification.style.cssText = `
-        position: fixed;
-        top: 100px;
-        right: 20px;
-        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-        color: white;
-        padding: 1rem 2rem;
-        border-radius: 12px;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-        z-index: 10000;
-        animation: slideIn 0.3s ease;
-    `;
+    notification.className = 'notification-toast';
     notification.textContent = message;
-
     document.body.appendChild(notification);
-
-    setTimeout(() => {
-        notification.style.animation = 'slideOut 0.3s ease';
-        setTimeout(() => notification.remove(), 300);
-    }, 2000);
+    setTimeout(() => notification.remove(), 2300);
 }
 
-// 添加動畫樣式
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideIn {
-        from { transform: translateX(400px); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-    }
-    }
-    @keyframes slideOut {
-        from { transform: translateX(0); opacity: 1; }
-        to { transform: translateX(400px); opacity: 0; }
-    }
-`;
-document.head.appendChild(style);
+// 動畫樣式，如果已存在則不重複添加
+if (!document.getElementById('gemini-animations')) {
+    const style = document.createElement('style');
+    style.id = 'gemini-animations';
+    style.textContent = `
+        .notification-toast {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            z-index: 10000;
+            animation: slideIn 0.3s ease forwards, slideOut 0.3s ease 2s forwards;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(120%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(120%); opacity: 0; }
+        }
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        .loading-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #09f;
+            animation: spin 1s ease infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    `;
+    document.head.appendChild(style);
+}
 
-/**
- * 顯示全螢幕 Loading (僅動畫)
- */
 function showLoadingOverlay() {
     let loadingOverlay = document.getElementById('loadingOverlay');
     if (!loadingOverlay) {
         loadingOverlay = document.createElement('div');
         loadingOverlay.id = 'loadingOverlay';
         loadingOverlay.className = 'loading-overlay';
-        loadingOverlay.innerHTML = `
-            <div class="spinner"></div>
-        `;
+        loadingOverlay.innerHTML = `<div class="spinner"></div>`;
         document.body.appendChild(loadingOverlay);
     }
     loadingOverlay.classList.add('active');
 }
 
-/**
- * 隱藏全螢幕 Loading
- */
 function hideLoadingOverlay() {
     const loadingOverlay = document.getElementById('loadingOverlay');
     if (loadingOverlay) {
