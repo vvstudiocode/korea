@@ -558,11 +558,11 @@ body.no-scroll {
 
 .modal-close {
     position: absolute;
-    top: 1.5rem;
-    right: 1.5rem;
+    top: 1rem;
+    right: 1rem;
     background: none;
     border: none;
-    font-size: 2rem;
+    font-size: 1.5rem;
     color: var(--primary-text);
     cursor: pointer;
     z-index: 10;
@@ -636,18 +636,18 @@ body.no-scroll {
 }
 
 .product-detail-info h2 {
-    font-size: 2rem;
+    font-size: 1.6rem;
     margin-bottom: 0.5rem;
     font-family: 'Noto Sans TC', sans-serif;
     /* 思源黑體 */
 }
 
 .product-detail-price {
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     color: var(--primary-text);
     background: none;
     -webkit-text-fill-color: initial;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.2rem;
     font-weight: 500;
 }
 
@@ -656,6 +656,7 @@ body.no-scroll {
     line-height: 1.8;
     margin-bottom: 2rem;
     white-space: pre-line;
+    font-size: 0.8rem;
     /* 保留換行符號 */
 }
 
