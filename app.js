@@ -100,7 +100,7 @@ function displayProducts() {
     grid.innerHTML = products.map(product => {
         const images = product.image ? product.image.split(',').map(url => url.trim()) : [];
         const mainImage = images.length > 0 ? images[0] : 'https://via.placeholder.com/300';
-        
+
         let imageHtml = images.length > 1 ? `
             <div class="image-slider-container">
                 <div class="image-slider">${images.map(img => `<img src="${img}" class="slider-image" loading="lazy">`).join('')}</div>
@@ -160,7 +160,7 @@ function showProductDetail(productId) {
             <div class="slider-dots">${images.map((_, i) => `<div class="slider-dot ${i === 0 ? 'active' : ''}"></div>`).join('')}</div>
         </div>` : `
         <div class="image-slider-container"><img src="${images.length > 0 ? images[0] : 'https://via.placeholder.com/300'}" class="slider-image"></div>`;
-    
+
     document.querySelector('.product-detail-image').innerHTML = imageHtml;
     document.getElementById('modalProductName').textContent = product.name;
     document.getElementById('modalProductPrice').textContent = `NT$ ${product.price}`;
@@ -206,7 +206,7 @@ function decreaseQuantity() {
  */
 function addToCartFromModal() {
     const quantity = parseInt(document.getElementById('modalQuantity').value);
-    
+
     // **新增**：獲取選擇的選項
     const selectedOptions = {};
     document.querySelectorAll('#modalProductOptions .option-select').forEach(select => {
@@ -290,14 +290,14 @@ function updateCartUI() {
         cartItems.innerHTML = `<div class="empty-cart"><p>購物車是空的</p><p class="empty-cart-hint">快去挑選喜歡的商品吧！</p></div>`;
         checkoutBtn.disabled = true;
     } else {
-        cartItems.innerHTML = cart.map(item => {
+        cartItems.innerHTML = cart.map((item, index) => {
             // **新增**：顯示選項
             let optionsHtml = '';
             if (item.selectedOptions && Object.keys(item.selectedOptions).length > 0) {
                 optionsHtml = '<div class="cart-item-options">' +
                     Object.entries(item.selectedOptions)
-                    .map(([key, value]) => `<span>${key}: ${value}</span>`)
-                    .join(' ') +
+                        .map(([key, value]) => `<span>${key}: ${value}</span>`)
+                        .join(' ') +
                     '</div>';
             }
 
@@ -309,12 +309,12 @@ function updateCartUI() {
                     ${optionsHtml}
                     <div class="cart-item-price">NT$ ${item.price}</div>
                     <div class="cart-item-quantity">
-                        <button class="qty-btn-small" onclick="updateCartQuantity('${item.cartItemId}', -1)">-</button>
+                        <button class="qty-btn-small" onclick="updateCartQuantity(${index}, -1)">-</button>
                         <span>${item.quantity}</span>
-                        <button class="qty-btn-small" onclick="updateCartQuantity('${item.cartItemId}', 1)">+</button>
+                        <button class="qty-btn-small" onclick="updateCartQuantity(${index}, 1)">+</button>
                     </div>
                 </div>
-                <button class="remove-item" onclick="removeFromCart('${item.cartItemId}')">🗑️</button>
+                <button class="remove-item" onclick="removeFromCart(${index})">🗑️</button>
             </div>
         `}).join('');
         checkoutBtn.disabled = false;
@@ -324,13 +324,13 @@ function updateCartUI() {
 /**
  * **核心修改**：更新購物車商品數量
  */
-function updateCartQuantity(cartItemId, change) {
-    const item = cart.find(i => i.cartItemId === cartItemId);
+function updateCartQuantity(index, change) {
+    const item = cart[index];
     if (!item) return;
 
     const newQuantity = item.quantity + change;
     if (newQuantity <= 0) {
-        removeFromCart(cartItemId);
+        removeFromCart(index);
         return;
     }
 
@@ -342,8 +342,8 @@ function updateCartQuantity(cartItemId, change) {
 /**
  * **核心修改**：移除購物車商品
  */
-function removeFromCart(cartItemId) {
-    cart = cart.filter(item => item.cartItemId !== cartItemId);
+function removeFromCart(index) {
+    cart.splice(index, 1);
     saveCartToLocalStorage();
     updateCartUI();
 }
@@ -402,7 +402,7 @@ async function handleOrderSubmit(e) {
         customerEmail: document.getElementById('customerEmail').value,
         customerAddress: document.getElementById('customerAddress').value,
     };
-    
+
     showLoadingOverlay();
     const submitBtn = e.target.querySelector('.submit-order-btn');
     submitBtn.disabled = true;
@@ -444,7 +444,7 @@ async function handleOrderSubmit(e) {
                 document.getElementById('orderNumber').textContent = orderId;
                 closeModal('checkoutModal');
                 showModal('successModal');
-                
+
                 loadProducts(); // 重新載入商品 (未來可同步庫存)
                 cart = [];
                 saveCartToLocalStorage();
