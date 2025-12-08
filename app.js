@@ -401,6 +401,7 @@ async function handleOrderSubmit(e) {
         customerLineId: document.getElementById('customerLineId').value,
         customerEmail: document.getElementById('customerEmail').value,
         customerAddress: document.getElementById('customerAddress').value,
+        customerNote: document.getElementById('customerNote').value || '', // 備注欄位（選填）
     };
 
     showLoadingOverlay();
