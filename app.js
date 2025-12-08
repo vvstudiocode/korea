@@ -29,7 +29,7 @@ function initializeApp() {
 }
 
 /**
- * 設定事件監聽器
+ * 設定事件監聯器
  */
 function setupEventListeners() {
     // 購物車按鈕
@@ -44,6 +44,33 @@ function setupEventListeners() {
 
     // 遮罩層點擊關閉
     document.getElementById('overlay').addEventListener('click', closeAllModals);
+
+    // 圖片輪播滑動監聽 (使用事件委派)
+    document.addEventListener('scroll', handleSliderScroll, true);
+}
+
+/**
+ * 處理圖片輪播滑動，更新指示點
+ */
+function handleSliderScroll(e) {
+    const slider = e.target;
+    if (!slider.classList || !slider.classList.contains('image-slider')) return;
+
+    const container = slider.closest('.image-slider-container');
+    if (!container) return;
+
+    const dots = container.querySelectorAll('.slider-dot');
+    if (dots.length === 0) return;
+
+    // 計算目前顯示的是第幾張圖片
+    const scrollLeft = slider.scrollLeft;
+    const imageWidth = slider.offsetWidth;
+    const currentIndex = Math.round(scrollLeft / imageWidth);
+
+    // 更新指示點
+    dots.forEach((dot, index) => {
+        dot.classList.toggle('active', index === currentIndex);
+    });
 }
 
 // ===== 商品管理 =====
