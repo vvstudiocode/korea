@@ -138,10 +138,6 @@
                 <div class="product-detail-info">
                     <h2 id="modalProductName"></h2>
                     <p class="product-detail-price" id="modalProductPrice"></p>
-                    <p class="product-detail-description" id="modalProductDescription"></p>
-                    <div class="product-detail-stock">
-                        庫存：<span id="modalProductStock"></span> 件
-                    </div>
 
                     <!-- 商品選項容器 (動態產生) -->
                     <div id="modalProductOptions" class="product-options-container"></div>
@@ -157,6 +153,12 @@
                     <button class="add-to-cart-btn" onclick="addToCartFromModal()">
                         加入購物車
                     </button>
+
+                    <!-- 商品描述放在最後 -->
+                    <p class="product-detail-description" id="modalProductDescription"></p>
+                    <div class="product-detail-stock">
+                        庫存：<span id="modalProductStock"></span> 件
+                    </div>
                 </div>
             </div>
         </div>
