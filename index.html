@@ -64,9 +64,8 @@
                     <li>代購服務屬於客製化給付，一旦訂單成立並付款後，即不接受任何理由（如跑單、改變心意、顏色尺寸不合等）要求取消、退款或更改訂單內容。請務必在下單前再次確認。</li>
 
                     <li class="section-header"><strong>五、採買與寄送時程</strong></li>
-                    <li><strong>採購時程：</strong>代購人員將於每週日統一採買。若遇商品缺貨、斷貨或限購，將第一時間通知您。</li>
-                    <li><strong>運送時程：</strong>商品採買後將統一從韓國寄回台灣，到貨時間約需 <strong>7-30個工作天</strong> (不含假日與國定假日)。</li>
-                    <li><strong>出貨與通知：</strong>商品抵台並完成品檢後，將依序包裝寄出，並以 Email 通知您出貨及提供物流追蹤編號。</li>
+                    <li><strong>採購時程：</strong>代購人員將於 12/15~12/19採購 。若遇商品缺貨、斷貨或限購，將第一時間通知您。</li>
+                    <li><strong>運送時程：</strong>商品採買後將統一 <strong>12/20寄出</strong></li>
                 </ul>
             </div>
         </div>
@@ -171,14 +170,34 @@
                     <input type="email" id="customerEmail" required placeholder="example@email.com">
                 </div>
 
+                <!-- 711 店到店說明 -->
+                <div class="shipping-notice">
+                    <p>📦 本店僅提供 <strong>7-11 店到店</strong> 取貨服務</p>
+                    <p class="store-query-link">查詢門市：<a href="https://www.ibon.com.tw/retail_inquiry.aspx#gsc.tab=0"
+                            target="_blank">👉 點此查詢</a></p>
+                </div>
+
                 <div class="form-group">
-                    <label for="customerAddress">收件地址 *</label>
-                    <textarea id="customerAddress" required rows="3" placeholder="請輸入完整收件地址"></textarea>
+                    <label for="storeName">7-11 門市名稱 *</label>
+                    <input type="text" id="storeName" required placeholder="例如：信義門市">
+                </div>
+
+                <div class="form-group">
+                    <label for="storeCode">門市店號 *</label>
+                    <input type="text" id="storeCode" required placeholder="例如：123456">
+                </div>
+
+                <div class="form-group">
+                    <label for="storeAddress">門市地址 *</label>
+                    <input type="text" id="storeAddress" required placeholder="例如：台北市信義區XX路XX號">
                 </div>
 
                 <div class="form-group">
                     <label for="customerNote">備注（選填）</label>
-                    <textarea id="customerNote" rows="3" placeholder="請在此填寫匯款後五碼，如有下訂Monclos 舒適護手霜，請附上英文"></textarea>
+                    <textarea id="customerNote" rows="3" placeholder="請在此填寫匯款後五碼。
+如有下訂Monclos 舒適護手霜，請附上英文"></textarea>
+                    <p class="form-hint">匯款完成後請至官方 Line 回覆：<a href="https://lin.ee/qEQwlef" target="_blank">@597gest</a>
+                    </p>
                 </div>
 
                 <div class="order-summary">
@@ -202,7 +221,9 @@
                         </div>
                         <div class="payment-item">
                             <span class="payment-label">任何問題可洽網頁最下方LINE | IG</span>
-                            <span class="payment-value"></span>
+                        </div>
+                        <div class="payment-item">
+                            <span class="payment-value">匯款完成後請聯繫我們匯款後五碼</span>
                         </div>
                     </div>
                     <p class="payment-note">請於下單後 3 天內完成匯款，並保留匯款收據供查詢</p>
