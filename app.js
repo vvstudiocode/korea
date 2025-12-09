@@ -674,6 +674,12 @@ function showModal(modalId) {
     if (modal) {
         modal.classList.add('active');
         document.body.classList.add('no-scroll');
+
+        // 確保模態框內容捲動到最上方
+        const modalContent = modal.querySelector('.modal-content');
+        if (modalContent) {
+            modalContent.scrollTop = 0;
+        }
     }
 }
 
