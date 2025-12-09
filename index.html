@@ -102,6 +102,23 @@
         </div>
 
         <div class="cart-footer">
+            <!-- 運送方式選擇 -->
+            <div class="shipping-method-selector">
+                <label>運送方式：</label>
+                <div class="shipping-options">
+                    <label class="shipping-option">
+                        <input type="radio" name="shippingMethod" value="pickup"
+                            onchange="updateShippingMethod('pickup')">
+                        <span>限台中市面交 <strong>免運</strong></span>
+                    </label>
+                    <label class="shipping-option">
+                        <input type="radio" name="shippingMethod" value="711" checked
+                            onchange="updateShippingMethod('711')">
+                        <span>7-11 店到店 <strong>NT$ 60</strong></span>
+                    </label>
+                </div>
+            </div>
+
             <div class="cart-total">
                 <span>總計：</span>
                 <span class="total-amount" id="totalAmount">NT$ 0</span>
@@ -152,6 +169,15 @@
             <h2>填寫收件資訊</h2>
 
             <form id="orderForm">
+                <!-- 訂單摘要（放在最上方） -->
+                <div class="order-summary">
+                    <h3>訂單摘要</h3>
+                    <div id="orderSummary"></div>
+                    <div class="order-total">
+                        總金額：<span id="orderTotal">NT$ 0</span>
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <label for="customerName">姓名 *</label>
                     <input type="text" id="customerName" required placeholder="請輸入您的姓名">
@@ -170,26 +196,28 @@
                     <input type="email" id="customerEmail" required placeholder="example@email.com">
                 </div>
 
-                <!-- 711 店到店說明 -->
-                <div class="shipping-notice">
-                    <p>📦 本店僅提供 <strong>7-11 店到店</strong> 取貨服務</p>
-                    <p class="store-query-link">查詢門市：<a href="https://www.ibon.com.tw/retail_inquiry.aspx#gsc.tab=0"
-                            target="_blank">👉 點此查詢</a></p>
-                </div>
+                <!-- 711 店到店欄位區塊 -->
+                <div id="storeFieldsSection">
+                    <div class="shipping-notice">
+                        <p>📦 您選擇了 <strong>7-11 店到店</strong> 取貨</p>
+                        <p class="store-query-link">查詢門市：<a href="https://www.ibon.com.tw/retail_inquiry.aspx#gsc.tab=0"
+                                target="_blank">👉 點此查詢</a></p>
+                    </div>
 
-                <div class="form-group">
-                    <label for="storeName">7-11 門市名稱 *</label>
-                    <input type="text" id="storeName" required placeholder="例如：信義門市">
-                </div>
+                    <div class="form-group">
+                        <label for="storeName">7-11 門市名稱 *</label>
+                        <input type="text" id="storeName" required placeholder="例如：信義門市">
+                    </div>
 
-                <div class="form-group">
-                    <label for="storeCode">門市店號 *</label>
-                    <input type="text" id="storeCode" required placeholder="例如：123456">
-                </div>
+                    <div class="form-group">
+                        <label for="storeCode">門市店號 *</label>
+                        <input type="text" id="storeCode" required placeholder="例如：123456">
+                    </div>
 
-                <div class="form-group">
-                    <label for="storeAddress">門市地址 *</label>
-                    <input type="text" id="storeAddress" required placeholder="例如：台北市信義區XX路XX號">
+                    <div class="form-group">
+                        <label for="storeAddress">門市地址 *</label>
+                        <input type="text" id="storeAddress" required placeholder="例如：台北市信義區XX路XX號">
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -198,14 +226,6 @@
 如有下訂Monclos 舒適護手霜，請附上英文"></textarea>
                     <p class="form-hint">匯款完成後請至官方 Line 回覆：<a href="https://lin.ee/qEQwlef" target="_blank">@597gest</a>
                     </p>
-                </div>
-
-                <div class="order-summary">
-                    <h3>訂單摘要</h3>
-                    <div id="orderSummary"></div>
-                    <div class="order-total">
-                        總金額：<span id="orderTotal">NT$ 0</span>
-                    </div>
                 </div>
 
                 <div class="payment-info">
