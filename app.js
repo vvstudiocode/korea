@@ -388,8 +388,20 @@ function updateCartUI() {
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
     cartBadge.textContent = totalItems;
 
-    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    totalAmount.textContent = `NT$ ${total.toLocaleString()}`;
+    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const shippingFee = getShippingFee();
+    const total = cart.length > 0 ? subtotal + shippingFee : 0;
+
+    // 顯示運費和總計
+    if (cart.length > 0) {
+        const shippingText = shippingFee > 0 ? `NT$ ${shippingFee}` : '免運';
+        totalAmount.innerHTML = `
+            <div class="cart-subtotal">小計：NT$ ${subtotal.toLocaleString()}</div>
+            <div class="cart-shipping">運費（${getShippingMethodName()}）：${shippingText}</div>
+            <div class="cart-final-total">NT$ ${total.toLocaleString()}</div>`;
+    } else {
+        totalAmount.textContent = 'NT$ 0';
+    }
 
     if (cart.length === 0) {
         cartItems.innerHTML = `<div class="empty-cart"><p>購物車是空的</p><p class="empty-cart-hint">快去挑選喜歡的商品吧！</p></div>`;
@@ -471,15 +483,73 @@ function loadCartFromLocalStorage() {
 
 // ===== 結帳流程 =====
 
+// 運送方式設定
+const SHIPPING_METHODS = {
+    'pickup': { name: '限台中市面交', fee: 0 },
+    '711': { name: '7-11 店到店', fee: 60 }
+};
+let selectedShippingMethod = '711'; // 預設 711 店到店
+
+/**
+ * 更新運送方式
+ */
+function updateShippingMethod(method) {
+    selectedShippingMethod = method;
+    localStorage.setItem('shippingMethod', method);
+    updateCartUI();
+}
+
+/**
+ * 取得目前運費
+ */
+function getShippingFee() {
+    return SHIPPING_METHODS[selectedShippingMethod]?.fee || 0;
+}
+
+/**
+ * 取得目前運送方式名稱
+ */
+function getShippingMethodName() {
+    return SHIPPING_METHODS[selectedShippingMethod]?.name || '';
+}
+
+/**
+ * 根據運送方式顯示/隱藏門市欄位
+ */
+function toggleStoreFields() {
+    const storeFields = document.getElementById('storeFieldsSection');
+    const shippingNotice = document.querySelector('.shipping-notice');
+
+    if (storeFields) {
+        if (selectedShippingMethod === '711') {
+            storeFields.style.display = 'block';
+            if (shippingNotice) shippingNotice.style.display = 'block';
+            // 設定為必填
+            document.getElementById('storeName').required = true;
+            document.getElementById('storeCode').required = true;
+            document.getElementById('storeAddress').required = true;
+        } else {
+            storeFields.style.display = 'none';
+            if (shippingNotice) shippingNotice.style.display = 'none';
+            // 取消必填
+            document.getElementById('storeName').required = false;
+            document.getElementById('storeCode').required = false;
+            document.getElementById('storeAddress').required = false;
+        }
+    }
+}
+
 function showCheckout() {
     if (cart.length === 0) return;
     toggleCart();
 
     const orderSummary = document.getElementById('orderSummary');
     const orderTotal = document.getElementById('orderTotal');
-    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const shippingFee = getShippingFee();
+    const total = subtotal + shippingFee;
 
-    orderSummary.innerHTML = cart.map(item => {
+    let summaryHTML = cart.map(item => {
         // **新增**：顯示選項於訂單摘要
         let optionText = '';
         if (item.selectedOptions && Object.keys(item.selectedOptions).length > 0) {
@@ -492,7 +562,20 @@ function showCheckout() {
         </div>`;
     }).join('');
 
+    // 加入運費項目
+    const shippingText = shippingFee > 0 ? `NT$ ${shippingFee}` : '免運';
+    summaryHTML += `
+        <div class="summary-item shipping-fee">
+            <span>運費（${getShippingMethodName()}）</span>
+            <span>${shippingText}</span>
+        </div>`;
+
+    orderSummary.innerHTML = summaryHTML;
     orderTotal.textContent = `NT$ ${total.toLocaleString()}`;
+
+    // 根據運送方式顯示/隱藏門市欄位
+    toggleStoreFields();
+
     showModal('checkoutModal');
 }
 
@@ -533,7 +616,9 @@ async function handleOrderSubmit(e) {
             orderData: {
                 ...formData,
                 items: simplifiedItems,
-                total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+                shippingMethod: getShippingMethodName(), // 運送方式
+                shippingFee: getShippingFee(), // 運費
+                total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0) + getShippingFee(), // 總金額含運費
                 orderId: orderId
             }
         };
