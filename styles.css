@@ -743,7 +743,11 @@ body.no-scroll {
     margin-bottom: 2rem;
     white-space: pre-line;
     font-size: 0.8rem;
-    /* 保留換行符號 */
+
+    /* 增加與上方按鈕的距離 */
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .product-detail-stock {
@@ -1283,113 +1287,133 @@ body.no-scroll {
         right: 0;
     }
 
-    /* 購物車底部區塊 - 手機版大幅縮小 */
+    /* 購物車底部區塊 - 手機版極簡 */
     .cart-footer {
-        padding: 0.5rem 0.8rem;
+        padding: 0.4rem 0.6rem;
     }
 
     .shipping-method-selector {
-        margin-bottom: 0.3rem;
-        padding-bottom: 0.3rem;
+        margin-bottom: 0.2rem;
+        padding-bottom: 0.2rem;
+        border-bottom: none;
     }
 
     .shipping-method-selector>label {
-        margin-bottom: 0.2rem;
-        font-size: 0.75rem;
+        display: none;
     }
 
     .shipping-options {
-        gap: 0;
+        gap: 0.3rem;
         padding: 0;
         flex-direction: row;
     }
 
     .shipping-option {
-        padding: 0.25rem 0.5rem;
+        padding: 0.2rem 0.4rem;
         border-radius: 4px;
         flex: 1;
     }
 
     .shipping-option input[type="radio"] {
-        width: 14px;
-        height: 14px;
+        width: 12px;
+        height: 12px;
     }
 
     .shipping-option span {
-        font-size: 0.7rem;
+        font-size: 0.65rem;
     }
 
     .shipping-option strong {
-        font-size: 0.7rem;
+        font-size: 0.65rem;
+        margin-left: 0.1rem;
     }
 
     .cart-total {
-        font-size: 1rem;
-        margin-bottom: 0.4rem;
+        font-size: 0.9rem;
+        margin-bottom: 0.3rem;
         flex-direction: row;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.3rem;
+    }
+
+    .cart-total>span:first-child {
+        font-size: 0.8rem;
+    }
+
+    .total-amount {
+        gap: 0.1rem;
     }
 
     .cart-subtotal,
     .cart-shipping {
-        font-size: 0.65rem;
+        font-size: 0.6rem;
     }
 
     .cart-final-total {
-        font-size: 1rem;
+        font-size: 0.9rem;
         margin-top: 0;
         padding-top: 0;
         border-top: none;
     }
 
     .checkout-btn {
-        padding: 0.6rem;
-        font-size: 0.85rem;
+        padding: 0.5rem;
+        font-size: 0.8rem;
     }
 
-    /* 購物車商品項目 - 手機版縮小 */
+    /* 購物車商品項目 - 手機版極簡 */
     .cart-items {
-        padding: 0.8rem;
+        padding: 0.5rem;
     }
 
     .cart-item {
-        gap: 0.8rem;
-        padding-bottom: 0.8rem;
-        margin-bottom: 0.8rem;
+        gap: 0.5rem;
+        padding-bottom: 0.5rem;
+        margin-bottom: 0.5rem;
     }
 
     .cart-item-image {
-        width: 60px;
-        height: 75px;
+        width: 45px;
+        height: 55px;
+        border-radius: 4px;
     }
 
     .cart-item-name {
-        font-size: 0.85rem;
+        font-size: 0.75rem;
+        line-height: 1.2;
     }
 
     .cart-item-price {
-        font-size: 0.8rem;
+        font-size: 0.7rem;
+    }
+
+    .cart-item-options {
+        margin-top: 0.1rem;
+        gap: 0.2rem;
     }
 
     .cart-item-options span {
-        font-size: 0.7rem;
-        padding: 0.1rem 0.4rem;
+        font-size: 0.6rem;
+        padding: 0.05rem 0.3rem;
     }
 
     .cart-item-quantity {
-        gap: 0.5rem;
-        margin-top: 0.3rem;
+        gap: 0.4rem;
+        margin-top: 0.2rem;
+    }
+
+    .cart-item-quantity span {
+        font-size: 0.75rem;
     }
 
     .qty-btn-small {
-        width: 20px;
-        height: 20px;
-        font-size: 0.8rem;
+        width: 18px;
+        height: 18px;
+        font-size: 0.7rem;
     }
 
     .remove-item {
-        font-size: 0.85rem;
+        font-size: 0.75rem;
     }
 }
 
