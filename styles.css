@@ -473,6 +473,30 @@ h4 {
     background: none;
     -webkit-text-fill-color: initial;
     color: var(--primary-text);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.3rem;
+}
+
+.cart-subtotal,
+.cart-shipping {
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: var(--secondary-text);
+}
+
+.cart-shipping {
+    color: var(--accent-dark-pink);
+}
+
+.cart-final-total {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--primary-text);
+    margin-top: 0.3rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .checkout-btn {
@@ -493,6 +517,58 @@ h4 {
     background: var(--accent-dark-pink);
     transform: none;
     box-shadow: none;
+}
+
+/* 運送方式選擇器 */
+.shipping-method-selector {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.shipping-method-selector>label {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--secondary-text);
+    margin-bottom: 0.8rem;
+    font-weight: 500;
+}
+
+.shipping-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.shipping-option {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.8rem 1rem;
+    background: var(--bg-pink);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.shipping-option:hover {
+    background: #ffe4ec;
+}
+
+.shipping-option input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent-dark-pink);
+}
+
+.shipping-option span {
+    font-size: 0.95rem;
+    color: var(--primary-text);
+}
+
+.shipping-option strong {
+    color: var(--accent-dark-pink);
+    margin-left: 0.3rem;
 }
 
 /* 禁止背景捲動 */
@@ -927,6 +1003,16 @@ body.no-scroll {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+}
+
+/* 運費項目樣式 */
+.summary-item.shipping-fee {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px dashed var(--accent-rose);
+    border-bottom: none;
+    color: var(--secondary-text);
+    font-size: 0.95rem;
 }
 
 .summary-item:last-child {
