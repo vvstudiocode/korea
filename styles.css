@@ -818,6 +818,60 @@ body.no-scroll {
     /* iOS 滑順滾動 */
 }
 
+/* 711 店到店說明 */
+.shipping-notice {
+    background: linear-gradient(135deg, #fff0f3 0%, #ffe4ec 100%);
+    border: 1px solid var(--accent-rose);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.shipping-notice p {
+    margin: 0;
+    color: var(--primary-text);
+    font-size: 0.95rem;
+}
+
+.shipping-notice strong {
+    color: var(--accent-dark-pink);
+}
+
+.store-query-link {
+    margin-top: 0.5rem !important;
+    font-size: 0.9rem !important;
+}
+
+.store-query-link a {
+    color: var(--accent-dark-pink);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.store-query-link a:hover {
+    color: #c07880;
+    text-decoration: underline;
+}
+
+/* 表單提示文字 */
+.form-hint {
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--secondary-text);
+}
+
+.form-hint a {
+    color: var(--accent-dark-pink);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.form-hint a:hover {
+    text-decoration: underline;
+}
+
 .checkout-form h2 {
     margin-bottom: 2rem;
     text-align: center;
