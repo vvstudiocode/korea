@@ -75,30 +75,80 @@ function handleSliderScroll(e) {
 
 // ===== 商品管理 =====
 
+const PRODUCTS_CACHE_KEY = 'koreanShoppingProducts';
+const CACHE_EXPIRY_MS = 5 * 60 * 1000; // 快取有效期：5分鐘
+
 /**
- * 從 GAS API 載入商品
+ * 從 GAS API 載入商品（含快取機制）
  */
 async function loadProducts() {
     const productsGrid = document.getElementById('productsGrid');
 
-    try {
+    // 1. 先嘗試從快取載入（立即顯示）
+    const cached = loadProductsFromCache();
+    if (cached) {
+        console.log('📦 從快取載入商品');
+        products = cached;
+        displayProductsProgressive(); // 漸進式顯示
+    } else {
         productsGrid.innerHTML = '<div class="loading">載入商品中...</div>';
+    }
 
+    // 2. 背景從 API 更新資料
+    try {
         const response = await fetch(`${GAS_API_URL}?action=getProducts`);
         const result = await response.json();
 
         if (result.success) {
-            products = result.data;
-            displayProducts();
-        } else {
+            const newProducts = result.data;
+
+            // 如果資料有變化，更新顯示
+            if (JSON.stringify(newProducts) !== JSON.stringify(products)) {
+                console.log('🔄 更新商品資料');
+                products = newProducts;
+                saveProductsToCache(products);
+                displayProductsProgressive();
+            } else {
+                console.log('✅ 商品資料無變化');
+                saveProductsToCache(products); // 更新快取時間
+            }
+        } else if (!cached) {
             productsGrid.innerHTML = `<div class="loading">載入失敗：${result.error}</div>`;
         }
     } catch (error) {
         console.error('載入商品失敗:', error);
-        productsGrid.innerHTML = '<div class="loading">⚠️ 無法連接到伺服器<br><small>請確認 GAS API URL 設定正確</small></div>';
+        if (!cached) {
+            productsGrid.innerHTML = '<div class="loading">⚠️ 無法連接到伺服器<br><small>請確認網路連線</small></div>';
+            loadDemoProducts();
+        }
+    }
+}
 
-        // 使用示範資料
-        loadDemoProducts();
+/**
+ * 儲存商品到快取
+ */
+function saveProductsToCache(data) {
+    const cacheData = {
+        timestamp: Date.now(),
+        products: data
+    };
+    localStorage.setItem(PRODUCTS_CACHE_KEY, JSON.stringify(cacheData));
+}
+
+/**
+ * 從快取載入商品
+ */
+function loadProductsFromCache() {
+    try {
+        const cached = localStorage.getItem(PRODUCTS_CACHE_KEY);
+        if (!cached) return null;
+
+        const cacheData = JSON.parse(cached);
+        // 檢查快取是否過期（超過5分鐘仍可使用，只是會觸發背景更新）
+        return cacheData.products;
+    } catch (e) {
+        console.error('快取讀取失敗:', e);
+        return null;
     }
 }
 
@@ -115,48 +165,76 @@ function loadDemoProducts() {
         { id: 'P006', name: '簡約LOGO T-shirt', description: '熱門百搭單品', price: 890, stock: 12, image: 'https://picsum.photos/400/300?random=6', category: '流行服飾', options: { '顏色': ['黑色', '白色'], '尺寸': ['S', 'M', 'L'] } }
     ];
 
-    displayProducts();
+    displayProductsProgressive();
 }
 
+/**
+ * 漸進式顯示商品（一個一個出現）
+ */
+function displayProductsProgressive() {
+    const grid = document.getElementById('productsGrid');
+    grid.innerHTML = ''; // 清空
+
+    products.forEach((product, index) => {
+        // 使用 setTimeout 讓每個商品依序出現
+        setTimeout(() => {
+            const card = createProductCard(product);
+            grid.insertAdjacentHTML('beforeend', card);
+
+            // 添加淡入動畫
+            const addedCard = grid.lastElementChild;
+            addedCard.style.opacity = '0';
+            addedCard.style.transform = 'translateY(20px)';
+            requestAnimationFrame(() => {
+                addedCard.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                addedCard.style.opacity = '1';
+                addedCard.style.transform = 'translateY(0)';
+            });
+        }, index * 80); // 每個商品間隔 80ms 出現
+    });
+}
 
 /**
- * 顯示商品清單
+ * 建立單個商品卡片 HTML
+ */
+function createProductCard(product) {
+    const images = product.image ? product.image.split(',').map(url => url.trim()) : [];
+    const mainImage = images.length > 0 ? images[0] : 'https://via.placeholder.com/300';
+
+    let imageHtml = images.length > 1 ? `
+        <div class="image-slider-container">
+            <div class="image-slider">${images.map(img => `<img src="${img}" class="slider-image" loading="lazy">`).join('')}</div>
+            <div class="slider-dots">${images.map((_, i) => `<div class="slider-dot ${i === 0 ? 'active' : ''}"></div>`).join('')}</div>
+        </div>` : `
+        <div class="image-slider-container"><img src="${mainImage}" class="slider-image" loading="lazy"></div>`;
+
+    const hasOptions = product.options && Object.keys(product.options).length > 0;
+    const buttonHtml = hasOptions ? `
+        <button class="card-add-btn" onclick="event.stopPropagation(); showProductDetail('${product.id}')">
+            選擇規格
+        </button>` : `
+        <button class="card-add-btn" onclick="event.stopPropagation(); addToCartById('${product.id}')">
+            加入購物車
+        </button>`;
+
+    return `
+    <div class="product-card" onclick="showProductDetail('${product.id}')">
+        ${imageHtml}
+        <div class="product-info">
+            <h3 class="product-name">${product.name}</h3>
+            <div class="product-footer">
+                <span class="product-price">NT$ ${product.price}</span>
+                ${buttonHtml}
+            </div>
+        </div>
+    </div>`;
+}
+
+/**
+ * 顯示商品清單（保留原函數供其他地方呼叫）
  */
 function displayProducts() {
-    const grid = document.getElementById('productsGrid');
-    grid.innerHTML = products.map(product => {
-        const images = product.image ? product.image.split(',').map(url => url.trim()) : [];
-        const mainImage = images.length > 0 ? images[0] : 'https://via.placeholder.com/300';
-
-        let imageHtml = images.length > 1 ? `
-            <div class="image-slider-container">
-                <div class="image-slider">${images.map(img => `<img src="${img}" class="slider-image" loading="lazy">`).join('')}</div>
-                <div class="slider-dots">${images.map((_, i) => `<div class="slider-dot ${i === 0 ? 'active' : ''}"></div>`).join('')}</div>
-            </div>` : `
-            <div class="image-slider-container"><img src="${mainImage}" class="slider-image" loading="lazy"></div>`;
-
-        // **修改**：根據商品是否有選項，決定按鈕功能
-        const hasOptions = product.options && Object.keys(product.options).length > 0;
-        const buttonHtml = hasOptions ? `
-            <button class="card-add-btn" onclick="event.stopPropagation(); showProductDetail('${product.id}')">
-                選擇規格
-            </button>` : `
-            <button class="card-add-btn" onclick="event.stopPropagation(); addToCartById('${product.id}')">
-                加入購物車
-            </button>`;
-
-        return `
-        <div class="product-card" onclick="showProductDetail('${product.id}')">
-            ${imageHtml}
-            <div class="product-info">
-                <h3 class="product-name">${product.name}</h3>
-                <div class="product-footer">
-                    <span class="product-price">NT$ ${product.price}</span>
-                    ${buttonHtml}
-                </div>
-            </div>
-        </div>`;
-    }).join('');
+    displayProductsProgressive();
 }
 
 
@@ -427,7 +505,10 @@ async function handleOrderSubmit(e) {
         customerPhone: document.getElementById('customerPhone').value,
         customerLineId: document.getElementById('customerLineId').value,
         customerEmail: document.getElementById('customerEmail').value,
-        customerAddress: document.getElementById('customerAddress').value,
+        // 711 店到店資訊
+        storeName: document.getElementById('storeName').value,
+        storeCode: document.getElementById('storeCode').value,
+        storeAddress: document.getElementById('storeAddress').value,
         customerNote: document.getElementById('customerNote').value || '', // 備注欄位（選填）
     };
 
