@@ -1282,6 +1282,56 @@ body.no-scroll {
     .cart-sidebar.active {
         right: 0;
     }
+
+    /* 購物車底部區塊 - 手機版縮小高度 */
+    .cart-footer {
+        padding: 0.8rem;
+    }
+
+    .shipping-method-selector {
+        margin-bottom: 0.8rem;
+        padding-bottom: 0.8rem;
+    }
+
+    .shipping-method-selector>label {
+        margin-bottom: 0.5rem;
+        font-size: 0.85rem;
+    }
+
+    .shipping-options {
+        gap: 0;
+        padding: 0;
+    }
+
+    .shipping-option {
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+    }
+
+    .shipping-option span {
+        font-size: 0.85rem;
+    }
+
+    .cart-total {
+        font-size: 1.2rem;
+        margin-bottom: 0.8rem;
+    }
+
+    .cart-subtotal,
+    .cart-shipping {
+        font-size: 0.8rem;
+    }
+
+    .cart-final-total {
+        font-size: 1.1rem;
+        margin-top: 0.2rem;
+        padding-top: 0.3rem;
+    }
+
+    .checkout-btn {
+        padding: 0.8rem;
+        font-size: 0.9rem;
+    }
 }
 
 /* Social Icons */
