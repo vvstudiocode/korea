@@ -855,6 +855,7 @@ async function handleSearchOrder() {
     try {
         const response = await fetch(GAS_API_URL, {
             method: 'POST',
+            // 這裡用 text/plain 是正確的，避免 GAS 發生 CORS 預檢 (Preflight) 錯誤
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify({
                 action: 'searchOrder',
@@ -865,11 +866,16 @@ async function handleSearchOrder() {
         const result = await response.json();
 
         if (result.success) {
-            if (result.orders && result.orders.length > 0) {
-                renderSearchResults(result.orders);
+            // --- 修正點開始 ---
+            // 後端回傳的結構是 result.data.orders，不是 result.orders
+            const orders = result.data ? result.data.orders : [];
+
+            if (orders && orders.length > 0) {
+                renderSearchResults(orders);
             } else {
                 resultsContainer.innerHTML = '<div class="no-results">查無此手機號碼的訂單資料</div>';
             }
+            // --- 修正點結束 ---
         } else {
             resultsContainer.innerHTML = `<div class="error-message">查詢失敗：${result.error || '未知錯誤'}</div>`;
         }
