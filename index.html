@@ -24,6 +24,9 @@
                 <span class="logo-text">韓國代購</span>
             </div>
             <div class="nav-actions">
+                <button class="search-btn" id="searchBtn" onclick="openSearchModal()">
+                    🔍 訂單查詢
+                </button>
                 <button class="cart-btn" id="cartBtn">
                     🛒 購物車
                     <span class="cart-badge" id="cartBadge">0</span>
@@ -273,6 +276,27 @@
 
     <!-- 遮罩層 -->
     <div class="overlay" id="overlay"></div>
+
+    <!-- 訂單查詢模態框 -->
+    <div class="modal" id="searchOrderModal">
+        <div class="modal-content search-order-form">
+            <button class="modal-close" onclick="closeSearchModal()">✕</button>
+            <h2>訂單查詢</h2>
+
+            <div class="search-input-group">
+                <p>請輸入訂購時的手機號碼查詢訂單狀態</p>
+                <div class="form-group">
+                    <input type="tel" id="searchPhone" placeholder="例如：0912345678"
+                        onkeypress="handleSearchKeyPress(event)">
+                    <button class="submit-order-btn" onclick="handleSearchOrder()" style="margin-top: 10px;">查詢</button>
+                </div>
+            </div>
+
+            <div id="searchResults" class="search-results">
+                <!-- 查詢結果會顯示在這裡 -->
+            </div>
+        </div>
+    </div>
 
     <script src="app.js"></script>
 </body>
