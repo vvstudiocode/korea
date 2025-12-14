@@ -1537,40 +1537,87 @@ body.no-scroll {
 }
 
 /* Modal for search */
+/* Modal for search */
 .search-order-form {
-    max-width: 800px;
+    max-width: 500px;
+    /* 更精緻的寬度 */
     width: 90%;
+    padding: 2.5rem;
+    /* 增加內距，解決貼邊問題 */
+    text-align: center;
+    /* 標題置中 */
 }
 
 .search-input-group p {
-    margin-bottom: 15px;
-    color: #666;
-    font-size: 0.9rem;
+    margin-bottom: 20px;
+    color: var(--secondary-text);
+    font-size: 0.95rem;
 }
 
 .search-input-group input {
     width: 100%;
-    padding: 10px;
+    padding: 12px 15px;
+    /* 增加輸入框高度 */
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 1rem;
-    margin-bottom: 10px;
+    margin-bottom: 1.5rem;
+    /* 增加輸入框與按鈕的距離 */
+    background: #f9f9f9;
+    /* 淺灰底色，更柔和 */
+    transition: all 0.3s;
+}
+
+.search-input-group input:focus {
+    background: white;
+    border-color: var(--primary-text);
+    outline: none;
 }
 
 .search-input-group .submit-order-btn {
     width: 100%;
     padding: 12px;
-    background-color: #333;
+    background-color: var(--primary-text);
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 0;
+    /* 保持一致的方角風格 */
     font-size: 1rem;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: all 0.3s;
+    letter-spacing: 0.1em;
 }
 
 .search-input-group .submit-order-btn:hover {
-    background-color: #555;
+    background-color: var(--accent-dark-pink);
+    transform: none;
+}
+
+/* 搜尋結果樣式優化 */
+.search-results {
+    margin-top: 25px;
+    max-height: 400px;
+    overflow-y: auto;
+    text-align: left;
+    /* 內容靠左 */
+    padding: 5px;
+    /* 預留陰影空間 */
+}
+
+.search-result-card {
+    background: #fff;
+    border: none;
+    /* 移除邊框 */
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    /* 更柔和的陰影 */
+    transition: transform 0.2s;
+}
+
+.search-result-card:hover {
+    transform: translateY(-2px);
 }
 
 
