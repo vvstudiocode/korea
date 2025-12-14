@@ -799,9 +799,126 @@ function showLoadingOverlay() {
     loadingOverlay.classList.add('active');
 }
 
+
 function hideLoadingOverlay() {
     const loadingOverlay = document.getElementById('loadingOverlay');
     if (loadingOverlay) {
         loadingOverlay.classList.remove('active');
     }
 }
+
+// ===== 訂單查詢功能 =====
+
+function openSearchModal() {
+    const modal = document.getElementById('searchOrderModal');
+    if (modal) {
+        modal.classList.add('active');
+        document.body.classList.add('no-scroll');
+        // 清空之前的查詢結果和輸入
+        document.getElementById('searchPhone').value = '';
+        document.getElementById('searchResults').innerHTML = '';
+        setTimeout(() => {
+            const phoneInput = document.getElementById('searchPhone');
+            if (phoneInput) phoneInput.focus();
+        }, 100);
+    }
+}
+
+function closeSearchModal() {
+    closeModal('searchOrderModal');
+}
+
+function handleSearchKeyPress(event) {
+    if (event.key === 'Enter') {
+        handleSearchOrder();
+    }
+}
+
+async function handleSearchOrder() {
+    const phoneInput = document.getElementById('searchPhone');
+    const phoneNumber = phoneInput.value.trim();
+    const resultsContainer = document.getElementById('searchResults');
+
+    if (!phoneNumber) {
+        alert('請輸入手機號碼');
+        return;
+    }
+
+    if (phoneNumber.length < 8) {
+        alert('請輸入正確的手機號碼格式');
+        return;
+    }
+
+    showLoadingOverlay();
+    resultsContainer.innerHTML = '';
+
+    try {
+        const response = await fetch(GAS_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({
+                action: 'searchOrder',
+                phoneNumber: phoneNumber
+            })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            if (result.orders && result.orders.length > 0) {
+                renderSearchResults(result.orders);
+            } else {
+                resultsContainer.innerHTML = '<div class="no-results">查無此手機號碼的訂單資料</div>';
+            }
+        } else {
+            resultsContainer.innerHTML = `<div class="error-message">查詢失敗：${result.error || '未知錯誤'}</div>`;
+        }
+    } catch (error) {
+        console.error('查詢訂單錯誤:', error);
+        resultsContainer.innerHTML = '<div class="error-message">連線錯誤，請稍後再試</div>';
+    } finally {
+        hideLoadingOverlay();
+    }
+}
+
+function renderSearchResults(orders) {
+    const container = document.getElementById('searchResults');
+    let html = '';
+
+    orders.forEach(order => {
+        let itemsHtml = order.items.map(item => `
+            <div class="search-item-row">
+                <span class="item-name">${item.name} ${item.spec !== '無規格' ? `(${item.spec})` : ''}</span>
+                <span class="item-qty">x${item.qty}</span>
+            </div>
+        `).join('');
+
+        html += `
+            <div class="search-result-card">
+                <div class="card-header">
+                    <span class="order-id">#${order.orderId}</span>
+                    <span class="order-status status-${getStatusClass(order.status)}">${order.status}</span>
+                </div>
+                <div class="card-date">訂購日期：${order.date}</div>
+                <div class="card-items">
+                    ${itemsHtml}
+                </div>
+                <div class="card-footer">
+                    <div class="shipping-info">運送：${order.shipping}</div>
+                    <div class="total-price">總計：NT$ ${order.total}</div>
+                </div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+}
+
+function getStatusClass(status) {
+    if (status === '已出貨') return 'shipped';
+    if (status === '已完成') return 'completed';
+    if (status === '取消') return 'cancelled';
+    return 'pending';
+}
+
+
