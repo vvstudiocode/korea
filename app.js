@@ -866,13 +866,26 @@ async function handleSearchOrder() {
         const result = await response.json();
 
         if (result.success) {
+            console.log('🔍 Search API Result:', result); // 關鍵除錯：顯示後端回傳的完整資料
+
             // --- 修正點開始 ---
-            // 後端回傳的結構是 result.data.orders，不是 result.orders
-            const orders = result.data ? result.data.orders : [];
+            // 嘗試從不同結構取得訂單資料，以防後端格式與預期不符
+            let orders = [];
+
+            if (result.data && Array.isArray(result.data.orders)) {
+                orders = result.data.orders;
+            } else if (Array.isArray(result.orders)) {
+                orders = result.orders;
+            } else if (result.data && Array.isArray(result.data)) {
+                orders = result.data; // 極端情況：data 本身就是陣列
+            }
+
+            console.log('📦 Parsed Orders:', orders);
 
             if (orders && orders.length > 0) {
                 renderSearchResults(orders);
             } else {
+                console.warn('❌ No orders found in response');
                 resultsContainer.innerHTML = '<div class="no-results">查無此手機號碼的訂單資料</div>';
             }
             // --- 修正點結束 ---
