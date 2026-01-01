@@ -603,13 +603,25 @@ async function handleOrderSubmit(e) {
         const orderId = 'KR' + new Date().toISOString().slice(0, 10).replace(/-/g, '') + Math.random().toString().slice(2, 6);
 
         // **核心修改**：確保 selectedOptions 被傳送到後端
-        const simplifiedItems = cart.map(item => ({
-            id: item.id,
-            name: item.name,
-            quantity: item.quantity,
-            price: item.price,
-            selectedOptions: item.selectedOptions // 包含選項資訊
-        }));
+        const simplifiedItems = cart.map(item => {
+            // 將選項物件轉換為字串 (e.g., "顏色: 紅, 尺寸: M")
+            let specString = '';
+            if (item.selectedOptions && Object.keys(item.selectedOptions).length > 0) {
+                specString = Object.entries(item.selectedOptions)
+                    .map(([key, value]) => `${key}: ${value}`)
+                    .join(', ');
+            }
+
+            return {
+                id: item.id,
+                name: item.name,
+                qty: Number(item.quantity || 0), // Ensure number
+                quantity: Number(item.quantity || 0),
+                price: parseFloat(item.price || 0), // Ensure float
+                spec: specString,
+                selectedOptions: item.selectedOptions
+            };
+        });
 
         const payload = {
             action: 'submitOrder',
