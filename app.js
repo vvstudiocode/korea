@@ -103,7 +103,7 @@ async function loadProducts() {
         console.log('📦 從快取載入商品');
         products = cached;
         displayProductsProgressive(); // 漸進式顯示
-    } else {
+    } else if (productsGrid) {
         productsGrid.innerHTML = '<div class="loading">載入商品中...</div>';
     }
 
@@ -125,12 +125,12 @@ async function loadProducts() {
                 console.log('✅ 商品資料無變化');
                 saveProductsToCache(products); // 更新快取時間
             }
-        } else if (!cached) {
+        } else if (!cached && productsGrid) {
             productsGrid.innerHTML = `<div class="loading">載入失敗：${result.error}</div>`;
         }
     } catch (error) {
         console.error('載入商品失敗:', error);
-        if (!cached) {
+        if (!cached && productsGrid) {
             productsGrid.innerHTML = '<div class="loading">⚠️ 無法連接到伺服器<br><small>請確認網路連線</small></div>';
             loadDemoProducts();
         }
@@ -186,6 +186,8 @@ function loadDemoProducts() {
  */
 function displayProductsProgressive() {
     const grid = document.getElementById('productsGrid');
+    if (!grid) return; // 如果找不到 Grid (例如使用了自訂排版)，則不執行舊有的顯示邏輯
+
     grid.innerHTML = ''; // 清空
 
     products.forEach((product, index) => {
@@ -363,23 +365,27 @@ function getCartItemId(productId, options) {
  * **核心修改**：加入購物車
  */
 function addToCart(product, quantity, selectedOptions) {
+    if (!product || !product.id) {
+        console.error('❌ 嘗試加入無效商品:', product);
+        return;
+    }
     const cartItemId = getCartItemId(product.id, selectedOptions);
     const existingItem = cart.find(item => item.cartItemId === cartItemId);
 
     if (existingItem) {
         existingItem.quantity += quantity;
     } else {
-        const images = product.image ? product.image.split(',').map(url => url.trim()) : [];
-        const mainImage = images.length > 0 ? images[0] : 'https://via.placeholder.com/300';
+        const images = String(product.image || '').split(',').map(url => url.trim());
+        const mainImage = images.length > 0 && images[0] !== '' ? images[0] : 'https://via.placeholder.com/300';
 
         cart.push({
-            cartItemId: cartItemId, // 使用新的唯一 ID
+            cartItemId: cartItemId,
             id: product.id,
             name: product.name,
             price: product.price,
             image: mainImage,
             quantity: quantity,
-            selectedOptions: selectedOptions // 儲存選項
+            selectedOptions: selectedOptions
         });
     }
 
@@ -388,15 +394,14 @@ function addToCart(product, quantity, selectedOptions) {
     showNotification('已加入購物車！');
 }
 
-
-/**
- * **核心修改**：更新購物車 UI
- */
 function updateCartUI() {
     const cartItems = document.getElementById('cartItems');
     const cartBadge = document.getElementById('cartBadge');
     const totalAmount = document.getElementById('totalAmount');
     const checkoutBtn = document.getElementById('checkoutBtn');
+
+    // 過濾無效項目 (防止舊快取干擾)
+    cart = cart.filter(item => item && item.name && item.name !== 'undefined');
 
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
     cartBadge.textContent = totalItems;
