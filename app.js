@@ -22,24 +22,22 @@ document.addEventListener('DOMContentLoaded', () => {
  * 初始化應用程式
  */
 async function initializeApp() {
-    console.log('App Version: 2.3 (Dynamic Layout Sync)'); // 更新版本
+    console.log('App Version: 2.3 (Dynamic Layout Sync)');
+
+    // 1. 如果有快取排版，立即隱藏預設區域
+    const cachedLayout = localStorage.getItem('omo_cached_layout');
+    if (cachedLayout) {
+        const defaultSection = document.querySelector('.products-section');
+        if (defaultSection) defaultSection.style.display = 'none';
+    }
+
     await loadProducts();
     loadCartFromLocalStorage();
     updateCartUI();
 
-    // 初始化頁面渲染器
+    // 2. 初始化頁面渲染器 (它內部會處理快取與遠端更新)
     if (typeof PageRenderer !== 'undefined') {
-        const container = document.getElementById('pageBuilderRoot');
-        if (container) {
-            const layout = await PageRenderer.fetchLayout();
-            if (layout && layout.length > 0) {
-                // 如果有設定排版，隱藏原有的靜態商品區
-                const defaultSection = document.querySelector('.products-section');
-                if (defaultSection) defaultSection.style.display = 'none';
-
-                PageRenderer.render(container, layout);
-            }
-        }
+        PageRenderer.init();
     }
 }
 
