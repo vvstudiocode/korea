@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastUpdated": "2026-01-02T14:56:41.634Z",
+  "lastUpdated": "2026-01-02T15:18:57.043Z",
   "sections": [
     {
       "type": "hero",
@@ -13,16 +13,8 @@
       "marginBottom": 0
     },
     {
-      "type": "products",
-      "title": "精選推薦",
-      "category": "全部",
-      "limit": 2,
-      "marginTop": 0,
-      "marginBottom": 0
-    },
-    {
       "type": "product_list",
-      "title": "最新商品",
+      "title": "",
       "category": "全部",
       "limit": 32,
       "marginTop": 0,
