@@ -733,8 +733,8 @@ body.no-scroll {
     }
 
     .product-image {
-        height: 180px;
-        min-height: 140px;
+        height: auto;
+        aspect-ratio: 1 / 1;
     }
 
     .product-name {
