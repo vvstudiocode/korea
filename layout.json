@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastUpdated": "2026-01-02T14:18:33.754Z",
+  "lastUpdated": "2026-01-02T14:20:14.203Z",
   "sections": [
     {
       "type": "hero",
@@ -9,12 +9,6 @@
       "image": "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1200",
       "buttonText": "",
       "buttonLink": "",
-      "marginTop": 0,
-      "marginBottom": 0
-    },
-    {
-      "type": "categories",
-      "title": "商品分類",
       "marginTop": 0,
       "marginBottom": 0
     },
@@ -44,7 +38,7 @@
     "copyright": "2025 OMO Select. All rights reserved.",
     "notices": [
       {
-        "title": "1111一、實體採買承諾",
+        "title": "一、實體採買承諾",
         "content": "本店所有商品皆為代購人員於韓國當地實體門市/專櫃/官方通路親自採買，保證正品。"
       },
       {
