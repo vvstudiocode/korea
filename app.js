@@ -4,7 +4,7 @@
  */
 
 // ===== 設定 =====
-const GAS_API_URL = 'https://script.google.com/macros/s/AKfycby7V5VwHfn_Tb-wpg_SSrme2c2P5bin6qjhxEkr80RDLg6p5TPn2EXySkpG9qnyvfNF/exec'; // 請替換成您的 GAS Web App URL
+const GAS_API_URL = 'https://script.google.com/macros/s/AKfycby7V5VwHfn_Tb-wpg_SSrme2c2P5bin6qjhxEkr80RDLg6p5TPn2EXySkpG9qnyvfNF/exec';
 
 // ===== 全域變數 =====
 let products = [];
@@ -21,11 +21,26 @@ document.addEventListener('DOMContentLoaded', () => {
 /**
  * 初始化應用程式
  */
-function initializeApp() {
-    console.log('App Version: 2.1 (Product Options)'); // 版本標記
-    loadProducts();
+async function initializeApp() {
+    console.log('App Version: 2.3 (Dynamic Layout Sync)'); // 更新版本
+    await loadProducts();
     loadCartFromLocalStorage();
     updateCartUI();
+
+    // 初始化頁面渲染器
+    if (typeof PageRenderer !== 'undefined') {
+        const container = document.getElementById('pageBuilderRoot');
+        if (container) {
+            const layout = await PageRenderer.fetchLayout();
+            if (layout && layout.length > 0) {
+                // 如果有設定排版，隱藏原有的靜態商品區
+                const defaultSection = document.querySelector('.products-section');
+                if (defaultSection) defaultSection.style.display = 'none';
+
+                PageRenderer.render(container, layout);
+            }
+        }
+    }
 }
 
 /**
