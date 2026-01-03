@@ -127,6 +127,103 @@ const PageRenderer = {
                 case 'announcement':
                     section.innerHTML = this.templateAnnouncement(comp);
                     break;
+                case 'image_carousel':
+                    this.renderImageCarousel(section, comp);
+                    break;
+                case 'text_combination':
+                    section.innerHTML = this.templateTextCombination(comp);
+                    break;
+                case 'custom_code':
+                    const content = comp.htmlContent || '';
+
+                    // 檢查是否為完整 HTML 文件 (包含 doctype, html, head 或 body 標籤)
+                    // 使用簡單的正規表達式或檢查字串
+                    const isFullPage = /<!DOCTYPE|<html|<head|<body/i.test(content);
+
+                    if (isFullPage) {
+                        // 使用 IFrame 渲染完整頁面以避免樣式衝突與確保結構正確
+                        const iframe = document.createElement('iframe');
+                        iframe.style.cssText = 'width:100%; border:none; display:block; visibility:hidden;'; // 預設隱藏，調整完高度再顯示
+
+                        // 為了讓 IFrame 自動調整高度，我們需要在載入後計算
+                        iframe.onload = function () {
+                            const doc = iframe.contentWindow.document;
+                            const updateHeight = () => {
+                                // 嘗試取得內容高度
+                                const height = Math.max(
+                                    doc.body.scrollHeight,
+                                    doc.body.offsetHeight,
+                                    doc.documentElement.scrollHeight
+                                );
+                                iframe.style.height = height + 'px';
+                                iframe.style.visibility = 'visible';
+                            };
+
+                            // 稍微延遲並多次檢查，因為有些內容 (如圖片, tailwind) 可能需要時間渲染
+                            updateHeight();
+                            setTimeout(updateHeight, 100);
+                            setTimeout(updateHeight, 500);
+                            setTimeout(updateHeight, 1000);
+
+                            // 監聽 iframe 內的 resize (如果支援)
+                            if (iframe.contentWindow.ResizeObserver) {
+                                const ro = new iframe.contentWindow.ResizeObserver(updateHeight);
+                                ro.observe(doc.body);
+                            }
+                        };
+
+                        section.appendChild(iframe);
+
+                        // 寫入內容
+                        // 寫入內容 (延遲執行以確保 IFrame 已被加入 DOM)
+                        setTimeout(() => {
+                            try {
+                                const doc = iframe.contentDocument || iframe.contentWindow.document;
+                                doc.open();
+                                doc.write(content);
+                                doc.close();
+                            } catch (e) {
+                                console.error('IFrame Write Error:', e);
+                            }
+                        }, 10);
+
+                    } else {
+                        // 一般片段：使用原有邏輯
+                        section.innerHTML = content;
+
+                        // 依序執行 script 以確保依賴關係 (如 tailwind) 正確載入
+                        const scripts = Array.from(section.querySelectorAll('script'));
+
+                        const runScripts = (index) => {
+                            if (index >= scripts.length) return;
+
+                            const oldScript = scripts[index];
+                            const newScript = document.createElement('script');
+
+                            // 複製屬性
+                            Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+
+                            if (oldScript.src) {
+                                // 外部腳本：等待載入完成後再執行下一個
+                                newScript.onload = () => runScripts(index + 1);
+                                newScript.onerror = () => {
+                                    console.error('Script load failed:', oldScript.src);
+                                    runScripts(index + 1);
+                                };
+                                oldScript.parentNode.replaceChild(newScript, oldScript);
+                            } else {
+                                // 內聯腳本：直接執行並接續下一個
+                                newScript.textContent = oldScript.textContent;
+                                oldScript.parentNode.replaceChild(newScript, oldScript);
+                                runScripts(index + 1);
+                            }
+                        };
+
+                        if (scripts.length > 0) {
+                            runScripts(0);
+                        }
+                    }
+                    break;
             }
             container.appendChild(section);
         }
@@ -235,42 +332,152 @@ const PageRenderer = {
     },
 
     templateInfoSection: function (comp) {
+        const isRight = comp.layout === 'right';
+        const ratio = comp.ratio || '1:1';
+
         return `
             <div class="section-container">
-                <div class="info-grid">
-                    <div class="info-image">
-                        <img src="${comp.image}" alt="info">
+                <div class="info-grid-flex" style="display:flex; flex-direction: ${isRight ? 'row-reverse' : 'row'}; align-items:center; gap:4rem;">
+                    <div class="info-image" style="flex:1;">
+                        <div style="width:100%; aspect-ratio:${ratio.replace(':', '/')}; background:url('${comp.image}') center/cover no-repeat; border-radius:12px;"></div>
                     </div>
-                    <div class="info-text" style="text-align: ${comp.textAlign || 'left'}">
+                    <div class="info-text" style="flex:1; text-align: ${comp.textAlign || 'left'}; padding: 20px;">
                         <h3>${comp.title || ''}</h3>
-                        <p>${comp.subtitle || ''}</p>
+                        <p style="white-space: pre-wrap;">${comp.subtitle || ''}</p>
                         ${comp.buttonText ? `<a href="${comp.buttonLink || '#'}" class="text-link">${comp.buttonText}</a>` : ''}
                     </div>
+                </div>
+                <style>
+                    @media (max-width: 768px) {
+                        .info-grid-flex { flex-direction: column !important; gap: 2rem !important; }
+                    }
+                </style>
+            </div>
+        `;
+    },
+
+    templateTextCombination: function (comp) {
+        const align = comp.textAlign || 'center';
+        return `
+            <div class="section-container">
+                <div class="text-combo-container" style="max-width:800px; margin:0 auto; text-align:${align}; padding: 20px 0;">
+                    ${comp.title ? `<h2 style="font-size:2rem; margin-bottom:1rem; font-family:'Playfair Display', serif;">${comp.title}</h2>` : ''}
+                    ${comp.subtitle ? `<div style="font-size:1rem; color:#888; margin-bottom:1.5rem; letter-spacing:1px; text-transform:uppercase;">${comp.subtitle}</div>` : ''}
+                    ${comp.content ? `<div style="font-size:1.1rem; line-height:1.8; color:#444; margin-bottom:2rem; white-space:pre-wrap;">${comp.content}</div>` : ''}
+                    ${comp.buttonText ? `
+                        <a href="${comp.buttonLink || '#'}" class="product-btn" style="display:inline-block; width:auto; padding:10px 40px; border-radius:0;">
+                            ${comp.buttonText}
+                        </a>
+                    ` : ''}
                 </div>
             </div>
         `;
     },
 
+    renderImageCarousel: function (section, comp) {
+        const fullWidth = comp.fullWidth;
+        const ratioDesktop = comp.ratioDesktop || '21:9';
+        const ratioMobile = comp.ratioMobile || '16:9';
+        const speed = comp.speed !== undefined ? comp.speed : 3;
+        const uniqueId = 'carousel-' + Math.random().toString(36).substr(2, 9);
+
+        let containerStyle = fullWidth ? 'width:100%;' : 'max-width:1200px; margin:0 auto; padding:0 20px;';
+
+        section.innerHTML = `
+            <div class="image-carousel-container" style="${containerStyle}">
+                <div id="${uniqueId}" class="swiper-wrapper no-scrollbar" style="display:flex; overflow-x:auto; scroll-snap-type:x mandatory; scroll-behavior:smooth; -webkit-overflow-scrolling:touch;">
+                    ${(comp.images || []).map(img => `
+                        <a href="${img.link || '#'}" class="carousel-slide" style="flex:0 0 100%; scroll-snap-align:start; position:relative; display:block;">
+                            <div class="ratio-box-desktop" style="display:block;">
+                                <div style="aspect-ratio:${ratioDesktop.replace(':', '/')}; background:url('${img.src}') center/cover no-repeat;"></div>
+                            </div>
+                            <div class="ratio-box-mobile" style="display:none;">
+                                <div style="aspect-ratio:${ratioMobile.replace(':', '/')}; background:url('${img.src}') center/cover no-repeat;"></div>
+                            </div>
+                        </a>
+                    `).join('')}
+                </div>
+            </div>
+            <style>
+                .no-scrollbar::-webkit-scrollbar { display: none; }
+                .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+                @media (max-width: 768px) {
+                    .ratio-box-desktop { display: none !important; }
+                    .ratio-box-mobile { display: block !important; }
+                }
+            </style>
+            <script>
+                (function() {
+                    const container = document.getElementById('${uniqueId}');
+                    if(!container) return;
+                    const speed = ${speed} * 1000;
+                    if(speed <= 0) return;
+
+                    let scrolled = 0;
+                    let direction = 1;
+                    
+                    setInterval(() => {
+                        if(container.matches(':hover')) return; // 滑鼠懸停時暫停
+                        
+                        const itemWidth = container.offsetWidth;
+                        const maxScroll = container.scrollWidth - container.clientWidth;
+                        
+                        // 計算目前是第幾張 (round)
+                        let currentSlide = Math.round(container.scrollLeft / itemWidth);
+                        let nextSlide = currentSlide + 1;
+                        
+                        if (nextSlide * itemWidth > maxScroll + 10) { // +10 for buffer
+                            nextSlide = 0; // 回到第一張
+                        }
+                        
+                        container.scrollTo({
+                            left: nextSlide * itemWidth,
+                            behavior: 'smooth'
+                        });
+                    }, speed);
+                })();
+            </script>
+        `;
+
+        // Execute the script manually since innerHTML scripts don't run automatically
+        const script = section.querySelector('script');
+        if (script) {
+            const newScript = document.createElement('script');
+            newScript.textContent = script.textContent;
+            section.appendChild(newScript);
+        }
+    },
+
     renderProducts: async function (section, comp) {
         // 決定是否使用輪播（products 類型用輪播，product_list 用 grid）
         const useCarousel = comp.type === 'products';
+        const itemsDesktop = comp.itemsDesktop || 4;
+        const itemsMobile = comp.itemsMobile || 2;
+        const ratio = comp.ratio || '1:1';
 
         section.innerHTML = `
             <div class="section-container">
-                ${comp.title ? `<h2 class="section-title">${comp.title}</h2>` : ''}
+                ${comp.title ? `<h2 class="section-title" style="text-align:${comp.textAlign || 'center'}">${comp.title}</h2>` : ''}
                 ${useCarousel ? `
                     <div class="products-carousel-wrapper">
                         <button class="carousel-nav prev" onclick="PageRenderer.scrollCarousel(this, -1)">‹</button>
-                    <div class="products-carousel">
+                    <div class="products-carousel" style="grid-auto-columns: calc(100% / ${itemsDesktop} - 20px);">
                             <div class="loading-spinner">商品載入中，請稍等</div>
                         </div>
                         <button class="carousel-nav next" onclick="PageRenderer.scrollCarousel(this, 1)">›</button>
                     </div>
                 ` : `
-                    <div class="products-grid">
+                    <div class="products-grid" style="grid-template-columns: repeat(${itemsDesktop}, 1fr);">
                         <div class="loading-spinner">商品載入中，請稍等</div>
                     </div>
                 `}
+                <style>
+                    @media (max-width: 768px) {
+                        .products-carousel { grid-auto-columns: calc(100% / ${itemsMobile} - 10px) !important; }
+                        .products-grid { grid-template-columns: repeat(${itemsMobile}, 1fr) !important; }
+                    }
+                    .product-card .card-img-box { aspect-ratio: ${ratio.replace(':', '/')} !important; }
+                </style>
             </div>
         `;
 
