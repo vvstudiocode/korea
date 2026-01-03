@@ -1,16 +1,17 @@
 {
   "version": "1.0",
-  "lastUpdated": "2026-01-02T16:23:25.226Z",
+  "lastUpdated": "2026-01-03T02:47:11.100Z",
   "sections": [
     {
       "type": "hero",
       "title": "Welcome to OMO Select",
-      "subtitle": "Discover the best Korean products",
+      "subtitle": "",
       "image": "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1200",
       "buttonText": "",
       "buttonLink": "",
       "marginTop": 0,
-      "marginBottom": 0
+      "marginBottom": 0,
+      "textAlign": "left"
     },
     {
       "type": "product_list",
@@ -48,6 +49,18 @@
       {
         "title": "五、採買與寄送時程",
         "content": "採購時程：代購人員將於 12/15~12/18採購。若遇商品缺貨、斷貨或限購，將第一時間通知您。\n運送時程：商品採買後將統一 12/20寄出"
+      },
+      {
+        "title": "新區塊標題",
+        "content": "區塊內容..."
+      },
+      {
+        "title": "新區塊標題",
+        "content": "區塊內容..."
+      },
+      {
+        "title": "新區塊標題",
+        "content": "區塊內容..."
       }
     ]
   }
