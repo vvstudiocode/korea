@@ -385,63 +385,88 @@ const PageRenderer = {
         card.setAttribute('data-id', p.id);
         card.onclick = () => { if (typeof showProductDetail === 'function') showProductDetail(p.id); };
 
-        // 圖片網址處理
-        let imageUrl = 'https://via.placeholder.com/400?text=No+Image';
-        const rawImg = p.image || p.prodImage || p.img || '';
-        const imgStr = String(rawImg).trim();
-        if (imgStr && imgStr !== '' && imgStr !== 'undefined' && imgStr !== 'null') {
-            imageUrl = imgStr.split(',')[0].trim();
-        }
-
-        const hasOptions = p.options && (typeof p.options === 'string' ? p.options !== '{}' : Object.keys(p.options).length > 0);
-        const btnText = hasOptions ? '選擇規格' : '加入購物車';
-
-        // 使用 DOM 建立元素避免 HTML 跳脫問題
-        const imgBox = document.createElement('div');
-        imgBox.className = 'card-img-box';
-        imgBox.style.cssText = 'width:100%; aspect-ratio:1/1; background:#f5f5f5; border-radius:12px; overflow:hidden; margin-bottom:15px; position:relative;';
-
-        const img = document.createElement('img');
-        img.src = imageUrl;
-        img.alt = p.name || '';
-        img.loading = 'lazy';
-        img.style.cssText = 'width:100%; height:100%; object-fit:cover; display:block;';
-        img.onerror = function () {
-            this.style.display = 'none';
-            this.parentElement.innerHTML = '<div style="padding:80px 10px; color:#999;">⚠️ 圖片載入失敗</div>';
-        };
-        imgBox.appendChild(img);
-
-        const infoBox = document.createElement('div');
-        infoBox.className = 'card-info-box';
-        infoBox.style.cssText = 'padding:0; width:100%;';
-
-        const title = document.createElement('h3');
-        title.style.cssText = 'font-size:1.1rem; font-weight:500; margin-bottom:8px; height:2.8em; line-height:1.4; overflow:hidden; color:#333; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;';
-        title.textContent = p.name || '';
-
-        const price = document.createElement('div');
-        price.style.cssText = 'font-weight:700; font-size:1.1rem; margin-bottom:12px; color:#333;';
-        price.textContent = 'NT$ ' + (p.price || 0);
-
-        const btn = document.createElement('button');
-        btn.style.cssText = 'width:100%; padding:12px; background:#D68C94; color:white; border:none; border-radius:30px; cursor:pointer; font-weight:500; transition: background 0.3s;';
-        btn.textContent = btnText;
-        btn.onclick = (e) => {
-            e.stopPropagation();
-            if (hasOptions) {
-                if (typeof showProductDetail === 'function') showProductDetail(p.id);
-            } else {
-                if (typeof addToCartById === 'function') addToCartById(p.id);
+        try {
+            // 圖片網址處理
+            let imageUrl = 'https://via.placeholder.com/400?text=No+Image';
+            const rawImg = p.image || p.prodImage || p.img || '';
+            const imgStr = String(rawImg).trim();
+            if (imgStr && imgStr !== '' && imgStr !== 'undefined' && imgStr !== 'null') {
+                imageUrl = imgStr.split(',')[0].trim();
             }
-        };
 
-        infoBox.appendChild(title);
-        infoBox.appendChild(price);
-        infoBox.appendChild(btn);
+            const hasOptions = p.options && (typeof p.options === 'string' ? p.options !== '{}' : Object.keys(p.options).length > 0);
 
-        card.appendChild(imgBox);
-        card.appendChild(infoBox);
+            // 判斷庫存狀態
+            // 確保 stock 為數字，若 undefined 則視為包含庫存 (因為有些舊資料可能沒這欄位)
+            // 但如果使用者明確希望 "設定0的時候變售完"，則必須檢查 0
+            const stockVal = Number(p.stock !== undefined ? p.stock : 999);
+            const isSoldOut = stockVal <= 0;
+
+            let btnText;
+            if (isSoldOut) {
+                btnText = '已售完';
+            } else {
+                btnText = hasOptions ? '選擇規格' : '加入購物車';
+            }
+
+            // 使用 DOM 建立元素避免 HTML 跳脫問題
+            const imgBox = document.createElement('div');
+            imgBox.className = 'card-img-box';
+            imgBox.style.cssText = 'width:100%; aspect-ratio:1/1; background:#f5f5f5; border-radius:12px; overflow:hidden; margin-bottom:15px; position:relative;';
+
+            const img = document.createElement('img');
+            img.src = imageUrl;
+            img.alt = p.name || '';
+            img.loading = 'lazy';
+            img.style.cssText = 'width:100%; height:100%; object-fit:cover; display:block;';
+            img.onerror = function () {
+                this.style.display = 'none';
+                this.parentElement.innerHTML = '<div style="padding:80px 10px; color:#999;">⚠️ 圖片載入失敗</div>';
+            };
+            imgBox.appendChild(img);
+
+            const infoBox = document.createElement('div');
+            infoBox.className = 'card-info-box';
+            infoBox.style.cssText = 'padding:0; width:100%;';
+
+            const title = document.createElement('h3');
+            title.style.cssText = 'font-size:1.1rem; font-weight:500; margin-bottom:8px; height:2.8em; line-height:1.4; overflow:hidden; color:#333; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;';
+            title.textContent = p.name || '';
+
+            const price = document.createElement('div');
+            price.style.cssText = 'font-weight:700; font-size:1.1rem; margin-bottom:12px; color:#333;';
+            price.textContent = 'NT$ ' + (p.price || 0);
+
+            const btn = document.createElement('button');
+            if (isSoldOut) {
+                btn.className = 'card-add-btn sold-out';
+                btn.style.cssText = 'width:100%; padding:12px; background:#ccc; color:#fff; border:none; border-radius:30px; cursor:not-allowed; font-weight:500;';
+                btn.disabled = true;
+            } else {
+                btn.className = 'card-add-btn';
+                btn.style.cssText = 'width:100%; padding:12px; background:#D68C94; color:white; border:none; border-radius:30px; cursor:pointer; font-weight:500; transition: background 0.3s;';
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    if (hasOptions) {
+                        if (typeof showProductDetail === 'function') showProductDetail(p.id);
+                    } else {
+                        if (typeof addToCartById === 'function') addToCartById(p.id);
+                    }
+                };
+            }
+            btn.textContent = btnText;
+
+            infoBox.appendChild(title);
+            infoBox.appendChild(price);
+            infoBox.appendChild(btn);
+
+            card.appendChild(imgBox);
+            card.appendChild(infoBox);
+
+        } catch (e) {
+            console.error('Render Card Error:', e);
+            card.innerHTML = `<div style="padding:20px; border:1px solid red; color:red;">商品渲染錯誤: ${p ? p.name : 'Unknown'}</div>`;
+        }
 
         return card;
     }
