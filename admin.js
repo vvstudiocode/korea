@@ -623,7 +623,7 @@ function renderProducts(products) {
 
         return `
         <tr class="${p._isModified ? 'row-modified' : ''}" data-id="${p.id}">
-            <td style="cursor:move; text-align:center; color:#999;">☰</td>
+            <td style="cursor:move; text-align:center; color:#999;" class="drag-handle">☰</td>
             <td><img src="${imageUrl}" class="table-thumb" style="width:40px;height:40px;object-fit:cover;vertical-align:middle;"></td>
             <td>${p.name} ${p._isNew ? '(新)' : ''}</td>
             <td>${p.price}</td>
@@ -640,6 +640,14 @@ function renderProducts(products) {
             </td>
         </tr>
     `}).join('');
+
+    // 重要：將資料綁定到 DOM 元素，以便拖勒排序後能找回正確資料
+    const rows = tbody.querySelectorAll('tr');
+    rows.forEach((row, index) => {
+        if (displayProducts[index]) {
+            row._productData = displayProducts[index];
+        }
+    });
 
     enableProductDragAndDrop();
 }
@@ -692,6 +700,18 @@ function handleDragOver(e) {
         e.preventDefault();
     }
     e.dataTransfer.dropEffect = 'move';
+
+    // Live DOM Swapping Logic
+    const targetRow = this;
+    if (dragSrcEl && targetRow !== dragSrcEl && targetRow.parentNode === dragSrcEl.parentNode) {
+        const rect = targetRow.getBoundingClientRect();
+        const next = (e.clientY - rect.top) / (rect.bottom - rect.top) > 0.5;
+
+        // 如果滑鼠在下半部，插入到目標之後；否則插入到目標之前
+        // insertBefore(node, nextSibling) -> if nextSibling is null, insert at end
+        targetRow.parentNode.insertBefore(dragSrcEl, next ? targetRow.nextSibling : targetRow);
+    }
+
     return false;
 }
 
@@ -700,29 +720,48 @@ function handleDrop(e) {
         e.stopPropagation();
     }
 
-    if (dragSrcEl !== this) {
-        // 交換資料 (簡單的視覺交換，真正順序要看 currentProducts)
-        // 但我們需要更新 currentProducts 的順序以符合 DOM
+    // 因為在 DragOver 已經完成了 DOM 的移動，這裡只需要更新資料陣列
+    if (dragSrcEl) {
+        dragSrcEl.classList.remove('dragging');
+
+        // 根據新的 DOM 順序重建 currentProducts
         const tbody = document.getElementById('productsTableBody');
         const rows = Array.from(tbody.querySelectorAll('tr'));
-        const srcIndex = rows.indexOf(dragSrcEl);
-        const dstIndex = rows.indexOf(this);
 
-        // 移動 array 元素
-        const item = currentProducts[srcIndex];
-        currentProducts.splice(srcIndex, 1);
-        currentProducts.splice(dstIndex, 0, item);
+        // 建立新的產品陣列
+        const newOrderProducts = [];
+        let hasChanges = false;
 
-        renderProducts(currentProducts); // 重新渲染確保正確
+        rows.forEach(row => {
+            // 這邊我們需要一個唯一識別符來找回原本的產品物件
+            // 假設第一欄的 checkbox 或按鈕包含 id，或是找 row 裡的內容
+            // 比較嚴謹的做法是在 renderProducts 時給 tr 加 data-id
+            // 但如果不想改 renderProducts，我們可以用 indexOf 對照舊陣列? 
+            // 不行，因為有排序問題。
+            // 我們依賴 `dragSrcEl` 是原本的 DOM 元素，所以 DOM 順序就是新的順序
+            // 只要我們能從 DOM row 找到對應的 product object
 
-        // 顯示排序儲存按鈕，或者直接啟用 "儲存變更" (但那是儲存內容)
-        // 我們可以在 "儲存商品變更" 區域增加一個 "儲存排序" 按鈕？
-        // 或者直接讓 "儲存商品變更" 也包含排序 (比較複雜，因為那是 updateProductsBatch)
-        // 建議新增一個 "儲存排序" 按鈕，或者在拖曳後這顯示提示。
-        showUnsavedSortWarning();
+            // 由於目前的 renderProducts 沒有給 tr 加 ID，我們暫時用一個比較笨的方法：
+            // 在 render 時期一定要加 data-id，否則這裡很難對應
+            // 讓我檢查一下 renderProducts
+        });
+
+        // 既然要即時回饋，那我們的 renderProducts 必須要改一下，給 TR 加上 index 或 ID
+        // 在此之前，先用一個簡單的方法：直接重新抓取 currentProducts
+        // 因為 DOM 元素本身就是從 currentProducts render 出來的，我們可以為每個 product 物件加個臨時標記？
+        // 或者：在 renderProducts 時，直接把 product object 綁定到 DOM element (row._product = product)
+
+        // 為了避免改動太大，我們假設 renderProducts 會被我們改 (見下一步驟)
+        // 這裡先寫邏輯：
+
+        const newProducts = rows.map(row => row._productData).filter(p => p);
+
+        if (newProducts.length === currentProducts.length) {
+            currentProducts = newProducts;
+            showUnsavedSortWarning();
+        }
     }
 
-    dragSrcEl.classList.remove('dragging');
     return false;
 }
 
