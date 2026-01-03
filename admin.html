@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OMO Select - 後台管理系統</title>
+    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="page-renderer.css">
+    <link rel="stylesheet" href="page-builder.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+
+    <!-- 登入頁面 -->
+    <div id="loginPage" class="login-container">
+        <div class="login-box">
+            <h2>CMS 後台管理</h2>
+            <div class="form-group">
+                <input type="password" id="adminPassword" placeholder="請輸入管理員密碼">
+            </div>
+            <button onclick="handleLogin()" id="loginBtn">登入</button>
+            <p id="loginError" class="error-msg"></p>
+        </div>
+    </div>
+
+    <!-- 管理儀表板 -->
+    <div id="dashboardPage" class="dashboard-container" style="display: none;">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h3>OMO ADMIN</h3>
+            </div>
+            <ul class="nav-links">
+                <li id="tab-dashboard" class="active" onclick="switchTab('dashboard')"><span class="icon"></span><span
+                        class="text">總覽報表</span></li>
+                <li id="tab-orders" onclick="switchTab('orders')"><span class="icon"></span><span
+                        class="text">訂單管理</span></li>
+                <li id="tab-products" onclick="switchTab('products')"><span class="icon"></span><span
+                        class="text">商品管理</span></li>
+                <li id="tab-builder" onclick="switchTab('builder')"><span class="icon"></span><span
+                        class="text">首頁排版</span></li>
+                <li id="tab-purchasing" onclick="switchTab('purchasing')"><span class="icon"></span><span
+                        class="text">採買統計</span></li>
+                <li id="tab-settings" onclick="switchTab('settings')"><span class="icon"></span><span
+                        class="text">網站設定</span></li>
+            </ul>
+            <button class="sidebar-collapse-btn" onclick="toggleDesktopSidebar()" title="收合選單">⟨</button>
+            <div class="sidebar-footer">
+                <button onclick="logout()">登出</button>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <header class="top-bar">
+                <button class="hamburger-btn" onclick="toggleSidebar()" aria-label="選單">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <h2 id="pageTitle">總覽報表</h2>
+                <div class="header-actions">
+                    <a href="https://vvstudiocode.github.io/korea/" target="_blank" class="icon-btn"
+                        style="text-decoration:none; margin-right:10px; display:flex; align-items:center;">
+                        前往官網
+                    </a>
+                    <div id="batchActions" style="display:none; margin-right: 1rem;">
+                        <span id="unsavedChangesMsg"
+                            style="color: #d9534f; font-size: 0.9rem; margin-right: 10px;"></span>
+                        <button id="saveBatchBtn" onclick="saveBatchUpdates()" class="accent-btn">💾 儲存所有變更</button>
+                    </div>
+                    <button onclick="refreshData()" class="refresh-btn">重新整理</button>
+                </div>
+            </header>
+
+            <!-- 1. 儀表板視圖 -->
+            <div id="dashboardView" class="view-section">
+                <div class="dashboard-controls">
+                    <div class="date-filter">
+                        <label for="dateRange">統計範圍：</label>
+                        <select id="dateRange" onchange="filterDashboardByDate(this.value)">
+                            <option value="all">全部</option>
+                            <option value="today">今日</option>
+                            <option value="week">近7天</option>
+                            <option value="month" selected>本月</option>
+                            <option value="year">今年</option>
+                        </select>
+                    </div>
+                    <button onclick="refreshData()" class="icon-btn">🔄</button>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card revenue">
+                        <div class="stat-icon"></div>
+                        <div class="stat-info">
+                            <h3>總營業額</h3>
+                            <p class="stat-value" id="statRevenue">NT$ 0</p>
+                            <small class="stat-trend">已確認訂單</small>
+                        </div>
+                    </div>
+                    <div class="stat-card cost">
+                        <div class="stat-icon"></div>
+                        <div class="stat-info">
+                            <h3>預估總成本</h3>
+                            <p class="stat-value" id="statCost">NT$ 0</p>
+                            <small class="stat-trend">商品成本統計</small>
+                        </div>
+                    </div>
+                    <div class="stat-card profit highlight">
+                        <div class="stat-icon"></div>
+                        <div class="stat-info">
+                            <h3>預估毛利</h3>
+                            <p class="stat-value" id="statProfit">NT$ 0</p>
+                            <small class="stat-trend" id="statProfitMargin">毛利率: 0%</small>
+                        </div>
+                    </div>
+                    <div class="stat-card orders">
+                        <div class="stat-icon"></div>
+                        <div class="stat-info">
+                            <h3>訂單統計</h3>
+                            <p class="stat-value" id="statOrders">0</p>
+                            <small class="stat-trend">待處理: <span id="statPending">0</span></small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. 訂單管理視圖 -->
+            <div id="ordersView" class="view-section" style="display: none;">
+                <div class="toolbar" style="margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+                    <button class="add-btn" onclick="openCreateOrderModal()">+ 新增訂單</button>
+                    <!-- 訂單搜尋 -->
+                    <div style="flex: 1; min-width: 200px;">
+                        <input type="text" id="orderSearchInput" placeholder="🔍 搜尋訂單編號、客戶姓名、電話..."
+                            oninput="filterOrders()"
+                            style="width: 100%; padding: 0.6rem; border-radius: 6px; border: 1px solid #ddd;">
+                    </div>
+                    <!-- 狀態篩選 -->
+                    <select id="orderStatusFilter" onchange="filterOrders()"
+                        style="padding: 0.6rem; border-radius: 6px; border: 1px solid #ddd;">
+                        <option value="">全部狀態</option>
+                        <option value="待處理">待處理</option>
+                        <option value="已確認">已確認</option>
+                        <option value="已出貨">已出貨</option>
+                        <option value="已完成">已完成</option>
+                        <option value="已取消">已取消</option>
+                    </select>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>訂單編號</th>
+                                <th>狀態</th>
+                                <th>日期</th>
+                                <th>客戶</th>
+                                <th>運送方式</th>
+                                <th>總額</th>
+                                <th width="150">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTableBody">
+                            <tr>
+                                <td colspan="6" class="loading-cell">載入中...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <small style="margin-top:10px; display:block; color:#666;">💡 提示：修改狀態後，請按右上角「儲存所有變更」才會生效。</small>
+            </div>
+
+            <!-- 3. 商品管理視圖 -->
+            <div id="productsView" class="view-section" style="display: none;">
+                <div class="toolbar">
+                    <button class="add-btn" onclick="openProductModal()">+ 新增商品</button>
+                    <!-- 商品搜尋 -->
+                    <div style="flex: 1; margin: 0 1rem;">
+                        <input type="text" id="productSearchInput" placeholder="🔍 搜尋商品名稱、分類、品牌..."
+                            oninput="filterProductsList()"
+                            style="width: 100%; padding: 0.6rem; border-radius: 6px; border: 1px solid #ddd;">
+                    </div>
+                    <!-- 商品批次儲存區 -->
+                    <div id="productBatchActions" style="display:inline-flex; align-items:center; margin-left: 1rem;">
+                        <span id="unsavedProductsMsg"
+                            style="color: #d9534f; font-size: 0.9rem; margin-right: 10px;"></span>
+                        <button onclick="saveProductBatchChanges()" class="accent-btn" disabled>💾 儲存商品變更</button>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th width="40"></th>
+                                <th width="60">圖片</th>
+                                <th>名稱</th>
+                                <th>售價</th>
+                                <th>成本(NT)</th>
+                                <th>利潤</th>
+                                <th>原價(KRW)</th>
+                                <th>庫存</th>
+                                <th>狀態</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productsTableBody">
+                            <tr>
+                                <td colspan="8" class="loading-cell">載入中...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 採買統計視圖 -->
+            <div id="purchasingView" class="view-section" style="display: none;">
+                <div class="view-header">
+                    <h2>採買統計</h2>
+                    <div class="view-actions">
+                        <button class="btn-primary" onclick="loadPurchasingStats()">重新計算</button>
+                        <button class="btn-secondary" onclick="exportPurchasingStats()">匯出報表</button>
+                    </div>
+                </div>
+
+                <div class="filter-bar">
+                    <div class="filter-group">
+                        <label>日期範圍：</label>
+                        <input type="date" id="statsStartDate">
+                        <span>至</span>
+                        <input type="date" id="statsEndDate">
+                        <button class="btn-small" onclick="loadPurchasingStats()">篩選</button>
+                        <button class="btn-link" onclick="setStatsShortcut('today')">今日</button>
+                        <button class="btn-link" onclick="setStatsShortcut('yesterday')">昨日</button>
+                        <button class="btn-link" onclick="setStatsShortcut('7days')">近7日</button>
+                    </div>
+                </div>
+
+                <div class="stats-summary-cards">
+                    <div class="stats-card">
+                        <div class="stats-label">總計商品種數</div>
+                        <div class="stats-value" id="statsTotalTypes">0</div>
+                    </div>
+                    <div class="stats-card">
+                        <div class="stats-label">總計商品件數</div>
+                        <div class="stats-value" id="statsTotalQty">0</div>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>商品名稱</th>
+                                <th>規格/款式</th>
+                                <th>採買數量</th>
+                                <th>涉及訂單數</th>
+                            </tr>
+                        </thead>
+                        <tbody id="purchasingStatsBody">
+                            <tr>
+                                <td colspan="4" style="text-align:center">請選擇日期範圍後點擊篩選</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 4. 網站設定視圖 -->
+            <div id="settingsView" class="view-section" style="display: none;">
+                <div id="settingsForm"></div>
+            </div>
+
+            <!-- 首頁排版編輯器 (升級版) -->
+            <div id="builderSection" class="view-section"
+                style="display: none; padding: 0; height: calc(100vh - 70px);">
+                <div class="visual-builder">
+                    <!-- 左側：編輯區 -->
+                    <div class="builder-sidebar">
+                        <div class="sidebar-header">
+                            <h3>區塊管理</h3>
+                            <button class="add-btn-circle" onclick="openModal('addCompModal')" title="新增區塊">+</button>
+                        </div>
+                        <div class="components-list" id="builderComponentsList">
+                            <!-- 由 page-builder.js 動態產生 -->
+                        </div>
+                        <div class="sidebar-footer">
+                            <button class="save-btn" id="saveLayoutBtn" onclick="PageBuilder.saveLayout()">儲存排版</button>
+                        </div>
+                    </div>
+
+                    <!-- 右側：預覽區 -->
+                    <div class="builder-preview">
+                        <div class="preview-toolbar">
+                            <div class="device-toggles">
+                                <button class="device-btn active" id="view-desktop"
+                                    onclick="PageBuilder.setPreviewMode('desktop')">💻 電腦版</button>
+                                <button class="device-btn" id="view-mobile"
+                                    onclick="PageBuilder.setPreviewMode('mobile')">📱 手機版</button>
+                            </div>
+                            <div class="preview-status">即時預覽中</div>
+                        </div>
+                        <div class="preview-viewport" id="previewViewport">
+                            <div class="preview-container" id="pageBuilderPreviewRoot">
+                                <!-- 由 page-renderer.js 動態渲染 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 訂單詳情 Modal (可編輯版) -->
+    <div id="orderDetailModal" class="modal">
+        <div class="modal-content large-modal">
+            <div class="modal-header">
+                <h3>訂單詳情 <span id="detailOrderId"></span></h3>
+                <button class="close-btn" onclick="closeModal('orderDetailModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="detail-section">
+                    <h4>客戶資訊 (可編輯)</h4>
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label>客戶姓名</label>
+                            <input type="text" id="detailName">
+                        </div>
+                        <div class="form-group half">
+                            <label>電話</label>
+                            <input type="text" id="detailPhone">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label>Email</label>
+                            <input type="text" id="detailEmail">
+                        </div>
+                        <div class="form-group half">
+                            <label>Line ID</label>
+                            <input type="text" id="detailLine">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>運送方式</label>
+                            <select id="detailShipping" onchange="updateShippingFee()">
+                                <option value="7-11店到店">7-11店到店 (+60)</option>
+                                <option value="限台中市面交">限台中市面交 (免運)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="detailStoreInfo" class="store-info-group">
+                        <div class="form-row">
+                            <div class="form-group half">
+                                <label>門市名稱</label>
+                                <input type="text" id="detailStoreName">
+                            </div>
+                            <div class="form-group half">
+                                <label>門市店號</label>
+                                <input type="text" id="detailStoreCode">
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 通用地址欄位 -->
+                    <div class="form-group">
+                        <label>地址 (門市或宅配)</label>
+                        <input type="text" id="detailStoreAddress">
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h4>商品明細 <button type="button" class="add-item-btn" onclick="openAddProductToOrder()"
+                            style="float:right; padding:0.4rem 0.8rem; font-size:0.85rem;">+ 新增商品</button></h4>
+
+                    <!-- 新增商品區域（隱藏） -->
+                    <div id="addProductArea"
+                        style="display:none; margin-bottom:1rem; padding:1rem; background:#f8f9fa; border-radius:4px;">
+                        <div class="form-row">
+                            <div class="form-group" style="flex:2;">
+                                <label>選擇商品（可輸入搜尋）</label>
+                                <input type="text" id="productSearch" list="productSuggestions" placeholder="輸入或選擇商品..."
+                                    style="width:100%; padding:0.5rem;">
+                                <datalist id="productSuggestions">
+                                    <!-- 動態載入 -->
+                                </datalist>
+                            </div>
+                            <!-- 新增規格選擇 -->
+                            <div class="form-group" id="specSelectGroup"
+                                style="display:none; width: 150px; margin-left: 10px;">
+                                <label>規格</label>
+                                <select id="productSpec"
+                                    style="width:100%; padding:0.55rem; border:1px solid #ddd; border-radius:4px;">
+                                </select>
+                            </div>
+                            <div class="form-group quarter">
+                                <label>數量</label>
+                                <input type="number" id="productQty" value="1" min="1">
+                            </div>
+                            <div class="form-group" style="flex:0 0 auto; align-self:flex-end;">
+                                <button type="button" onclick="addProductToOrderItems()"
+                                    class="accent-btn">確認新增</button>
+                                <button type="button" onclick="cancelAddProduct()"
+                                    style="margin-left:0.5rem;">取消</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <table class="detail-table">
+                        <thead>
+                            <tr>
+                                <th>商品</th>
+                                <th>規格</th>
+                                <th>數量</th>
+                                <th>小計</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="detailItemsBody"></tbody>
+                    </table>
+                </div>
+
+                <div class="detail-section">
+                    <h4>訂單總計</h4>
+                    <table class="detail-table">
+                        <tr>
+                            <td>運費</td>
+                            <td><input type="number" id="detailShippingFee" value="0" min="0"
+                                    style="width:80px; padding:0.3rem;" oninput="updateTotal()"> 元</td>
+                        </tr>
+                        <tr>
+                            <td><strong>總金額</strong></td>
+                            <td><strong id="detailTotal">0</strong> 元</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="detail-section">
+                    <h4>備註 (可編輯)</h4>
+                    <textarea id="detailNote" class="note-box" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button onclick="closeModal('orderDetailModal')">取消</button>
+                <button onclick="saveOrderDetailToBatch()" class="accent-btn">確認修改 (暫存)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 商品編輯 Modal -->
+    <div id="productModal" class="modal">
+        <div class="modal-content large-modal">
+            <div class="modal-header">
+                <h3>編輯商品</h3>
+                <button class="close-btn" onclick="closeModal('productModal')">✕</button>
+            </div>
+
+            <form id="productForm" onsubmit="handleProductSubmit(event)"
+                style="display:flex; flex-direction:column; height:100%;">
+                <div class="modal-body">
+                    <input type="hidden" id="prodId">
+
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label>商品名稱 *</label>
+                            <input type="text" id="prodName" required>
+                        </div>
+                        <div class="form-group half">
+                            <label>品牌名稱 (圖片分類)</label>
+                            <input type="text" id="prodBrand" list="brandList" placeholder="選擇或輸入品牌">
+                            <datalist id="brandList">
+                                <!-- 動態載入品牌列表 -->
+                            </datalist>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label>分類</label>
+                            <input type="text" id="prodCategory" list="categoryList">
+                            <datalist id="categoryList">
+                                <option value="流行服飾">
+                                <option value="美妝保養">
+                                <option value="零食食品">
+                                <option value="生活用品">
+                            </datalist>
+                        </div>
+                        <div class="form-group half"></div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group quarter">
+                            <label>台幣售價 *</label>
+                            <input type="number" id="prodPrice" required>
+                        </div>
+                        <div class="form-group quarter">
+                            <label>韓幣原價</label>
+                            <input type="number" id="prodPriceKrw" placeholder="₩">
+                        </div>
+                        <!-- 內嵌匯率輸入 -->
+                        <div class="form-group quarter">
+                            <label>匯率 (÷)</label>
+                            <input type="number" id="prodExchangeRate" placeholder="例如 49">
+                        </div>
+                        <div class="form-group quarter">
+                            <label>成本 (台幣)</label>
+                            <input type="number" id="prodCost" placeholder="自動計算">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group quarter">
+                            <label>庫存</label>
+                            <input type="number" id="prodStock" value="99">
+                        </div>
+                        <div class="form-group quarter">
+                            <label>狀態</label>
+                            <select id="prodStatus">
+                                <option value="上架">上架</option>
+                                <option value="下架">下架</option>
+                            </select>
+                        </div>
+                        <div class="form-group half"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>描述</label>
+                        <textarea id="prodDesc" rows="3"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>商品圖片</label>
+                        <div class="image-upload-area">
+                            <div class="upload-zone" id="uploadZone"
+                                onclick="document.getElementById('imageFileInput').click()">
+                                <div class="upload-icon">📷</div>
+                                <p>點擊選擇圖片或拖放到此處</p>
+                                <small>支援 JPG, PNG, WEBP (最大 5MB)</small>
+                            </div>
+                            <input type="file" id="imageFileInput" accept="image/jpeg,image/png,image/webp" multiple
+                                style="display:none" onchange="handleImageSelect(event)">
+
+                            <div class="image-preview-container" id="imagePreviewContainer"></div>
+
+                            <button type="button" class="upload-btn" id="uploadImagesBtn"
+                                onclick="uploadImagesToGitHub()" style="display:none">
+                                <span id="uploadBtnText">上傳圖片到 GitHub</span>
+                            </button>
+                        </div>
+
+                        <input type="hidden" id="prodImage">
+                    </div>
+                    <div class="form-group">
+                        <label>規格設定</label>
+                        <div id="specBuilderContainer" class="spec-builder-container">
+                            <!-- 動態產生規格輸入列 -->
+                        </div>
+                        <button type="button" class="btn-small" onclick="addSpecGroup()" style="margin-top: 5px;">
+                            + 新增規格類別 (例如：顏色、尺寸)
+                        </button>
+                    </div>
+                </div> <!-- End modal-body -->
+
+                <div class="modal-actions">
+                    <button type="button" onclick="closeModal('productModal')">取消</button>
+                    <button type="submit" class="accent-btn">儲存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    </div>
+
+    <!-- 新增區塊模態框 -->
+    <div class="modal" id="addCompModal">
+        <div class="modal-content" style="width: 500px;">
+            <h3>選擇要新增的區塊類型</h3>
+            <div class="component-selector">
+                <div class="comp-type-btn" onclick="PageBuilder.addComponent('hero'); closeModal('addCompModal')">
+                    <span class="icon"></span>
+                    <span>首頁大圖</span>
+                </div>
+                <div class="comp-type-btn" onclick="PageBuilder.addComponent('categories'); closeModal('addCompModal')">
+                    <span class="icon"></span>
+                    <span>分類導覽</span>
+                </div>
+                <div class="comp-type-btn" onclick="PageBuilder.addComponent('products'); closeModal('addCompModal')">
+                    <span class="icon"></span>
+                    <span>輪播圖</span>
+                </div>
+                <div class="comp-type-btn"
+                    onclick="PageBuilder.addComponent('product_list'); closeModal('addCompModal')">
+                    <span class="icon"></span>
+                    <span>商品列表</span>
+                </div>
+                <div class="comp-type-btn"
+                    onclick="PageBuilder.addComponent('image_carousel'); closeModal('addCompModal')">
+                    <span class="icon"></span>
+                    <span>圖片輪播</span>
+                </div>
+                <div class="comp-type-btn"
+                    onclick="PageBuilder.addComponent('text_combination'); closeModal('addCompModal')">
+                    <span class="icon"></span>
+                    <span>文字組合</span>
+                </div>
+                <div class="comp-type-btn"
+                    onclick="PageBuilder.addComponent('custom_code'); closeModal('addCompModal')">
+                    <span class="icon"></span>
+                    <span>程式碼</span>
+                </div>
+                <div class="comp-type-btn"
+                    onclick="PageBuilder.addComponent('info_section'); closeModal('addCompModal')">
+                    <span class="icon"></span>
+                    <span>圖文介紹</span>
+                </div>
+                <div class="comp-type-btn"
+                    onclick="PageBuilder.addComponent('announcement'); closeModal('addCompModal')">
+                    <span class="icon"></span>
+                    <span>公告欄</span>
+                </div>
+            </div>
+            <div class="modal-actions" style="margin-top:2rem;">
+                <button onclick="closeModal('addCompModal')">取消</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Toast 通知容器 -->
+    <div id="toastContainer" style="position: fixed; top: 20px; right: 20px; z-index: 10000;"></div>
+
+    <script src="page-renderer.js"></script>
+    <script src="page-builder.js"></script>
+    <script src="admin.js"></script>
+</body>
+
+</html>
