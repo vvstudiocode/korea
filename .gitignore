@@ -1,5 +1,6 @@
 .DS_Store
 .vscode/
 gas-backend/
+layout.json
 *.log
 node_modules/
