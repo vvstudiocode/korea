@@ -224,13 +224,25 @@ function createProductCard(product) {
         <div class="image-slider-container"><img src="${mainImage}" class="slider-image" loading="lazy"></div>`;
 
     const hasOptions = product.options && Object.keys(product.options).length > 0;
-    const buttonHtml = hasOptions ? `
+    const isSoldOut = typeof product.stock !== 'undefined' && Number(product.stock) <= 0;
+
+    let buttonHtml;
+    if (isSoldOut) {
+        buttonHtml = `
+        <button class="card-add-btn sold-out" disabled style="background-color: #ccc; cursor: not-allowed;">
+            已售完
+        </button>`;
+    } else if (hasOptions) {
+        buttonHtml = `
         <button class="card-add-btn" onclick="event.stopPropagation(); showProductDetail('${product.id}')">
             選擇規格
-        </button>` : `
+        </button>`;
+    } else {
+        buttonHtml = `
         <button class="card-add-btn" onclick="event.stopPropagation(); addToCartById('${product.id}')">
             加入購物車
         </button>`;
+    }
 
     return `
     <div class="product-card" onclick="showProductDetail('${product.id}')">
@@ -259,6 +271,10 @@ function displayProducts() {
 function addToCartById(productId) {
     const product = products.find(p => String(p.id) === String(productId));
     if (product) {
+        if (typeof product.stock !== 'undefined' && Number(product.stock) <= 0) {
+            alert('此商品已售完');
+            return;
+        }
         // **修改**：無規格商品傳入空的 selectedOptions
         addToCart(product, 1, {});
     }
@@ -304,6 +320,23 @@ function showProductDetail(productId) {
             `;
             optionsContainer.appendChild(optionEl);
         });
+    }
+
+
+
+    // **新增**：檢查庫存狀態
+    const isSoldOut = typeof product.stock !== 'undefined' && Number(product.stock) <= 0;
+    const addToCartBtn = document.querySelector('.add-to-cart-btn');
+    if (isSoldOut) {
+        addToCartBtn.disabled = true;
+        addToCartBtn.textContent = '已售完';
+        addToCartBtn.style.backgroundColor = '#ccc';
+        addToCartBtn.style.cursor = 'not-allowed';
+    } else {
+        addToCartBtn.disabled = false;
+        addToCartBtn.textContent = '加入購物車';
+        addToCartBtn.style.backgroundColor = ''; // 恢復原樣式
+        addToCartBtn.style.cursor = '';
     }
 
     showModal('productModal');
