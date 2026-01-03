@@ -288,8 +288,8 @@ const PageBuilder = {
         this.addInnerField(container, '上方間距 (px)', 'marginTop', comp.marginTop || 0, 'range');
         this.addInnerField(container, '下方間距 (px)', 'marginBottom', comp.marginBottom || 0, 'range');
 
-        // 通用: 文字對齊
-        if (['hero', 'info_section', 'announcement', 'products', 'product_list'].includes(comp.type)) {
+        // 通用: 文字對齊 (除了 image_carousel 自有設定外)
+        if (['hero', 'info_section', 'announcement', 'products', 'product_list', 'text_combination'].includes(comp.type)) {
             this.addInnerField(container, '文字對齊', 'textAlign', comp.textAlign || 'center', 'select', ['left', 'center', 'right']);
         }
 
@@ -298,10 +298,109 @@ const PageBuilder = {
         hr.style.cssText = 'margin: 15px 0; border: none; border-top: 1px solid #eee;';
         container.appendChild(hr);
 
-        if (comp.type === 'hero' || comp.type === 'info_section') {
+        if (comp.type === 'hero') {
             this.addInnerField(container, '標題', 'title', comp.title);
             this.addInnerField(container, '副標題/文字', 'subtitle', comp.subtitle, 'textarea');
             this.addInnerField(container, '圖片 URL', 'image', comp.image);
+            this.addInnerField(container, '按鈕文字', 'buttonText', comp.buttonText);
+            this.addInnerField(container, '跳轉連結', 'buttonLink', comp.buttonLink);
+        } else if (comp.type === 'text_combination') {
+            this.addInnerField(container, '標題', 'title', comp.title);
+            this.addInnerField(container, '副標題', 'subtitle', comp.subtitle);
+            this.addInnerField(container, '內文', 'content', comp.content, 'textarea');
+            this.addInnerField(container, '按鈕文字', 'buttonText', comp.buttonText);
+            this.addInnerField(container, '跳轉連結', 'buttonLink', comp.buttonLink);
+        } else if (comp.type === 'custom_code') {
+            this.addInnerField(container, '程式碼內容 (HTML/CSS/JS)', 'htmlContent', comp.htmlContent, 'textarea');
+            const tip = document.createElement('div');
+            tip.style.cssText = 'color:#666; font-size:12px; margin-top:5px;';
+            tip.textContent = '注意：請確保程式碼語法正確。支援 <script> 與 <style> 標籤。';
+            container.appendChild(tip);
+        } else if (comp.type === 'image_carousel') {
+            // 圖片輪播設定
+            this.addInnerField(container, '全寬模式', 'fullWidth', comp.fullWidth, 'checkbox');
+
+            // 輪播速度
+            this.addInnerField(container, '自動輪播速度 (秒, 0為不輪播)', 'speed', comp.speed || 3, 'number');
+
+            // 比例設定
+            const ratioOptions = ['original', '21:9', '16:9', '4:3', '1:1', '3:4'];
+            const ratioWrapper = document.createElement('div');
+            ratioWrapper.style.display = 'flex';
+            ratioWrapper.style.gap = '10px';
+            container.appendChild(ratioWrapper);
+
+            const desktopRatioDiv = document.createElement('div');
+            desktopRatioDiv.style.flex = 1;
+            this.addInnerField(desktopRatioDiv, '桌面比例', 'ratioDesktop', comp.ratioDesktop || '21:9', 'select', ratioOptions);
+            ratioWrapper.appendChild(desktopRatioDiv);
+
+            const mobileRatioDiv = document.createElement('div');
+            mobileRatioDiv.style.flex = 1;
+            this.addInnerField(mobileRatioDiv, '手機比例', 'ratioMobile', comp.ratioMobile || '16:9', 'select', ratioOptions);
+            ratioWrapper.appendChild(mobileRatioDiv);
+
+            // 圖片管理
+            const imagesWrapper = document.createElement('div');
+            imagesWrapper.innerHTML = '<label style="display:block;margin:15px 0 5px;font-size:14px;color:#555;">輪播圖片</label>';
+
+            const imagesList = document.createElement('div');
+            imagesList.style.cssText = 'background:#f9f9f9; padding:10px; border-radius:8px; border:1px solid #eee;';
+
+            (comp.images || []).forEach((img, idx) => {
+                const item = document.createElement('div');
+                item.style.cssText = 'background:white; padding:10px; border:1px solid #ddd; border-radius:4px; margin-bottom:10px; display:flex; gap:10px; align-items:start;';
+                item.innerHTML = `
+                    <div style="flex:1;">
+                        <input type="text" placeholder="圖片 URL" value="${img.src || ''}" 
+                               oninput="PageBuilder.updateCarouselImage(${index}, ${idx}, 'src', this.value)"
+                               style="width:100%; padding:6px; font-size:13px; margin-bottom:5px; border:1px solid #eee;">
+                        <input type="text" placeholder="連結 URL (選填)" value="${img.link || ''}" 
+                               oninput="PageBuilder.updateCarouselImage(${index}, ${idx}, 'link', this.value)"
+                               style="width:100%; padding:6px; font-size:13px; border:1px solid #eee;">
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:5px;">
+                        <img src="${img.src || ''}" style="width:40px; height:40px; object-fit:cover; background:#eee; border-radius:4px;">
+                        <button onclick="PageBuilder.removeCarouselImage(${index}, ${idx})" style="background:#dc3545; color:white; border:none; border-radius:4px; padding:2px 5px; font-size:12px; cursor:pointer;">刪除</button>
+                    </div>
+                `;
+                imagesList.appendChild(item);
+            });
+
+            const addBtn = document.createElement('button');
+            addBtn.textContent = '+ 新增圖片';
+            addBtn.style.cssText = 'width:100%; padding:8px; background:white; border:1px dashed #999; border-radius:4px; margin-top:5px; cursor:pointer; font-size:13px;';
+            addBtn.onclick = () => {
+                if (!this.layout[index].images) this.layout[index].images = [];
+                this.layout[index].images.push({ src: '', link: '' });
+                this.renderInlineForm(container, this.layout[index], index);
+                // this.updatePreview();
+            };
+            imagesList.appendChild(addBtn);
+            imagesWrapper.appendChild(imagesList);
+            container.appendChild(imagesWrapper);
+
+        } else if (comp.type === 'info_section') {
+            this.addInnerField(container, '標題', 'title', comp.title);
+            this.addInnerField(container, '副標題/文字', 'subtitle', comp.subtitle, 'textarea');
+            this.addInnerField(container, '圖片 URL', 'image', comp.image);
+
+            // Layout & Ratio
+            const layoutOptions = document.createElement('div');
+            layoutOptions.style.cssText = 'display:flex; gap:10px; margin-bottom:10px;';
+
+            const layoutDiv = document.createElement('div');
+            layoutDiv.style.flex = 1;
+            this.addInnerField(layoutDiv, '圖片位置', 'layout', comp.layout || 'left', 'select', ['left', 'right']);
+            layoutOptions.appendChild(layoutDiv);
+
+            const ratioDiv = document.createElement('div');
+            ratioDiv.style.flex = 1;
+            this.addInnerField(ratioDiv, '圖片比例', 'ratio', comp.ratio || '1:1', 'select', ['1:1', '4:3', '3:4', '16:9', 'original']);
+            layoutOptions.appendChild(ratioDiv);
+
+            container.appendChild(layoutOptions);
+
             this.addInnerField(container, '按鈕文字', 'buttonText', comp.buttonText);
             this.addInnerField(container, '跳轉連結', 'buttonLink', comp.buttonLink);
         } else if (comp.type === 'product_list' || comp.type === 'products') {
@@ -424,6 +523,39 @@ const PageBuilder = {
             }
         } else if (comp.type === 'announcement') {
             this.addInnerField(container, '公告內容', 'text', comp.text);
+
+            // Extra Product Settings (Ratio, Columns)
+            if (isProducts || comp.type === 'product_list') {
+                const settingsWrapper = document.createElement('div');
+                settingsWrapper.style.marginTop = '15px';
+                settingsWrapper.style.padding = '10px';
+                settingsWrapper.style.background = '#f8f8f8';
+                settingsWrapper.style.borderRadius = '6px';
+
+                settingsWrapper.innerHTML = '<div style="font-size:12px; font-weight:bold; color:#555; margin-bottom:10px;">外觀設定</div>';
+
+                // Ratio
+                const ratioDiv = document.createElement('div');
+                this.addInnerField(ratioDiv, '圖片比例', 'ratio', comp.ratio || '1:1', 'select', ['1:1', '3:4', '4:3']);
+                settingsWrapper.appendChild(ratioDiv);
+
+                // Columns (Desktop / Mobile)
+                const colWrapper = document.createElement('div');
+                colWrapper.style.cssText = 'display:flex; gap:10px; margin-top:10px;';
+
+                const dtCol = document.createElement('div');
+                dtCol.style.flex = 1;
+                this.addInnerField(dtCol, '桌面欄數', 'itemsDesktop', comp.itemsDesktop || 4, 'number');
+                colWrapper.appendChild(dtCol);
+
+                const mbCol = document.createElement('div');
+                mbCol.style.flex = 1;
+                this.addInnerField(mbCol, '手機欄數', 'itemsMobile', comp.itemsMobile || 2, 'number');
+                colWrapper.appendChild(mbCol);
+
+                settingsWrapper.appendChild(colWrapper);
+                container.appendChild(settingsWrapper);
+            }
 
             // 背景透明選項
             const bgWrapper = document.createElement('div');
@@ -603,8 +735,11 @@ const PageBuilder = {
     getComponentTypeInfo: function (type) {
         const types = {
             'hero': { name: '首頁大圖', icon: '' },
+            'image_carousel': { name: '圖片輪播', icon: '' },
+            'text_combination': { name: '文字組合', icon: '' },
+            'custom_code': { name: '自訂程式碼', icon: '' },
             'categories': { name: '分類導覽', icon: '' },
-            'products': { name: '輪播圖', icon: '' },
+            'products': { name: '商品輪播', icon: '' },
             'product_list': { name: '商品列表', icon: '' },
             'info_section': { name: '圖文介紹', icon: '' },
             'announcement': { name: '公告欄', icon: '' }
@@ -629,6 +764,25 @@ const PageBuilder = {
             newComp.title = '新圖文介紹';
             newComp.subtitle = '在這裡輸入介紹文字...';
             newComp.image = 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=600';
+        } else if (type === 'image_carousel') {
+            newComp.title = '新圖片輪播';
+            newComp.images = [
+                { src: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800', link: '' },
+                { src: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=800', link: '' }
+            ];
+            newComp.fullWidth = true;
+            newComp.ratioDesktop = '21:9';
+            newComp.ratioMobile = '16:9';
+            newComp.speed = 3; // 預設 3 秒
+        } else if (type === 'text_combination') {
+            newComp.title = 'Paragraph Title';
+            newComp.subtitle = 'Subtitle';
+            newComp.content = 'Input your text contents to promote your product, or tell the story about your shop.';
+            newComp.buttonText = 'Enter';
+            newComp.textAlign = 'center';
+        } else if (type === 'custom_code') {
+            newComp.title = 'HTML/JS 程式碼';
+            newComp.htmlContent = '<!-- 在此輸入 HTML, CSS, 或 JS -->\n<div style="padding:20px; text-align:center;">自訂程式碼區塊</div>';
         } else if (type === 'categories') {
             newComp.title = '商品分類';
         }
@@ -709,7 +863,30 @@ const PageBuilder = {
             rangeWrapper.appendChild(valueDisplay);
             div.appendChild(rangeWrapper);
             container.appendChild(div);
+            div.appendChild(rangeWrapper);
+            container.appendChild(div);
             return; // 提前返回，不需要後續處理
+        } else if (type === 'checkbox') {
+            const wrapper = document.createElement('div');
+            wrapper.style.cssText = 'display:flex; align-items:center; gap:10px;';
+
+            input = document.createElement('input');
+            input.type = 'checkbox';
+            input.checked = !!value;
+            input.style.cssText = 'width:20px; height:20px;';
+
+            input.onchange = (e) => {
+                this.layout[this.editingIndex][key] = e.target.checked;
+            };
+
+            wrapper.appendChild(input);
+            const labelSpan = document.createElement('span');
+            labelSpan.textContent = '啟用';
+            wrapper.appendChild(labelSpan);
+
+            div.appendChild(wrapper);
+            container.appendChild(div);
+            return;
         } else {
             input = document.createElement('input');
             input.type = type;
@@ -798,6 +975,22 @@ const PageBuilder = {
         } finally {
             btn.disabled = false;
             btn.textContent = originalText;
+        }
+    },
+
+    updateCarouselImage: function (compIndex, imgIndex, field, value) {
+        if (this.layout[compIndex] && this.layout[compIndex].images && this.layout[compIndex].images[imgIndex]) {
+            this.layout[compIndex].images[imgIndex][field] = value;
+            // this.debouncedPreviewUpdate();
+        }
+    },
+
+    removeCarouselImage: function (compIndex, imgIndex) {
+        if (confirm('確定刪除此圖片？')) {
+            this.layout[compIndex].images.splice(imgIndex, 1);
+            const container = document.querySelector(`#edit-form-${compIndex}`);
+            if (container) this.renderInlineForm(container, this.layout[compIndex], compIndex);
+            // this.updatePreview();
         }
     },
 
