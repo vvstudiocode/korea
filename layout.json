@@ -1,18 +1,7 @@
 {
   "version": "1.0",
-  "lastUpdated": "2026-01-03T02:50:23.649Z",
+  "lastUpdated": "2026-01-03T03:35:07.585Z",
   "sections": [
-    {
-      "type": "hero",
-      "title": "Welcome to OMO Select",
-      "subtitle": "",
-      "image": "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1200",
-      "buttonText": "",
-      "buttonLink": "",
-      "marginTop": 0,
-      "marginBottom": 0,
-      "textAlign": "left"
-    },
     {
       "type": "product_list",
       "title": "",
