@@ -4,3 +4,7 @@ gas-backend/
 layout.json
 *.log
 node_modules/
+
+# 商品圖片（由後台上傳到 GitHub，不追蹤本地）
+images/
+images/products/
