@@ -554,6 +554,28 @@
                             + 新增規格類別 (例如：顏色、尺寸)
                         </button>
                     </div>
+
+                    <!-- 規格明細表格 -->
+                    <div class="form-group" id="variantsSection" style="display: none;">
+                        <label>規格明細 <small style="color:#888; font-weight:normal;">(設定各規格的價格、庫存、圖片)</small></label>
+                        <div class="variants-table-container">
+                            <table class="variants-table" id="variantsTable">
+                                <thead>
+                                    <tr>
+                                        <th width="40"><input type="checkbox" id="variantSelectAll"
+                                                onchange="toggleAllVariants(this)"></th>
+                                        <th width="80">圖片</th>
+                                        <th>款式</th>
+                                        <th width="100">價格</th>
+                                        <th width="100">庫存</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="variantsTableBody">
+                                    <!-- 動態產生 -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div> <!-- End modal-body -->
 
                 <div class="modal-actions">

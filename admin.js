@@ -836,6 +836,9 @@ function openProductModal(productId = null) {
     document.getElementById('imagePreviewContainer').innerHTML = '';
     document.getElementById('uploadImagesBtn').style.display = 'none';
 
+    // 重置 variants
+    currentProductVariants = [];
+
     if (productId) {
         // 先找 pending
         p = pendingProductUpdates.find(x => String(x.id) === String(productId));
@@ -867,12 +870,19 @@ function openProductModal(productId = null) {
             // 渲染預覽 (包含現有圖片)
             renderImagePreviews();
 
+            // 載入現有 variants
+            currentProductVariants = p.variants || [];
+
             // 處理規格產生器
             renderSpecBuilder(p.options || {});
+
+            // 渲染規格明細表格
+            setTimeout(() => updateVariantsTable(), 100);
         }
     } else {
         document.getElementById('prodImage').value = '';
         renderSpecBuilder({});
+        document.getElementById('variantsSection').style.display = 'none';
     }
 
     openModal('productModal');
@@ -927,7 +937,8 @@ async function handleProductSubmit(e) {
             image: document.getElementById('prodImage').value,
             modalImages: [...modalImages], // 保存完整順序資訊供上傳時參考
             newImages: newImagesToUpload, // 暫存待上傳檔案 (相容舊邏輯)
-            options: options
+            options: options,
+            variants: getVariantsData() // 收集規格明細資料
         };
 
         // 更新 Pending Queue
@@ -2139,3 +2150,201 @@ function getSpecData() {
 
     return result;
 }
+
+// ----------------------
+// 規格明細表格 (Variants)
+// ----------------------
+let currentProductVariants = []; // 暫存編輯中的 variants
+
+/**
+ * 產生所有規格組合
+ * 例如：{ "顏色": ["黑", "紅"], "尺寸": ["S", "M"] }
+ * 會產生：["黑/S", "黑/M", "紅/S", "紅/M"]
+ */
+function generateVariantCombinations(options) {
+    const keys = Object.keys(options);
+    if (keys.length === 0) return [];
+
+    // 取得所有 values 陣列
+    const valueArrays = keys.map(k => options[k]);
+
+    // 計算笛卡爾積
+    function cartesian(arrays) {
+        if (arrays.length === 0) return [[]];
+        const [first, ...rest] = arrays;
+        const restCombinations = cartesian(rest);
+        const result = [];
+        for (const item of first) {
+            for (const combo of restCombinations) {
+                result.push([item, ...combo]);
+            }
+        }
+        return result;
+    }
+
+    const combinations = cartesian(valueArrays);
+    return combinations.map(combo => combo.join('/'));
+}
+
+/**
+ * 更新規格明細表格
+ * 根據目前規格產生器的內容，產生或更新表格
+ */
+function updateVariantsTable() {
+    const options = getSpecData();
+    const combinations = generateVariantCombinations(options);
+    const section = document.getElementById('variantsSection');
+
+    if (combinations.length === 0) {
+        section.style.display = 'none';
+        return;
+    }
+
+    section.style.display = 'block';
+
+    // 取得預設價格和庫存
+    const defaultPrice = Number(document.getElementById('prodPrice').value) || 0;
+    const defaultStock = Number(document.getElementById('prodStock').value) || 99;
+
+    // 取得商品圖片列表 (供圖片選擇)
+    const imageList = getProductImageList();
+
+    const tbody = document.getElementById('variantsTableBody');
+    tbody.innerHTML = combinations.map((spec, index) => {
+        // 嘗試找到現有的 variant 資料
+        const existingVariant = currentProductVariants.find(v => v.spec === spec) || {};
+        const price = existingVariant.price !== undefined ? existingVariant.price : defaultPrice;
+        const stock = existingVariant.stock !== undefined ? existingVariant.stock : defaultStock;
+        const image = existingVariant.image || '';
+
+        // 產生圖片選擇下拉選單
+        const imageOptions = ['<option value="">不指定</option>']
+            .concat(imageList.map((url, i) => {
+                const selected = url === image ? 'selected' : '';
+                const shortName = `圖片 ${i + 1}`;
+                return `<option value="${url}" ${selected}>${shortName}</option>`;
+            }))
+            .join('');
+
+        // 圖片預覽
+        const imagePreview = image
+            ? `<img src="${image}" class="variant-thumb">`
+            : '<div class="variant-thumb-placeholder">📷</div>';
+
+        return `
+            <tr data-spec="${spec}">
+                <td><input type="checkbox" class="variant-checkbox"></td>
+                <td>
+                    <div class="variant-image-cell">
+                        ${imagePreview}
+                        <select class="variant-image-select" onchange="updateVariantImagePreview(this)">
+                            ${imageOptions}
+                        </select>
+                    </div>
+                </td>
+                <td class="variant-spec">${spec}</td>
+                <td><input type="number" class="variant-price" value="${price}" min="0"></td>
+                <td><input type="number" class="variant-stock" value="${stock}" min="0"></td>
+            </tr>
+        `;
+    }).join('');
+}
+
+/**
+ * 更新 variant 圖片預覽
+ */
+function updateVariantImagePreview(selectEl) {
+    const url = selectEl.value;
+    const cell = selectEl.closest('.variant-image-cell');
+    const existingImg = cell.querySelector('.variant-thumb, .variant-thumb-placeholder');
+
+    if (existingImg) existingImg.remove();
+
+    if (url) {
+        const img = document.createElement('img');
+        img.src = url;
+        img.className = 'variant-thumb';
+        cell.insertBefore(img, selectEl);
+    } else {
+        const placeholder = document.createElement('div');
+        placeholder.className = 'variant-thumb-placeholder';
+        placeholder.textContent = '📷';
+        cell.insertBefore(placeholder, selectEl);
+    }
+}
+
+/**
+ * 取得商品已上傳的圖片列表
+ */
+function getProductImageList() {
+    const imageValue = document.getElementById('prodImage').value;
+    if (!imageValue) return [];
+    return imageValue.split(',').map(url => url.trim()).filter(url => url !== '');
+}
+
+/**
+ * 從表格收集 variants 資料
+ */
+function getVariantsData() {
+    const tbody = document.getElementById('variantsTableBody');
+    if (!tbody) return [];
+
+    const rows = tbody.querySelectorAll('tr');
+    const variants = [];
+
+    rows.forEach(row => {
+        const spec = row.dataset.spec;
+        const price = Number(row.querySelector('.variant-price').value) || 0;
+        const stock = Number(row.querySelector('.variant-stock').value) || 0;
+        const imageSelect = row.querySelector('.variant-image-select');
+        const image = imageSelect ? imageSelect.value : '';
+
+        variants.push({ spec, price, stock, image });
+    });
+
+    return variants;
+}
+
+/**
+ * 全選/取消全選 variants
+ */
+function toggleAllVariants(checkbox) {
+    const checkboxes = document.querySelectorAll('#variantsTableBody .variant-checkbox');
+    checkboxes.forEach(cb => cb.checked = checkbox.checked);
+}
+
+/**
+ * 監聽規格產生器變更，自動更新 variants 表格
+ */
+function setupSpecBuilderListeners() {
+    const container = document.getElementById('specBuilderContainer');
+    if (!container) return;
+
+    // 使用事件委派監聽輸入變更
+    container.addEventListener('input', debounce(() => {
+        // 先保存目前表格的資料
+        const currentData = getVariantsData();
+        currentProductVariants = currentData;
+        // 重新產生表格
+        updateVariantsTable();
+    }, 500));
+}
+
+// Debounce 函數
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// 在 DOMContentLoaded 時設定監聽器
+document.addEventListener('DOMContentLoaded', () => {
+    setupSpecBuilderListeners();
+});
+
