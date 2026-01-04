@@ -329,9 +329,9 @@ h4 {
 /* ===== 購物車側邊欄 ===== */
 .cart-sidebar {
     position: fixed;
-    right: -450px;
+    right: -380px;
     top: 0;
-    width: 450px;
+    width: 380px;
     max-width: 100vw;
     height: 100vh;
     background: var(--bg-white);
@@ -387,9 +387,9 @@ h4 {
 
 .cart-item {
     display: flex;
-    gap: 1.5rem;
-    padding-bottom: 1.5rem;
-    margin-bottom: 1.5rem;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     background: none;
     border-radius: 0;
@@ -400,11 +400,10 @@ h4 {
 }
 
 .cart-item-image {
-    width: 90px;
-    height: 110px;
+    width: 50px;
+    height: 60px;
     object-fit: cover;
-    border-radius: 8px;
-    /* 圓角 */
+    border-radius: 4px;
 }
 
 .cart-item-info {
@@ -416,34 +415,35 @@ h4 {
 
 .cart-item-name {
     font-family: var(--font-heading);
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     font-weight: 600;
 }
 
 .cart-item-price {
     color: var(--secondary-text);
     font-weight: 400;
-    font-size: 1rem;
+    font-size: 0.9rem;
 }
 
 .cart-item-quantity {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    margin-top: 0.5rem;
+    gap: 0.8rem;
+    margin-top: 0.3rem;
 }
 
 .qty-btn-small {
     background: transparent;
     border: 1px solid var(--secondary-text);
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
+    font-size: 0.8rem;
 }
 
 .qty-btn-small:hover {
@@ -455,7 +455,7 @@ h4 {
 .remove-item {
     align-self: flex-start;
     color: var(--secondary-text);
-    font-size: 1rem;
+    font-size: 0.9rem;
     opacity: 0.5;
 }
 
@@ -466,7 +466,8 @@ h4 {
 }
 
 .cart-footer {
-    padding: 2rem;
+    padding: 1rem 1.5rem;
+    /* Reduced padding */
     background: var(--bg-pink);
 }
 
@@ -474,8 +475,10 @@ h4 {
     display: flex;
     justify-content: space-between;
     font-family: var(--font-heading);
-    font-size: 1.5rem;
-    margin-bottom: 1.5rem;
+    font-size: 1.2rem;
+    /* Reduced font size */
+    margin-bottom: 0.8rem;
+    /* Reduced margin */
 }
 
 .total-amount {
@@ -485,12 +488,12 @@ h4 {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 0.3rem;
+    gap: 0.1rem;
 }
 
 .cart-subtotal,
 .cart-shipping {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     font-weight: 400;
     color: var(--secondary-text);
 }
@@ -500,11 +503,11 @@ h4 {
 }
 
 .cart-final-total {
-    font-size: 1.3rem;
+    font-size: 1.1rem;
     font-weight: 600;
     color: var(--primary-text);
-    margin-top: 0.3rem;
-    padding-top: 0.5rem;
+    margin-top: 0.2rem;
+    padding-top: 0.3rem;
     border-top: 1px solid rgba(0, 0, 0, 0.1);
 }
 
@@ -530,8 +533,8 @@ h4 {
 
 /* 運送方式選擇器 */
 .shipping-method-selector {
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
@@ -539,7 +542,7 @@ h4 {
     display: block;
     font-size: 0.9rem;
     color: var(--secondary-text);
-    margin-bottom: 0.8rem;
+    margin-bottom: 0.5rem;
     font-weight: 500;
 }
 
@@ -553,9 +556,9 @@ h4 {
     display: flex;
     align-items: center;
     gap: 0.6rem;
-    padding: 0.8rem 1rem;
+    padding: 0.6rem 0.8rem;
     background: var(--bg-pink);
-    border-radius: 8px;
+    border-radius: 6px;
     cursor: pointer;
     transition: all 0.2s;
 }
@@ -802,6 +805,41 @@ body.no-scroll {
     margin-top: 2rem;
     padding-top: 1.5rem;
     border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Loading State for Submit Button - Moved out of nested block */
+.submit-order-btn.loading {
+    background-color: #ccc !important;
+    color: transparent !important;
+    pointer-events: none;
+    cursor: wait;
+    position: relative;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+.submit-order-btn.loading::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 20px;
+    height: 20px;
+    border: 2px solid white;
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    animation: btn-spin 0.8s linear infinite;
+    transform: translate(-50%, -50%);
+}
+
+@keyframes btn-spin {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+
+    100% {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
 }
 
 .product-detail-stock {

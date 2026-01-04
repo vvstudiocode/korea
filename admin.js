@@ -1953,6 +1953,8 @@ async function loadPurchasingStats() {
     const tbody = document.getElementById('purchasingStatsBody');
     tbody.innerHTML = '<tr><td colspan="4" style="text-align:center">計算中...</td></tr>';
 
+    showLoadingOverlay(); // Show loading
+
     try {
         const result = await callApi('getPurchasingStats', { startDate, endDate });
         if (result.success) {
@@ -1964,6 +1966,8 @@ async function loadPurchasingStats() {
     } catch (e) {
         console.error(e);
         tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:red">連線錯誤</td></tr>';
+    } finally {
+        hideLoadingOverlay(); // Hide loading
     }
 }
 

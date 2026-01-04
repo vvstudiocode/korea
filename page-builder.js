@@ -1116,6 +1116,7 @@ const PageBuilder = {
         const originalText = btn.textContent;
         btn.disabled = true;
         btn.textContent = '儲存中...';
+        showLoadingOverlay(); // Show Global Loading
 
         try {
             const layoutData = {
@@ -1154,6 +1155,7 @@ const PageBuilder = {
         } finally {
             btn.disabled = false;
             btn.textContent = originalText;
+            hideLoadingOverlay(); // Hide Global Loading
         }
     },
 

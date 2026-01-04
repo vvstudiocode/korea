@@ -646,9 +646,10 @@ async function handleOrderSubmit(e) {
         customerNote: document.getElementById('customerNote').value || '', // 備注欄位（選填）
     };
 
-    showLoadingOverlay();
+    // showLoadingOverlay(); // 改用按鈕本身的 Loading 狀態
     const submitBtn = e.target.querySelector('.submit-order-btn');
     submitBtn.disabled = true;
+    submitBtn.classList.add('loading'); // Add loading class
 
     try {
         const orderId = 'KR' + new Date().toISOString().slice(0, 10).replace(/-/g, '') + Math.random().toString().slice(2, 6);
@@ -697,7 +698,8 @@ async function handleOrderSubmit(e) {
 
         if (result.success) {
             setTimeout(() => {
-                hideLoadingOverlay();
+                // hideLoadingOverlay(); // 移除 global overlay
+                submitBtn.classList.remove('loading'); // Remove loading class
                 document.getElementById('orderNumber').textContent = orderId;
                 closeModal('checkoutModal');
                 showModal('successModal');
@@ -715,7 +717,8 @@ async function handleOrderSubmit(e) {
 
     } catch (error) {
         console.error('送出訂單失敗:', error);
-        hideLoadingOverlay();
+        // hideLoadingOverlay();
+        submitBtn.classList.remove('loading');
         submitBtn.disabled = false;
         alert('訂單送出失敗，請稍後再試\n錯誤: ' + error.message);
     }
