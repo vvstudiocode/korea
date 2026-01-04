@@ -52,10 +52,11 @@
                 <button onclick="logout()">登出</button>
             </div>
         </nav>
+        <div class="sidebar-overlay" onclick="closeMobileSidebar()"></div>
 
         <main class="main-content">
             <header class="top-bar">
-                <!-- hamburger removed -->
+                <button class="hamburger-btn" onclick="toggleMobileSidebar()">☰</button>
                 <h2 id="pageTitle">總覽報表</h2>
                 <div class="header-actions">
                     <a href="https://vvstudiocode.github.io/korea/" target="_blank" class="btn-outline"
