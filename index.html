@@ -7,6 +7,56 @@
     <title>Omo Select_韓國代購 | Korean Shopping</title>
     <meta name="description" content="提供最新韓國熱門商品代購服務，美妝保養、零食食品、生活用品應有盡有">
     <link rel="stylesheet" href="styles.css?v=1.1">
+    <style>
+        /* Critical Loading Styles */
+        #loadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease;
+        }
+
+        #loadingOverlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #D68C94;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+
+        .loading-text {
+            color: #D68C94;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            font-weight: 600;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
     <link rel="stylesheet" href="page-renderer.css?v=1.0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,6 +66,11 @@
 </head>
 
 <body>
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay">
+        <div class="spinner"></div>
+        <div class="loading-text">OMO Select</div>
+    </div>
     <!-- 導航列 -->
     <nav class="navbar">
         <div class="nav-container">

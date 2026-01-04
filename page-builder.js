@@ -166,7 +166,15 @@ const PageBuilder = {
             } else {
                 this.layout = layoutData.sections || [];
                 this.footer = layoutData.footer || null;
+                // 初始化全域設定 (如果有的話)
+                this.global = layoutData.global || {
+                    backgroundColor: '#ffffff',
+                    fontFamily: 'Noto Sans TC',
+                    fontSize: '16px'
+                };
             }
+
+            this.editingGlobal = false; // 新增全域編輯狀態旗標
 
             this.renderComponentsList();
             this.renderPreview();
@@ -184,6 +192,30 @@ const PageBuilder = {
 
         list.innerHTML = '';
 
+        // 1. 全域設定區塊
+        const globalDiv = document.createElement('div');
+        globalDiv.className = `comp-item global-item ${this.editingGlobal ? 'active' : ''}`;
+        globalDiv.innerHTML = `
+            <div class="comp-item-header" style="background: #e3f2fd; border-bottom: 2px solid #2196f3;">
+                <div class="comp-drag-handle" style="visibility:hidden;"></div>
+                <div class="comp-info" onclick="PageBuilder.toggleGlobalEdit()" style="cursor:pointer; flex: 1;">
+                    <span class="comp-name" style="font-weight:bold; color:#0d47a1; margin-left: 0;">全域設定</span>
+                </div>
+                <div class="comp-actions">
+                    <button class="comp-btn" onclick="PageBuilder.toggleGlobalEdit()">${this.editingGlobal ? '收起' : '編輯'}</button>
+                </div>
+            </div>
+            <div class="comp-edit-panel">
+                <div class="edit-form-inner" id="edit-form-global"></div>
+            </div>
+        `;
+
+        if (this.editingGlobal) {
+            this.renderGlobalForm(globalDiv.querySelector('#edit-form-global'));
+        }
+
+        list.appendChild(globalDiv);
+
         // 渲染區塊列表
         this.layout.forEach((comp, index) => {
             const div = document.createElement('div');
@@ -200,8 +232,8 @@ const PageBuilder = {
                         <span class="comp-type-tag">${info.name}</span>
                     </div>
                     <div class="comp-actions">
-                        <button class="comp-btn" onclick="PageBuilder.toggleEdit(${index})">${this.editingIndex === index && !this.editingFooter ? '收起' : '✎'}</button>
-                        <button class="comp-btn delete" onclick="PageBuilder.removeComponent(${index})">✕</button>
+                        <button class="comp-btn" onclick="PageBuilder.toggleEdit(${index})">${this.editingIndex === index && !this.editingFooter ? '收起' : '編輯'}</button>
+                        <button class="comp-btn delete" onclick="PageBuilder.removeComponent(${index})">刪除</button>
                     </div>
                 </div>
                 <div class="comp-edit-panel">
@@ -238,14 +270,13 @@ const PageBuilder = {
         const footerDiv = document.createElement('div');
         footerDiv.className = `comp-item footer-item ${this.editingFooter ? 'active' : ''}`;
         footerDiv.innerHTML = `
-            <div class="comp-item-header">
-                <div class="comp-drag-handle" style="visibility:hidden;">☰</div>
+            <div class="comp-item-header" style="background: #f5f5f5; border-bottom: 2px solid #6c757d;">
+                <div class="comp-drag-handle" style="visibility:hidden;"></div>
                 <div class="comp-info" onclick="PageBuilder.toggleFooterEdit()" style="cursor:pointer; flex: 1;">
-                    <span class="comp-name">📄 頁尾區塊</span>
-                    <span class="comp-type-tag" style="background:#6c757d;">Footer</span>
+                    <span class="comp-name" style="font-weight:bold; color:#495057; margin-left: 0;">頁尾區塊</span>
                 </div>
                 <div class="comp-actions">
-                    <button class="comp-btn" onclick="PageBuilder.toggleFooterEdit()">${this.editingFooter ? '收起' : '✎'}</button>
+                    <button class="comp-btn" onclick="PageBuilder.toggleFooterEdit()">${this.editingFooter ? '收起' : '編輯'}</button>
                 </div>
             </div>
             <div class="comp-edit-panel">
@@ -280,6 +311,7 @@ const PageBuilder = {
         this.editingFooter = !this.editingFooter;
         this.renderComponentsList();
     },
+
 
     renderInlineForm: function (container, comp, index) {
         container.innerHTML = '';
@@ -747,6 +779,82 @@ const PageBuilder = {
         return types[type] || { name: '未定類別', icon: '' };
     },
 
+    toggleGlobalEdit: function () {
+        this.editingGlobal = !this.editingGlobal;
+        this.editingIndex = null;
+        this.editingFooter = false;
+        this.renderComponentsList();
+    },
+
+    renderGlobalForm: function (container) {
+        if (!this.global) {
+            this.global = {
+                backgroundColor: '#ffffff',
+                fontFamily: 'Noto Sans TC',
+                fontSize: '16px'
+            };
+        }
+
+        // 背景顏色
+        this.addGlobalField(container, '網站背景顏色', 'backgroundColor', this.global.backgroundColor, 'color');
+
+        // 字體大小
+        this.addGlobalField(container, '預設字體大小 (px)', 'fontSize', this.global.fontSize || '16px', 'select', ['14px', '15px', '16px', '18px', '20px']);
+
+        // 字型
+        this.addGlobalField(container, '網站字型', 'fontFamily', this.global.fontFamily || 'Noto Sans TC', 'select', [
+            'Noto Sans TC',
+            'Microsoft JhengHei',
+            'Helvetica Neue',
+            'Arial',
+            'Times New Roman'
+        ]);
+
+        // 新增確認修改按鈕
+        this.addUpdateBtn(container);
+    },
+
+    // 專用於全域設定的欄位建立函數
+    addGlobalField: function (container, label, key, value, type = 'text', options = []) {
+        const div = document.createElement('div');
+        div.className = 'form-group';
+        div.style.marginBottom = '12px';
+        div.innerHTML = `<label style="font-size:12px; color:#666;">${label}</label>`;
+
+        let input;
+        if (type === 'select') {
+            input = document.createElement('select');
+            input.style.cssText = 'width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;';
+            options.forEach(opt => {
+                const o = document.createElement('option');
+                o.value = opt;
+                o.textContent = opt;
+                if (opt === value) o.selected = true;
+                input.appendChild(o);
+            });
+        } else if (type === 'color') {
+            input = document.createElement('input');
+            input.type = 'color';
+            input.style.cssText = 'width:100%; height:40px; padding:0; border:1px solid #ddd; border-radius:4px; cursor:pointer;';
+        } else {
+            input = document.createElement('input');
+            input.type = type;
+            input.style.cssText = 'width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;';
+        }
+
+        input.value = value || '';
+        input.dataset.key = key;
+
+        // 更新全域設定
+        input.onchange = (e) => {
+            this.global[key] = e.target.value;
+            this.debouncedPreviewUpdate();
+        };
+
+        div.appendChild(input);
+        container.appendChild(div);
+    },
+
     addComponent: function (type) {
         const newComp = { type: type, marginTop: 0, marginBottom: 20 };
         if (type === 'hero') {
@@ -894,10 +1002,14 @@ const PageBuilder = {
         }
 
         input.value = value || '';
+        input.dataset.key = key;
 
         // 取消自動預覽更新，改為手動
         input.oninput = (e) => {
-            this.layout[this.editingIndex][key] = type === 'number' ? parseInt(e.target.value) || 0 : e.target.value;
+            // 確保 editingIndex 有效才更新
+            if (this.editingIndex !== null && this.layout[this.editingIndex]) {
+                this.layout[this.editingIndex][key] = type === 'number' ? parseInt(e.target.value) || 0 : e.target.value;
+            }
             // this.debouncedPreviewUpdate(); // Disabled
         };
 

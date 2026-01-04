@@ -177,11 +177,6 @@ function switchTab(tabId) {
                 PageBuilder.renderPreview();
             }
         }
-    } else if (tabId === 'settings') {
-        document.getElementById('settingsView').style.display = 'block';
-        document.getElementById('pageTitle').textContent = '網站設定';
-        document.getElementById('batchActions').style.display = 'none'; // Ensure batch actions are hidden
-        loadSiteSettings();
     } else if (tabId === 'purchasing') {
         document.getElementById('purchasingView').style.display = 'block';
         document.getElementById('pageTitle').textContent = '採買統計';
@@ -1076,7 +1071,11 @@ function formatCurrency(num) {
 }
 
 function openModal(id) {
-    document.getElementById(id).style.display = 'flex';
+    const modal = document.getElementById(id);
+    modal.style.display = 'flex';
+    // 重置滾動位置，確保每次開啟都在最上面
+    const content = modal.querySelector('.modal-content');
+    if (content) content.scrollTop = 0;
 }
 
 function closeModal(id) {

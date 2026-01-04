@@ -20,6 +20,7 @@ const PageRenderer = {
                 const parsed = JSON.parse(cachedLayout);
                 this.render(container, parsed.sections || parsed);
                 this.renderFooter(parsed.footer);
+                this.applyGlobalSettings(parsed.global);
             } catch (e) { console.error('Cache parse error', e); }
         } else {
             // 如果沒快取，顯示載入狀態
@@ -34,6 +35,15 @@ const PageRenderer = {
             // 重新渲染最新內容
             this.render(container, layout.sections || layout);
             this.renderFooter(layout.footer);
+            this.applyGlobalSettings(layout.global);
+        }
+
+        // 3. 移除 Loading 動畫
+        const overlay = document.getElementById('loadingOverlay');
+        if (overlay) {
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+            }, 500); // 稍微延遲讓體驗更平順
         }
     },
 
@@ -271,6 +281,20 @@ const PageRenderer = {
             const socialHTML = socialDiv ? socialDiv.outerHTML : '';
             copyright.innerHTML = socialHTML + '\n' + footerData.copyright;
         }
+    },
+
+    applyGlobalSettings: function (global) {
+        if (!global) return;
+
+        // 設定 CSS 變數或直接改 Body 樣式
+        document.documentElement.style.setProperty('--site-bg-color', global.backgroundColor || '#ffffff');
+        document.documentElement.style.setProperty('--site-font-family', global.fontFamily || 'Noto Sans TC');
+        document.documentElement.style.setProperty('--site-base-font-size', global.fontSize || '16px');
+
+        // 直接套用到 body (或主要容器)
+        document.body.style.backgroundColor = global.backgroundColor || '#ffffff';
+        document.body.style.fontFamily = global.fontFamily || 'Noto Sans TC';
+        document.body.style.fontSize = global.fontSize || '16px';
     },
 
     templateAnnouncement: function (comp) {

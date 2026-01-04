@@ -172,9 +172,10 @@
     width: 375px;
     border: 12px solid #333;
     border-radius: 30px;
-    height: 667px;
-    min-height: 667px;
-    overflow: auto;
+    height: auto;
+    min-height: 600px;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 /* Component Items in Sidebar */
@@ -304,8 +305,9 @@
 }
 
 .comp-btn {
-    width: 28px;
+    min-width: 40px;
     height: 28px;
+    padding: 0 10px;
     border-radius: 6px;
     border: 1px solid #ddd;
     background: white;
@@ -313,20 +315,26 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: #666;
     transition: all 0.2s;
+    white-space: nowrap;
 }
 
 .comp-btn:hover {
-    background: #f5f5f5;
+    background: #f0f0f0;
     color: var(--accent);
     border-color: var(--accent);
+}
+
+.comp-btn.delete {
+    color: #888;
 }
 
 .comp-btn.delete:hover {
     color: #dc3545;
     border-color: #dc3545;
+    background: #fff5f5;
 }
 
 /* Component Type Selector Overlay */

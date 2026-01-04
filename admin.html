@@ -35,18 +35,17 @@
                 <h3>OMO ADMIN</h3>
             </div>
             <ul class="nav-links">
-                <li id="tab-dashboard" class="active" onclick="switchTab('dashboard')"><span class="icon"></span><span
-                        class="text">總覽報表</span></li>
-                <li id="tab-orders" onclick="switchTab('orders')"><span class="icon"></span><span
+                <li id="tab-dashboard" class="active" onclick="switchTab('dashboard')" data-tooltip="總覽報表"><span
+                        class="icon">◈</span><span class="text">總覽報表</span></li>
+                <li id="tab-orders" onclick="switchTab('orders')" data-tooltip="訂單管理"><span class="icon">☷</span><span
                         class="text">訂單管理</span></li>
-                <li id="tab-products" onclick="switchTab('products')"><span class="icon"></span><span
-                        class="text">商品管理</span></li>
-                <li id="tab-builder" onclick="switchTab('builder')"><span class="icon"></span><span
+                <li id="tab-products" onclick="switchTab('products')" data-tooltip="商品管理"><span
+                        class="icon">◇</span><span class="text">商品管理</span></li>
+                <li id="tab-builder" onclick="switchTab('builder')" data-tooltip="首頁排版"><span class="icon">◫</span><span
                         class="text">首頁排版</span></li>
-                <li id="tab-purchasing" onclick="switchTab('purchasing')"><span class="icon"></span><span
-                        class="text">採買統計</span></li>
-                <li id="tab-settings" onclick="switchTab('settings')"><span class="icon"></span><span
-                        class="text">網站設定</span></li>
+                <li id="tab-purchasing" onclick="switchTab('purchasing')" data-tooltip="採買統計"><span
+                        class="icon">◲</span><span class="text">採買統計</span></li>
+
             </ul>
             <button class="sidebar-collapse-btn" onclick="toggleDesktopSidebar()" title="收合選單">⟨</button>
             <div class="sidebar-footer">
@@ -267,10 +266,8 @@
                 </div>
             </div>
 
-            <!-- 4. 網站設定視圖 -->
-            <div id="settingsView" class="view-section" style="display: none;">
-                <div id="settingsForm"></div>
-            </div>
+            <!-- 4. 網站設定視圖 (已移除) -->
+
 
             <!-- 首頁排版編輯器 (升級版) -->
             <div id="builderSection" class="view-section"
