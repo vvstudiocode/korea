@@ -618,7 +618,7 @@ function renderProducts(products) {
 
         return `
         <tr class="${p._isModified ? 'row-modified' : ''}" data-id="${p.id}">
-            <td style="cursor:move; text-align:center; color:#999;" class="drag-handle">☰</td>
+            <td style="cursor:move; text-align:center; color:#999; font-size:1.2rem;" class="drag-handle">⠿</td>
             <td><img src="${imageUrl}" class="table-thumb" style="width:40px;height:40px;object-fit:cover;vertical-align:middle;"></td>
             <td>${p.name} ${p._isNew ? '(新)' : ''}</td>
             <td>${p.price}</td>

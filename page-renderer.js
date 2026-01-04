@@ -265,13 +265,13 @@ const PageRenderer = {
             const links = footerData.socialLinks;
             socialIcons.innerHTML = `
                 ${links.line ? `<a href="${links.line}" target="_blank" rel="noopener noreferrer">
-                    <img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/line.png" alt="Line">
+                    <img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/line.png" alt="Line" loading="lazy">
                 </a>` : ''}
                 ${links.instagram ? `<a href="${links.instagram}" target="_blank" rel="noopener noreferrer">
-                    <img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/instagram.png" alt="Instagram">
+                    <img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/instagram.png" alt="Instagram" loading="lazy">
                 </a>` : ''}
                 ${links.threads ? `<a href="${links.threads}" target="_blank" rel="noopener noreferrer">
-                    <img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/threads.png" alt="Threads">
+                    <img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/threads.png" alt="Threads" loading="lazy">
                 </a>` : ''}
             `;
         }
@@ -333,10 +333,10 @@ const PageRenderer = {
             <div class="single-image-section ${uid}" style="${containerStyle} text-align: ${comp.textAlign || 'center'}; position:relative;">
                 ${linkStart}
                     <!-- Desktop Image -->
-                    <img src="${comp.imageDesktop}" alt="${altText}" class="img-desktop" style="width: ${widthDesktop}; height: auto; max-width: 100%; margin: 0 auto;">
+                    <img src="${comp.imageDesktop}" alt="${altText}" class="img-desktop" loading="lazy" style="width: ${widthDesktop}; height: auto; max-width: 100%; margin: 0 auto;">
                     
                     <!-- Mobile Image -->
-                    <img src="${comp.imageMobile || comp.imageDesktop}" alt="${altText}" class="img-mobile" style="width: ${widthMobile}; height: auto; max-width: 100%; margin: 0 auto;">
+                    <img src="${comp.imageMobile || comp.imageDesktop}" alt="${altText}" class="img-mobile" loading="lazy" style="width: ${widthMobile}; height: auto; max-width: 100%; margin: 0 auto;">
                 ${linkEnd}
                 <style>
                     .${uid} .img-desktop { display: block; }

@@ -1671,3 +1671,136 @@ body.sidebar-open {
         transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 }
+
+/* ------------------------------------------------------------
+   Drag & Drop Visual Upgrades
+   ------------------------------------------------------------ */
+.drag-handle {
+    cursor: move;
+    user-select: none;
+    transition: color 0.2s;
+}
+
+.drag-handle:hover {
+    color: var(--accent) !important;
+}
+
+tr.dragging {
+    opacity: 0.5;
+    background: #f0f8ff !important;
+    border: 2px dashed #3498db;
+    transform: scale(0.98);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* ------------------------------------------------------------
+   Mobile Navigation (Bottom Tab Bar) - RWD Upgrade
+   ------------------------------------------------------------ */
+@media (max-width: 768px) {
+
+    /* 1. 隱藏原有側邊欄 */
+    .sidebar {
+        width: 100%;
+        height: auto;
+        min-height: auto;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        z-index: 1000;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        display: flex !important;
+        /* 強制顯示 */
+        flex-direction: row;
+        padding: 0;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        background: var(--bg-dark);
+        /* 保持深色背景 */
+    }
+
+    /* 2. 隱藏不需要的側邊欄元素 */
+    .sidebar-header,
+    .sidebar-footer,
+    .sidebar-collapse-btn {
+        display: none !important;
+    }
+
+    /* 3. 調整導航列表容器 */
+    .nav-links {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        justify-content: space-around;
+        align-items: center;
+    }
+
+    /* 4. 調整單個導航項目 */
+    .nav-links li {
+        padding: 10px 5px;
+        /* 縮小 padding */
+        margin: 0;
+        flex-direction: column;
+        /* icon在上，文字在下 */
+        gap: 4px;
+        border-left: none;
+        /* 移除左邊框 */
+        border-top: 3px solid transparent;
+        /* 改為上邊框指示 */
+        flex: 1;
+        /* 平均分配寬度 */
+        justify-content: center;
+        text-align: center;
+        font-size: 0.75rem;
+        /* 縮小文字 */
+    }
+
+    /* Active 狀態修正 */
+    .nav-links li.active {
+        background: rgba(255, 255, 255, 0.05);
+        border-left-color: transparent;
+        border-top-color: var(--accent);
+    }
+
+    .nav-links li .icon {
+        font-size: 1.25rem;
+        width: auto;
+        margin-bottom: 2px;
+    }
+
+    .nav-links li .text {
+        display: block;
+        /* 確保文字顯示 */
+        line-height: 1;
+    }
+
+    /* 5. 主內容區域調整 - 避免被底部導航遮擋 */
+    .main-content {
+        padding-bottom: 70px;
+        /* 留出底部空間 */
+        margin-left: 0 !important;
+        /* 確保沒有左邊距 */
+    }
+
+    /* 6. 其他 RWD 微調 */
+    .top-bar {
+        padding: 0.8rem 1rem;
+    }
+
+    .dashboard-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+        /* 單欄顯示 */
+    }
+
+    /* 修正 Builder 在手機版的高度 */
+    #builderSection {
+        height: calc(100vh - 130px) !important;
+        /* 扣除 top-bar 和 bottom-nav */
+    }
+}

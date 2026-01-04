@@ -43,6 +43,35 @@
     /* accent-hover */
 }
 
+.add-block-btn {
+    width: 30%;
+    height: 40px;
+    border-radius: 20px;
+    background: white;
+    color: black;
+    border: 1px solid #eee;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.add-block-btn:hover {
+    background: #D68C94 !important;
+    /* Brand Pink */
+    color: white !important;
+    width: 30%;
+    /* Shrink width */
+    border-color: #D68C94;
+    box-shadow: 0 4px 12px rgba(214, 140, 148, 0.4);
+    border-radius: 20px;
+}
+
 .builder-sidebar .components-list {
     flex: 1;
     overflow-y: auto;
@@ -59,7 +88,7 @@
     width: 100%;
     padding: 0.8rem;
     background: var(--primary);
-    color: #ffffff;
+    color: #000000;
     border: none;
     border-radius: 8px;
     font-weight: 700;

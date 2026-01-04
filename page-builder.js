@@ -269,7 +269,7 @@ const PageBuilder = {
         const addBtnContainer = document.createElement('div');
         addBtnContainer.style.cssText = 'padding: 5px 0; display: flex; justify-content: center; margin-bottom: 10px;';
         addBtnContainer.innerHTML = `
-            <button class="add-btn-circle" onclick="openModal('addCompModal')" title="新增區塊" style="width: 100%; height: 32px; border-radius: 6px; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 6px;">+ 新增區塊</button>
+            <button class="add-block-btn" onclick="openModal('addCompModal')" title="新增區塊">＋ 區塊</button>
         `;
         list.appendChild(addBtnContainer);
 
