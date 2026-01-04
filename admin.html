@@ -55,23 +55,19 @@
 
         <main class="main-content">
             <header class="top-bar">
-                <button class="hamburger-btn" onclick="toggleSidebar()" aria-label="選單">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </button>
+                <!-- hamburger removed -->
                 <h2 id="pageTitle">總覽報表</h2>
                 <div class="header-actions">
-                    <a href="https://vvstudiocode.github.io/korea/" target="_blank" class="icon-btn"
+                    <a href="https://vvstudiocode.github.io/korea/" target="_blank" class="btn-outline"
                         style="text-decoration:none; margin-right:10px; display:flex; align-items:center;">
-                        前往官網
+                        前往官網 ↗
                     </a>
                     <div id="batchActions" style="display:none; margin-right: 1rem;">
                         <span id="unsavedChangesMsg"
                             style="color: #d9534f; font-size: 0.9rem; margin-right: 10px;"></span>
                         <button id="saveBatchBtn" onclick="saveBatchUpdates()" class="accent-btn">💾 儲存所有變更</button>
                     </div>
-                    <button onclick="refreshData()" class="refresh-btn">重新整理</button>
+                    <!-- refresh btn removed -->
                 </div>
             </header>
 
@@ -88,7 +84,7 @@
                             <option value="year">今年</option>
                         </select>
                     </div>
-                    <button onclick="refreshData()" class="icon-btn">🔄</button>
+                    <!-- refresh btn removed -->
                 </div>
 
                 <div class="stats-grid">
@@ -275,10 +271,7 @@
                 <div class="visual-builder">
                     <!-- 左側：編輯區 -->
                     <div class="builder-sidebar">
-                        <div class="sidebar-header">
-                            <h3>區塊管理</h3>
-                            <button class="add-btn-circle" onclick="openModal('addCompModal')" title="新增區塊">+</button>
-                        </div>
+
                         <div class="components-list" id="builderComponentsList">
                             <!-- 由 page-builder.js 動態產生 -->
                         </div>
@@ -598,6 +591,11 @@
                     onclick="PageBuilder.addComponent('image_carousel'); closeModal('addCompModal')">
                     <span class="icon"></span>
                     <span>圖片輪播</span>
+                </div>
+                <div class="comp-type-btn"
+                    onclick="PageBuilder.addComponent('single_image'); closeModal('addCompModal')">
+                    <span class="icon"></span>
+                    <span>單張圖片</span>
                 </div>
                 <div class="comp-type-btn"
                     onclick="PageBuilder.addComponent('text_combination'); closeModal('addCompModal')">

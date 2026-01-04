@@ -216,6 +216,22 @@ body {
     gap: 6px;
 }
 
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.btn-outline:hover {
+    background: var(--primary);
+    color: white;
+}
+
 .refresh-btn:hover {
     background: #f8f9fa;
     border-color: #ccc;
@@ -1634,9 +1650,12 @@ body.sidebar-open {
     }
 
     .dashboard-container.sidebar-collapsed .sidebar-footer button {
-        padding: 10px 8px;
-        font-size: 0.7rem;
+        padding: 8px 0;
+        font-size: 0.8rem;
         letter-spacing: 0;
+        text-align: center;
+        width: 100%;
+        display: block;
     }
 
     .dashboard-container.sidebar-collapsed .sidebar-footer {

@@ -202,7 +202,7 @@ const PageBuilder = {
                     <span class="comp-name" style="font-weight:bold; color:#0d47a1; margin-left: 0;">全域設定</span>
                 </div>
                 <div class="comp-actions">
-                    <button class="comp-btn" onclick="PageBuilder.toggleGlobalEdit()">${this.editingGlobal ? '收起' : '編輯'}</button>
+                    <!-- edit btn removed -->
                 </div>
             </div>
             <div class="comp-edit-panel">
@@ -232,7 +232,6 @@ const PageBuilder = {
                         <span class="comp-type-tag">${info.name}</span>
                     </div>
                     <div class="comp-actions">
-                        <button class="comp-btn" onclick="PageBuilder.toggleEdit(${index})">${this.editingIndex === index && !this.editingFooter ? '收起' : '編輯'}</button>
                         <button class="comp-btn delete" onclick="PageBuilder.removeComponent(${index})">刪除</button>
                     </div>
                 </div>
@@ -266,6 +265,14 @@ const PageBuilder = {
             list.appendChild(div);
         });
 
+        // 在所有自訂元件之後，加入「新增區塊」按鈕
+        const addBtnContainer = document.createElement('div');
+        addBtnContainer.style.cssText = 'padding: 5px 0; display: flex; justify-content: center; margin-bottom: 10px;';
+        addBtnContainer.innerHTML = `
+            <button class="add-btn-circle" onclick="openModal('addCompModal')" title="新增區塊" style="width: 100%; height: 32px; border-radius: 6px; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 6px;">+ 新增區塊</button>
+        `;
+        list.appendChild(addBtnContainer);
+
         // 渲染頁尾區塊 (固定在最下方)
         const footerDiv = document.createElement('div');
         footerDiv.className = `comp-item footer-item ${this.editingFooter ? 'active' : ''}`;
@@ -276,7 +283,7 @@ const PageBuilder = {
                     <span class="comp-name" style="font-weight:bold; color:#495057; margin-left: 0;">頁尾區塊</span>
                 </div>
                 <div class="comp-actions">
-                    <button class="comp-btn" onclick="PageBuilder.toggleFooterEdit()">${this.editingFooter ? '收起' : '編輯'}</button>
+                    <!-- edit btn removed -->
                 </div>
             </div>
             <div class="comp-edit-panel">
@@ -333,7 +340,15 @@ const PageBuilder = {
         if (comp.type === 'hero') {
             this.addInnerField(container, '標題', 'title', comp.title);
             this.addInnerField(container, '副標題/文字', 'subtitle', comp.subtitle, 'textarea');
-            this.addInnerField(container, '圖片 URL', 'image', comp.image);
+
+            const imgLabel = document.createElement('div');
+            imgLabel.innerHTML = '<strong>圖片設定</strong>';
+            imgLabel.style.margin = '15px 0 10px 0';
+            container.appendChild(imgLabel);
+
+            this.addInnerField(container, '電腦版圖片 URL', 'image', comp.image);
+            this.addInnerField(container, '手機版圖片 URL', 'imageMobile', comp.imageMobile);
+
             this.addInnerField(container, '按鈕文字', 'buttonText', comp.buttonText);
             this.addInnerField(container, '跳轉連結', 'buttonLink', comp.buttonLink);
         } else if (comp.type === 'text_combination') {
@@ -348,6 +363,32 @@ const PageBuilder = {
             tip.style.cssText = 'color:#666; font-size:12px; margin-top:5px;';
             tip.textContent = '注意：請確保程式碼語法正確。支援 <script> 與 <style> 標籤。';
             container.appendChild(tip);
+        } else if (comp.type === 'single_image') {
+            this.addInnerField(container, '連結 URL', 'link', comp.link);
+            this.addInnerField(container, '全寬模式 (忽略寬度設定)', 'fullWidth', comp.fullWidth, 'checkbox');
+            this.addInnerField(container, 'ALT 替代文字', 'alt', comp.alt);
+
+            const hr = document.createElement('hr');
+            hr.style.cssText = 'margin:15px 0; border:none; border-top:1px dashed #eee;';
+            container.appendChild(hr);
+
+            const desktopLabel = document.createElement('div');
+            desktopLabel.innerHTML = '<strong>電腦版設定</strong>';
+            desktopLabel.style.marginBottom = '10px';
+            container.appendChild(desktopLabel);
+
+            this.addInnerField(container, '圖片 URL', 'imageDesktop', comp.imageDesktop);
+            this.addInnerField(container, '寬度 (例如 1200px 或 80%)', 'widthDesktop', comp.widthDesktop || '100%');
+
+            const mobileLabel = document.createElement('div');
+            mobileLabel.innerHTML = '<strong>手機版設定</strong>';
+            mobileLabel.style.marginTop = '15px';
+            mobileLabel.style.marginBottom = '10px';
+            container.appendChild(mobileLabel);
+
+            this.addInnerField(container, '圖片 URL', 'imageMobile', comp.imageMobile);
+            this.addInnerField(container, '寬度 (例如 100%)', 'widthMobile', comp.widthMobile || '100%');
+
         } else if (comp.type === 'image_carousel') {
             // 圖片輪播設定
             this.addInnerField(container, '全寬模式', 'fullWidth', comp.fullWidth, 'checkbox');
@@ -384,9 +425,17 @@ const PageBuilder = {
                 item.style.cssText = 'background:white; padding:10px; border:1px solid #ddd; border-radius:4px; margin-bottom:10px; display:flex; gap:10px; align-items:start;';
                 item.innerHTML = `
                     <div style="flex:1;">
-                        <input type="text" placeholder="圖片 URL" value="${img.src || ''}" 
+                        <label style="font-size:11px; color:#666;">電腦版圖片</label>
+                        <input type="text" placeholder="電腦版圖片 URL" value="${img.src || ''}" 
                                oninput="PageBuilder.updateCarouselImage(${index}, ${idx}, 'src', this.value)"
                                style="width:100%; padding:6px; font-size:13px; margin-bottom:5px; border:1px solid #eee;">
+                        
+                        <label style="font-size:11px; color:#666;">手機版圖片</label>
+                        <input type="text" placeholder="手機版圖片 URL (選填, 預設同電腦版)" value="${img.srcMobile || ''}" 
+                               oninput="PageBuilder.updateCarouselImage(${index}, ${idx}, 'srcMobile', this.value)"
+                               style="width:100%; padding:6px; font-size:13px; margin-bottom:5px; border:1px solid #eee;">
+
+                        <label style="font-size:11px; color:#666;">連結</label>
                         <input type="text" placeholder="連結 URL (選填)" value="${img.link || ''}" 
                                oninput="PageBuilder.updateCarouselImage(${index}, ${idx}, 'link', this.value)"
                                style="width:100%; padding:6px; font-size:13px; border:1px solid #eee;">
@@ -404,9 +453,9 @@ const PageBuilder = {
             addBtn.style.cssText = 'width:100%; padding:8px; background:white; border:1px dashed #999; border-radius:4px; margin-top:5px; cursor:pointer; font-size:13px;';
             addBtn.onclick = () => {
                 if (!this.layout[index].images) this.layout[index].images = [];
-                this.layout[index].images.push({ src: '', link: '' });
+                this.layout[index].images.push({ src: '', srcMobile: '', link: '' });
                 this.renderInlineForm(container, this.layout[index], index);
-                // this.updatePreview();
+                // this.renderPreview();
             };
             imagesList.appendChild(addBtn);
             imagesWrapper.appendChild(imagesList);
@@ -415,7 +464,14 @@ const PageBuilder = {
         } else if (comp.type === 'info_section') {
             this.addInnerField(container, '標題', 'title', comp.title);
             this.addInnerField(container, '副標題/文字', 'subtitle', comp.subtitle, 'textarea');
-            this.addInnerField(container, '圖片 URL', 'image', comp.image);
+
+            const imgLabel = document.createElement('div');
+            imgLabel.innerHTML = '<strong>圖片設定</strong>';
+            imgLabel.style.margin = '15px 0 10px 0';
+            container.appendChild(imgLabel);
+
+            this.addInnerField(container, '電腦版圖片 URL', 'image', comp.image);
+            this.addInnerField(container, '手機版圖片 URL', 'imageMobile', comp.imageMobile);
 
             // Layout & Ratio
             const layoutOptions = document.createElement('div');
@@ -460,7 +516,7 @@ const PageBuilder = {
                         this.layout[index].productIds = [];
                     }
                     this.renderInlineForm(container, this.layout[index], index);
-                    this.updatePreview();
+                    this.renderPreview();
                 };
 
                 sourceWrapper.appendChild(select);
@@ -487,7 +543,7 @@ const PageBuilder = {
 
                 catSelect.onchange = (e) => {
                     this.layout[index].category = e.target.value;
-                    this.updatePreview();
+                    this.renderPreview();
                 };
 
                 catWrapper.appendChild(catSelect);
@@ -521,7 +577,7 @@ const PageBuilder = {
                             ProductSelectorModal.open(comp.productIds, (newIds) => {
                                 this.layout[index].productIds = newIds;
                                 this.renderInlineForm(container, this.layout[index], index);
-                                this.updatePreview();
+                                this.renderPreview();
                             });
                         };
                     }
@@ -544,7 +600,7 @@ const PageBuilder = {
                             item.querySelector('button').onclick = () => {
                                 this.layout[index].productIds.splice(pidIdx, 1);
                                 this.renderInlineForm(container, this.layout[index], index);
-                                this.updatePreview();
+                                this.renderPreview();
                             };
                             previewContainer.appendChild(item);
                         }
@@ -605,7 +661,7 @@ const PageBuilder = {
             bgWrapper.querySelector('input').onchange = (e) => {
                 this.layout[index].bgTransparent = e.target.checked;
                 this.renderInlineForm(container, this.layout[index], index);
-                this.updatePreview();
+                this.renderPreview();
             };
             container.appendChild(bgWrapper);
 
@@ -721,13 +777,13 @@ const PageBuilder = {
     addFooterField: function (container, label, path, value) {
         const div = document.createElement('div');
         div.className = 'form-group';
-        div.style.marginBottom = '10px';
-        div.innerHTML = `<label style="font-size:12px; color:#666;">${label}</label>`;
+        div.style.marginBottom = '8px';
+        div.innerHTML = `<label style="font-size:11px; color:#555; margin-bottom:2px; display:block;">${label}</label>`;
 
         const input = document.createElement('input');
         input.type = 'text';
         input.value = value || '';
-        input.style.cssText = 'width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;';
+        input.style.cssText = 'width:100%; padding:6px; border:1px solid #ddd; border-radius:4px; font-size:13px;';
         input.oninput = (e) => {
             this.setFooterValue(path, e.target.value);
             this.debouncedPreviewUpdate();
@@ -774,7 +830,8 @@ const PageBuilder = {
             'products': { name: '商品輪播', icon: '' },
             'product_list': { name: '商品列表', icon: '' },
             'info_section': { name: '圖文介紹', icon: '' },
-            'announcement': { name: '公告欄', icon: '' }
+            'announcement': { name: '公告欄', icon: '' },
+            'single_image': { name: '單張圖片', icon: '' }
         };
         return types[type] || { name: '未定類別', icon: '' };
     },
@@ -818,8 +875,8 @@ const PageBuilder = {
     addGlobalField: function (container, label, key, value, type = 'text', options = []) {
         const div = document.createElement('div');
         div.className = 'form-group';
-        div.style.marginBottom = '12px';
-        div.innerHTML = `<label style="font-size:12px; color:#666;">${label}</label>`;
+        div.style.marginBottom = '8px';
+        div.innerHTML = `<label style="font-size:11px; color:#555; margin-bottom:2px; display:block;">${label}</label>`;
 
         let input;
         if (type === 'select') {
@@ -860,7 +917,16 @@ const PageBuilder = {
         if (type === 'hero') {
             newComp.title = '新橫幅';
             newComp.image = 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800';
+            newComp.imageMobile = 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600';
             newComp.buttonText = '查看更多';
+        } else if (type === 'single_image') {
+            newComp.imageDesktop = 'https://via.placeholder.com/1200x400?text=Desktop+Image';
+            newComp.imageMobile = 'https://via.placeholder.com/600x600?text=Mobile+Image';
+            newComp.link = '';
+            newComp.fullWidth = true;
+            newComp.widthDesktop = '100%';
+            newComp.widthMobile = '100%';
+            newComp.alt = '圖片說明';
         } else if (type === 'product_list' || type === 'products') {
             newComp.title = '輪播圖';
             newComp.category = '全部';
@@ -872,11 +938,12 @@ const PageBuilder = {
             newComp.title = '新圖文介紹';
             newComp.subtitle = '在這裡輸入介紹文字...';
             newComp.image = 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=600';
+            newComp.imageMobile = 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=600';
         } else if (type === 'image_carousel') {
             newComp.title = '新圖片輪播';
             newComp.images = [
-                { src: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800', link: '' },
-                { src: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=800', link: '' }
+                { src: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800', srcMobile: '', link: '' },
+                { src: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=800', srcMobile: '', link: '' }
             ];
             newComp.fullWidth = true;
             newComp.ratioDesktop = '21:9';
@@ -926,8 +993,8 @@ const PageBuilder = {
     addInnerField: function (container, label, key, value, type = 'text', options = []) {
         const div = document.createElement('div');
         div.className = 'form-group';
-        div.style.marginBottom = '12px';
-        div.innerHTML = `<label style="font-size:12px; color:#666;">${label}</label>`;
+        div.style.marginBottom = '8px';
+        div.innerHTML = `<label style="font-size:11px; color:#555; margin-bottom:2px; display:block;">${label}</label>`;
 
         let input;
         if (type === 'textarea') {

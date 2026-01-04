@@ -140,6 +140,9 @@ const PageRenderer = {
                 case 'image_carousel':
                     this.renderImageCarousel(section, comp);
                     break;
+                case 'single_image':
+                    section.innerHTML = this.templateSingleImage(comp);
+                    break;
                 case 'text_combination':
                     section.innerHTML = this.templateTextCombination(comp);
                     break;
@@ -308,16 +311,75 @@ const PageRenderer = {
         `;
     },
 
+    templateSingleImage: function (comp) {
+        const fullWidth = comp.fullWidth;
+        // 如果全寬，則寬度設為 100%，否則使用使用者設定的寬度
+        const widthDesktop = fullWidth ? '100%' : (comp.widthDesktop || '100%');
+        const widthMobile = fullWidth ? '100%' : (comp.widthMobile || '100%');
+
+        // 容器樣式：如果不是全寬，則限制最大寬度並置中
+        const containerStyle = fullWidth ?
+            'width: 100%;' :
+            'max-width: 1200px; margin: 0 auto; padding: 0 20px;';
+
+        const linkStart = comp.link ? `<a href="${comp.link}" style="display:block;">` : '';
+        const linkEnd = comp.link ? '</a>' : '';
+        const altText = comp.alt || '';
+
+        // 使用唯一的 class name 防止衝突
+        const uid = 'img-' + Math.random().toString(36).substr(2, 9);
+
+        return `
+            <div class="single-image-section ${uid}" style="${containerStyle} text-align: ${comp.textAlign || 'center'}; position:relative;">
+                ${linkStart}
+                    <!-- Desktop Image -->
+                    <img src="${comp.imageDesktop}" alt="${altText}" class="img-desktop" style="width: ${widthDesktop}; height: auto; max-width: 100%; margin: 0 auto;">
+                    
+                    <!-- Mobile Image -->
+                    <img src="${comp.imageMobile || comp.imageDesktop}" alt="${altText}" class="img-mobile" style="width: ${widthMobile}; height: auto; max-width: 100%; margin: 0 auto;">
+                ${linkEnd}
+                <style>
+                    .${uid} .img-desktop { display: block; }
+                    .${uid} .img-mobile { display: none; }
+                    @media (max-width: 768px) {
+                        .${uid} .img-desktop { display: none; }
+                        .${uid} .img-mobile { display: block; }
+                    }
+                </style>
+            </div>
+        `;
+    },
+
     templateHero: function (comp) {
         const align = comp.textAlign || 'center';
         const alignItems = align === 'left' ? 'flex-start' : (align === 'right' ? 'flex-end' : 'center');
+        const imgDesktop = comp.image || '';
+        const imgMobile = comp.imageMobile || imgDesktop;
+        const uid = 'hero-' + Math.random().toString(36).substr(2, 9);
+
         return `
-            <div class="hero-banner" style="background-image: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.4)), url('${comp.image}')">
+            <div class="hero-banner ${uid}">
+                <div class="hero-bg-desktop" style="background-image: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.4)), url('${imgDesktop}')"></div>
+                <div class="hero-bg-mobile" style="background-image: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.4)), url('${imgMobile}')"></div>
                 <div class="hero-content" style="text-align: ${align}; align-items: ${alignItems}">
                     <h1>${comp.title || ''}</h1>
                     <p>${comp.subtitle || ''}</p>
                     ${comp.buttonText ? `<a href="${comp.buttonLink || '#'}" class="cta-button">${comp.buttonText}</a>` : ''}
                 </div>
+                <style>
+                    .${uid} { position: relative; overflow: hidden; }
+                    .${uid} .hero-bg-desktop, .${uid} .hero-bg-mobile {
+                        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+                        background-size: cover; background-position: center; z-index: -1;
+                        transition: opacity 0.3s;
+                    }
+                    .${uid} .hero-bg-desktop { display: block; }
+                    .${uid} .hero-bg-mobile { display: none; }
+                    @media (max-width: 768px) {
+                        .${uid} .hero-bg-desktop { display: none; }
+                        .${uid} .hero-bg-mobile { display: block; }
+                    }
+                </style>
             </div>
         `;
     },
@@ -358,12 +420,17 @@ const PageRenderer = {
     templateInfoSection: function (comp) {
         const isRight = comp.layout === 'right';
         const ratio = comp.ratio || '1:1';
+        const imgDesktop = comp.image || '';
+        const imgMobile = comp.imageMobile || imgDesktop;
+        const uid = 'info-' + Math.random().toString(36).substr(2, 9);
+        const ratioStyle = ratio === 'original' ? 'auto' : ratio.replace(':', '/');
 
         return `
-            <div class="section-container">
+            <div class="section-container ${uid}">
                 <div class="info-grid-flex" style="display:flex; flex-direction: ${isRight ? 'row-reverse' : 'row'}; align-items:center; gap:4rem;">
                     <div class="info-image" style="flex:1;">
-                        <div style="width:100%; aspect-ratio:${ratio.replace(':', '/')}; background:url('${comp.image}') center/cover no-repeat; border-radius:12px;"></div>
+                        <div class="info-img-desktop" style="width:100%; aspect-ratio:${ratioStyle}; background:url('${imgDesktop}') center/cover no-repeat; border-radius:12px;"></div>
+                        <div class="info-img-mobile" style="width:100%; aspect-ratio:${ratioStyle}; background:url('${imgMobile}') center/cover no-repeat; border-radius:12px;"></div>
                     </div>
                     <div class="info-text" style="flex:1; text-align: ${comp.textAlign || 'left'}; padding: 20px;">
                         <h3>${comp.title || ''}</h3>
@@ -372,8 +439,12 @@ const PageRenderer = {
                     </div>
                 </div>
                 <style>
+                    .${uid} .info-img-desktop { display: block; }
+                    .${uid} .info-img-mobile { display: none; }
                     @media (max-width: 768px) {
                         .info-grid-flex { flex-direction: column !important; gap: 2rem !important; }
+                        .${uid} .info-img-desktop { display: none; }
+                        .${uid} .info-img-mobile { display: block; }
                     }
                 </style>
             </div>
@@ -416,7 +487,7 @@ const PageRenderer = {
                                 <div style="aspect-ratio:${ratioDesktop.replace(':', '/')}; background:url('${img.src}') center/cover no-repeat;"></div>
                             </div>
                             <div class="ratio-box-mobile" style="display:none;">
-                                <div style="aspect-ratio:${ratioMobile.replace(':', '/')}; background:url('${img.src}') center/cover no-repeat;"></div>
+                                <div style="aspect-ratio:${ratioMobile.replace(':', '/')}; background:url('${img.srcMobile || img.src}') center/cover no-repeat;"></div>
                             </div>
                         </a>
                     `).join('')}

@@ -51,8 +51,8 @@
 }
 
 body {
-    font-family: var(--font-body);
-    background: var(--bg-pink);
+    font-family: var(--site-font-family, var(--font-body));
+    background: var(--site-bg-color, var(--bg-pink));
     color: var(--primary-text);
     line-height: 1.8;
     min-height: 100vh;
