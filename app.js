@@ -303,31 +303,70 @@ function showProductDetail(productId) {
     document.getElementById('modalProductDescription').textContent = product.description || '暫無描述';
     document.getElementById('modalQuantity').value = 1;
 
-    // **新增**：動態產生商品選項
+    // 動態產生商品選項（根據 variants 判斷庫存）
     const optionsContainer = document.getElementById('modalProductOptions');
-    optionsContainer.innerHTML = ''; // 清空舊選項
+    optionsContainer.innerHTML = '';
     const hasOptions = product.options && Object.keys(product.options).length > 0;
+    const variants = product.variants || [];
 
     if (hasOptions) {
         Object.entries(product.options).forEach(([key, values]) => {
             const optionEl = document.createElement('div');
             optionEl.className = 'product-option';
+
+            // 建立選項 HTML，檢查每個規格的庫存
+            const optionButtons = values.map(value => {
+                // 找出對應的 variant（支援單規格和多規格）
+                const variant = variants.find(v => {
+                    const specParts = v.spec.split('/');
+                    return specParts.includes(value);
+                });
+
+                const variantStock = variant ? variant.stock : null;
+                const isSoldOut = variantStock !== null && variantStock <= 0;
+
+                if (isSoldOut) {
+                    return `<button type="button" class="option-btn sold-out" data-key="${key}" data-value="${value}" disabled>
+                        ${value} <span class="sold-out-label">售完</span>
+                    </button>`;
+                } else {
+                    return `<button type="button" class="option-btn" data-key="${key}" data-value="${value}" onclick="selectOption(this, '${key}', '${value}')">
+                        ${value}
+                    </button>`;
+                }
+            }).join('');
+
             optionEl.innerHTML = `
                 <label>${key}:</label>
-                <select class="option-select" data-option-key="${key}">
-                    ${values.map(value => `<option value="${value}">${value}</option>`).join('')}
-                </select>
+                <div class="option-buttons" data-option-key="${key}">
+                    ${optionButtons}
+                </div>
             `;
             optionsContainer.appendChild(optionEl);
         });
+
+        // 自動選擇第一個有庫存的選項
+        document.querySelectorAll('.option-buttons').forEach(group => {
+            const firstAvailable = group.querySelector('.option-btn:not(.sold-out)');
+            if (firstAvailable) {
+                firstAvailable.classList.add('selected');
+            }
+        });
+
+        // 更新價格顯示（根據選擇的規格）
+        updateSelectedVariantInfo(product);
     }
 
+    // 檢查整體庫存狀態（無規格商品用 stock，有規格商品檢查是否全部售完）
+    let isAllSoldOut = false;
+    if (hasOptions && variants.length > 0) {
+        isAllSoldOut = variants.every(v => v.stock <= 0);
+    } else {
+        isAllSoldOut = typeof product.stock !== 'undefined' && Number(product.stock) <= 0;
+    }
 
-
-    // **新增**：檢查庫存狀態
-    const isSoldOut = typeof product.stock !== 'undefined' && Number(product.stock) <= 0;
     const addToCartBtn = document.querySelector('.add-to-cart-btn');
-    if (isSoldOut) {
+    if (isAllSoldOut) {
         addToCartBtn.disabled = true;
         addToCartBtn.textContent = '已售完';
         addToCartBtn.style.backgroundColor = '#ccc';
@@ -335,11 +374,81 @@ function showProductDetail(productId) {
     } else {
         addToCartBtn.disabled = false;
         addToCartBtn.textContent = '加入購物車';
-        addToCartBtn.style.backgroundColor = ''; // 恢復原樣式
+        addToCartBtn.style.backgroundColor = '';
         addToCartBtn.style.cursor = '';
     }
 
     showModal('productModal');
+}
+
+/**
+ * 選擇規格選項
+ */
+function selectOption(btn, key, value) {
+    // 移除同組的其他選中狀態
+    const group = btn.closest('.option-buttons');
+    group.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+
+    // 更新價格和圖片
+    updateSelectedVariantInfo(currentProduct);
+}
+
+/**
+ * 根據選擇的規格更新價格和圖片
+ */
+function updateSelectedVariantInfo(product) {
+    if (!product || !product.variants || product.variants.length === 0) return;
+
+    // 獲取所有已選擇的規格值
+    const selectedValues = [];
+    document.querySelectorAll('.option-buttons').forEach(group => {
+        const selected = group.querySelector('.option-btn.selected');
+        if (selected) {
+            selectedValues.push(selected.dataset.value);
+        }
+    });
+
+    if (selectedValues.length === 0) return;
+
+    // 組合規格字串
+    const specString = selectedValues.join('/');
+
+    // 找到對應的 variant
+    const variant = product.variants.find(v => v.spec === specString);
+    if (variant) {
+        // 更新價格
+        document.getElementById('modalProductPrice').textContent = `NT$ ${variant.price}`;
+
+        // 更新圖片（如果有設定）
+        if (variant.image) {
+            const imageContainer = document.querySelector('.product-detail-image');
+            const slider = imageContainer.querySelector('.image-slider');
+            if (slider) {
+                // 找到對應圖片並滑動到該位置
+                const images = product.image.split(',').map(url => url.trim());
+                const imgIndex = images.findIndex(url => url === variant.image);
+                if (imgIndex >= 0) {
+                    const imageWidth = slider.offsetWidth;
+                    slider.scrollTo({ left: imgIndex * imageWidth, behavior: 'smooth' });
+                }
+            }
+        }
+
+        // 檢查選中規格的庫存
+        const addToCartBtn = document.querySelector('.add-to-cart-btn');
+        if (variant.stock <= 0) {
+            addToCartBtn.disabled = true;
+            addToCartBtn.textContent = '已售完';
+            addToCartBtn.style.backgroundColor = '#ccc';
+            addToCartBtn.style.cursor = 'not-allowed';
+        } else {
+            addToCartBtn.disabled = false;
+            addToCartBtn.textContent = '加入購物車';
+            addToCartBtn.style.backgroundColor = '';
+            addToCartBtn.style.cursor = '';
+        }
+    }
 }
 
 function increaseQuantity() {
@@ -360,12 +469,14 @@ function decreaseQuantity() {
 function addToCartFromModal() {
     const quantity = parseInt(document.getElementById('modalQuantity').value);
 
-    // **新增**：獲取選擇的選項
+    // 獲取選擇的選項（從按鈕）
     const selectedOptions = {};
-    document.querySelectorAll('#modalProductOptions .option-select').forEach(select => {
-        const key = select.dataset.optionKey;
-        const value = select.value;
-        selectedOptions[key] = value;
+    document.querySelectorAll('#modalProductOptions .option-buttons').forEach(group => {
+        const key = group.dataset.optionKey;
+        const selected = group.querySelector('.option-btn.selected');
+        if (selected) {
+            selectedOptions[key] = selected.dataset.value;
+        }
     });
 
     addToCart(currentProduct, quantity, selectedOptions);
