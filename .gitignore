@@ -2,6 +2,7 @@
 .vscode/
 gas-backend/
 layout.json
+layout_*.json
 *.log
 node_modules/
 

@@ -634,7 +634,8 @@ function renderProducts(products) {
     });
 
     tbody.innerHTML = displayProducts.map(p => {
-        const profit = (p.wholesalePrice || 0) - (p.cost || 0); // 總部利潤 = 批發價 - 成本
+        const retailProfit = (p.price || 0) - (p.cost || 0); // 利潤 = 售價 - 成本
+        const hqProfit = (p.wholesalePrice || 0) - (p.cost || 0); // 總部利潤 = 批發價 - 成本
         // 如果有多張圖片，只顯示第一張
         const imageUrl = (p.image || "").split(',')[0].trim();
 
@@ -645,8 +646,9 @@ function renderProducts(products) {
             <td>${p.name} ${p._isNew ? '(新)' : ''}</td>
             <td>${p.price}</td>
             <td style="color: #888;">${p.cost || 0}</td>
+            <td style="color: #28a745; font-weight: 500;">${retailProfit}</td>
             <td style="color: #6366f1;">${p.wholesalePrice || 0}</td>
-            <td style="color: #28a745; font-weight: 500;">${profit}</td>
+            <td style="color: #f59e0b; font-weight: 500;">${hqProfit}</td>
             <td style="color: #aaa; font-size:0.9em;">₩${p.priceKrw || 0}</td>
             <td>${p.stock}</td>
             <td>${p.status}</td>
