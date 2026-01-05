@@ -1003,10 +1003,16 @@ const PageBuilder = {
             newComp.widthDesktop = '100%';
             newComp.widthMobile = '100%';
             newComp.alt = '圖片說明';
-        } else if (type === 'product_list' || type === 'products') {
-            newComp.title = '輪播圖';
+        } else if (type === 'products') {
+            newComp.title = '精選商品';
             newComp.category = '全部';
             newComp.limit = 4;
+        } else if (type === 'product_list') {
+            newComp.title = '商品列表';
+            newComp.category = '全部';
+            newComp.limit = 8;
+            newComp.itemsDesktop = 4;
+            newComp.itemsMobile = 2;
         } else if (type === 'announcement') {
             newComp.text = '新公告內容';
             newComp.bgColor = '#f3f4f6';

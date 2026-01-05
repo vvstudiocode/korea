@@ -280,8 +280,69 @@ async function kolSwitchTab(tabId) {
 
 function toggleMobileSidebar() {
     const sidebar = document.querySelector('.sidebar');
+    const overlay = document.querySelector('.sidebar-overlay');
+
     sidebar.classList.toggle('active');
+    if (overlay) overlay.classList.toggle('active');
+    document.body.classList.toggle('sidebar-open');
 }
+
+function closeMobileSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.querySelector('.sidebar-overlay');
+
+    if (sidebar) sidebar.classList.remove('active');
+    if (overlay) overlay.classList.remove('active');
+    document.body.classList.remove('sidebar-open');
+}
+
+// 桌面版側邊欄縮合專用函數
+function toggleDesktopSidebar() {
+    const dashboard = document.getElementById('dashboardPage');
+    if (!dashboard) return;
+
+    // 只在桌面版生效
+    if (window.innerWidth <= 1024) return;
+
+    dashboard.classList.toggle('sidebar-collapsed');
+
+    // 保存縮合狀態到 localStorage
+    const isCollapsed = dashboard.classList.contains('sidebar-collapsed');
+    localStorage.setItem('kol_sidebar_collapsed', isCollapsed ? 'true' : 'false');
+
+    // 更新按鈕圖示
+    const collapseBtn = document.querySelector('.sidebar-collapse-btn');
+    if (collapseBtn) {
+        collapseBtn.innerHTML = isCollapsed ? '⟩' : '⟨';
+        collapseBtn.title = isCollapsed ? '展開選單' : '收合選單';
+    }
+
+    // 動畫結束後通知 PageBuilder 更新比例
+    setTimeout(() => {
+        if (typeof PageBuilder !== 'undefined' && PageBuilder.updatePreviewScale) {
+            PageBuilder.updatePreviewScale();
+        }
+    }, 310);
+}
+
+// 頁面載入時恢復側邊欄縮合狀態
+document.addEventListener('DOMContentLoaded', () => {
+    // 恢復收合狀態
+    setTimeout(() => {
+        const wasCollapsed = localStorage.getItem('kol_sidebar_collapsed') === 'true';
+        if (wasCollapsed && window.innerWidth > 1024) {
+            const dashboard = document.getElementById('dashboardPage');
+            if (dashboard) {
+                dashboard.classList.add('sidebar-collapsed');
+                const collapseBtn = document.querySelector('.sidebar-collapse-btn');
+                if (collapseBtn) {
+                    collapseBtn.innerHTML = '⟩';
+                    collapseBtn.title = '展開選單';
+                }
+            }
+        }
+    }, 100);
+});
 
 // ============================================================
 // 業績總覽
