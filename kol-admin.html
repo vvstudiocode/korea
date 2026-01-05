@@ -436,6 +436,150 @@
         </div>
     </div>
 
+    <!-- 編輯商品 Modal -->
+    <div id="editProductModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>編輯商品</h3>
+                <button class="close-btn" onclick="closeModal('editProductModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editProductId">
+                <div class="product-info" id="editProductInfo"></div>
+
+                <div class="form-group">
+                    <label>我的售價</label>
+                    <input type="number" id="editProductPrice" required>
+                </div>
+
+                <div class="form-group">
+                    <label>庫存數量</label>
+                    <input type="number" id="editProductStock" placeholder="自建商品可修改">
+                    <small class="hint-text" id="editStockHint">選品庫存由總部管理，無法修改</small>
+                </div>
+
+                <div class="form-group">
+                    <label>狀態</label>
+                    <select id="editProductStatus">
+                        <option value="active">上架</option>
+                        <option value="inactive">下架</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button onclick="closeModal('editProductModal')">取消</button>
+                <button class="accent-btn" onclick="saveMyProduct()">儲存變更</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 建立專屬商品 Modal -->
+    <div id="createOwnProductModal" class="modal">
+        <div class="modal-content large-modal">
+            <div class="modal-header">
+                <h3>建立專屬商品</h3>
+                <button class="close-btn" onclick="closeModal('createOwnProductModal')">✕</button>
+            </div>
+
+            <form id="createOwnProductForm" onsubmit="submitOwnProduct(event)">
+                <div class="modal-body">
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label>商品名稱 *</label>
+                            <input type="text" id="ownProdName" required>
+                        </div>
+                        <div class="form-group half">
+                            <label>分類</label>
+                            <input type="text" id="ownProdCategory" list="categoryList">
+                            <datalist id="categoryList">
+                                <option value="流行服飾">
+                                <option value="美妝保養">
+                                <option value="零食食品">
+                                <option value="生活用品">
+                            </datalist>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group quarter">
+                            <label>售價 (台幣) *</label>
+                            <input type="number" id="ownProdPrice" required>
+                        </div>
+                        <div class="form-group quarter">
+                            <label>成本 (自我管理用)</label>
+                            <input type="number" id="ownProdCost">
+                        </div>
+                        <div class="form-group quarter">
+                            <label>庫存 *</label>
+                            <input type="number" id="ownProdStock" value="99" required>
+                        </div>
+                        <div class="form-group quarter">
+                            <label>狀態</label>
+                            <select id="ownProdStatus">
+                                <option value="active">上架</option>
+                                <option value="inactive">下架</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>商品描述</label>
+                        <textarea id="ownProdDesc" rows="3"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>商品圖片</label>
+                        <div class="image-upload-area">
+                            <div class="upload-zone" onclick="document.getElementById('ownProductImageInput').click()">
+                                <div class="upload-icon">📷</div>
+                                <p>點擊上傳圖片</p>
+                                <small>支援 JPG, PNG, WEBP</small>
+                            </div>
+                            <input type="file" id="ownProductImageInput" accept="image/*" multiple style="display:none"
+                                onchange="handleKolImageSelect(event)">
+                            <div class="image-preview-container" id="ownProductImagePreview"></div>
+                            <input type="hidden" id="ownProdImages"> <!-- 儲存圖片 URL Array -->
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>規格設定</label>
+                        <div id="ownSpecContainer" class="spec-builder-container">
+                            <!-- 動態產生規格 -->
+                        </div>
+                        <button type="button" class="btn-small" onclick="addKolSpecGroup()" style="margin-top: 5px;">
+                            + 新增規格類別
+                        </button>
+                    </div>
+
+                    <!-- 規格明細表格 -->
+                    <div class="form-group" id="ownVariantsSection" style="display: none;">
+                        <label>規格明細</label>
+                        <div class="variants-table-container">
+                            <table class="variants-table">
+                                <thead>
+                                    <tr>
+                                        <th>款式</th>
+                                        <th width="100">價格</th>
+                                        <th width="100">庫存</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ownVariantsTableBody">
+                                    <!-- 動態產生 -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-actions">
+                    <button type="button" onclick="closeModal('createOwnProductModal')">取消</button>
+                    <button type="submit" class="accent-btn" id="btnCreateOwn">建立商品</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Toast 容器 -->
     <div id="toastContainer"></div>
 

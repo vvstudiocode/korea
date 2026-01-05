@@ -220,6 +220,11 @@ const PageBuilder = {
                     console.log('✅ Layout loaded from GAS');
                     this.layout = JSON.parse(data.data.settings.homepage_layout);
                     this.footer = null;
+                    this.global = {
+                        backgroundColor: '#ffffff',
+                        fontFamily: 'Noto Sans TC',
+                        fontSize: '16px'
+                    };
                 }
             } else {
                 this.layout = layoutData.sections || [];
@@ -1226,7 +1231,8 @@ const PageBuilder = {
                 version: '1.0',
                 lastUpdated: new Date().toISOString(),
                 sections: this.layout,
-                footer: this.footer
+                footer: this.footer,
+                global: this.global || { backgroundColor: '#ffffff', fontFamily: 'Noto Sans TC', fontSize: '16px' }
             };
 
             console.log('💾 Saving layout to GitHub:', layoutData);
