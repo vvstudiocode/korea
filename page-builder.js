@@ -78,7 +78,18 @@ const ProductSelectorModal = {
 
     renderList: function (filter = '') {
         const container = document.getElementById('psm-list');
-        const allProducts = typeof products !== 'undefined' ? products : (typeof currentProducts !== 'undefined' ? currentProducts : []);
+        // 擴展商品來源：支援 KOL 後台的 kolProducts 和 availableProducts
+        let allProducts = [];
+        if (typeof kolProducts !== 'undefined' && kolProducts.length > 0) {
+            allProducts = kolProducts;
+        } else if (typeof availableProducts !== 'undefined' && availableProducts.length > 0) {
+            allProducts = availableProducts;
+        } else if (typeof products !== 'undefined' && products.length > 0) {
+            allProducts = products;
+        } else if (typeof currentProducts !== 'undefined' && currentProducts.length > 0) {
+            allProducts = currentProducts;
+        }
+        console.log('📋 商品選擇器商品來源:', allProducts.length, '項');
 
         const filtered = allProducts.filter(p => p.name.toLowerCase().includes(filter.toLowerCase()));
 
@@ -635,7 +646,17 @@ const PageBuilder = {
                 manualWrapper.style.borderRadius = '8px';
                 manualWrapper.style.border = '1px solid #eee';
 
-                const allProducts = typeof products !== 'undefined' ? products : (typeof currentProducts !== 'undefined' ? currentProducts : []);
+                // 支援 KOL 後台的商品來源
+                let allProducts = [];
+                if (typeof kolProducts !== 'undefined' && kolProducts.length > 0) {
+                    allProducts = kolProducts;
+                } else if (typeof availableProducts !== 'undefined' && availableProducts.length > 0) {
+                    allProducts = availableProducts;
+                } else if (typeof products !== 'undefined' && products.length > 0) {
+                    allProducts = products;
+                } else if (typeof currentProducts !== 'undefined' && currentProducts.length > 0) {
+                    allProducts = currentProducts;
+                }
                 const selectedCount = (comp.productIds || []).length;
 
                 manualWrapper.innerHTML = `

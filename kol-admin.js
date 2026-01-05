@@ -100,6 +100,21 @@ function hideLoadingOverlay() {
     if (overlay) overlay.style.display = 'none';
 }
 
+// API 呼叫輔助函數 (for PageBuilder)
+function callApi(subAction, payload = {}) {
+    return fetch(GAS_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({
+            action: 'kolAction',
+            subAction: subAction,
+            storeId: kolStoreId,
+            token: kolToken,
+            ...payload
+        })
+    }).then(res => res.json());
+}
+
 function formatCurrency(num) {
     return 'NT$ ' + (Number(num) || 0).toLocaleString();
 }
