@@ -225,7 +225,7 @@ function showDashboard() {
     }
 }
 
-function kolSwitchTab(tabId) {
+async function kolSwitchTab(tabId) {
     document.querySelectorAll('.nav-links li').forEach(li => li.classList.remove('active'));
     document.querySelector(`#tab-${tabId}`).classList.add('active');
 
@@ -255,10 +255,24 @@ function kolSwitchTab(tabId) {
     } else if (tabId === 'layout') {
         document.getElementById('builderSection').style.display = 'block';
         document.getElementById('pageTitle').textContent = '排版管理';
-        // 每次切換到排版管理都重新渲染（因為 init 時元素可能隱藏）
+
+        // 確保商品資料已載入，用於排版預覽
+        if (kolProducts.length === 0 && typeof loadMyProducts === 'function') {
+            console.log('📦 排版管理：先載入商品資料...');
+            await loadMyProducts();
+        }
+
+        // 每次切換到排版管理都重新初始化（因為 init 時元素可能隱藏）
         if (typeof PageBuilder !== 'undefined') {
-            PageBuilder.renderComponentsList();
-            PageBuilder.renderPreview();
+            // 如果尚未初始化，重新執行 init
+            if (!PageBuilder.layout || PageBuilder.layout.length === 0) {
+                console.log('🎨 重新初始化 PageBuilder...');
+                await PageBuilder.init(kolStoreId);
+            } else {
+                // 已初始化，只重新渲染
+                PageBuilder.renderComponentsList();
+                await PageBuilder.renderPreview();
+            }
         }
         window.dispatchEvent(new Event('resize'));
     }

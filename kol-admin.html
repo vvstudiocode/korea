@@ -294,43 +294,45 @@
                                     <button type="submit" class="btn-primary">確認修改</button>
                                 </form>
                             </div>
+                            <button type="submit" class="btn-primary" style="margin-top: 20px;">儲存設定</button>
+                        </form>
                     </div>
                 </div>
+            </div>
 
-                <!-- 6. 排版管理 (Page Builder) -->
-                <div id="builderSection" class="view-section"
-                    style="display: none; padding: 0; height: calc(100vh - 70px);">
-                    <div class="visual-builder">
-                        <!-- 左側：編輯區 -->
-                        <div class="builder-sidebar">
-                            <div class="components-list" id="builderComponentsList">
-                                <!-- 由 page-builder.js 動態產生 -->
-                            </div>
-                            <div class="sidebar-footer">
-                                <button class="save-btn" id="saveLayoutBtn"
-                                    onclick="PageBuilder.saveLayout()">儲存排版</button>
-                            </div>
+            <!-- 6. 排版管理 (Page Builder) -->
+            <div id="builderSection" class="view-section"
+                style="display: none; padding: 0; height: calc(100vh - 70px);">
+                <div class="visual-builder">
+                    <!-- 左側：編輯區 -->
+                    <div class="builder-sidebar">
+                        <div class="components-list" id="builderComponentsList">
+                            <!-- 由 page-builder.js 動態產生 -->
                         </div>
+                        <div class="sidebar-footer">
+                            <button class="save-btn" id="saveLayoutBtn" onclick="PageBuilder.saveLayout()">儲存排版</button>
+                        </div>
+                    </div>
 
-                        <!-- 右側：預覽區 -->
-                        <div class="builder-preview">
-                            <div class="preview-toolbar">
-                                <div class="device-toggles">
-                                    <button class="device-btn active" id="view-desktop"
-                                        onclick="PageBuilder.setPreviewMode('desktop')">💻 電腦版</button>
-                                    <button class="device-btn" id="view-mobile"
-                                        onclick="PageBuilder.setPreviewMode('mobile')">📱 手機版</button>
-                                </div>
-                                <div class="preview-status">即時預覽中</div>
+                    <!-- 右側：預覽區 -->
+                    <div class="builder-preview">
+                        <div class="preview-toolbar">
+                            <div class="device-toggles">
+                                <button class="device-btn active" id="view-desktop"
+                                    onclick="PageBuilder.setPreviewMode('desktop')">💻 電腦版</button>
+                                <button class="device-btn" id="view-mobile"
+                                    onclick="PageBuilder.setPreviewMode('mobile')">📱 手機版</button>
                             </div>
-                            <div class="preview-viewport" id="previewViewport">
-                                <div class="preview-container" id="pageBuilderPreviewRoot">
-                                    <!-- 由 page-renderer.js 動態渲染 -->
-                                </div>
+                            <div class="preview-status">即時預覽中</div>
+                        </div>
+                        <div class="preview-viewport" id="previewViewport">
+                            <div class="preview-container" id="pageBuilderPreviewRoot">
+                                <!-- 由 page-renderer.js 動態渲染 -->
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
         </main>
     </div>

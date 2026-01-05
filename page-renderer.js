@@ -610,27 +610,39 @@ const PageRenderer = {
             // 兼容性處理：支援多種商品資料來源
             // 優先順序：kolProducts (KOL已選商品) > availableProducts (KOL可選商品) > products (前端) > currentProducts (admin)
             let allProducts = [];
+            let productSource = 'none';
+
             if (typeof kolProducts !== 'undefined' && kolProducts.length > 0) {
                 allProducts = kolProducts;
+                productSource = 'kolProducts';
             } else if (typeof availableProducts !== 'undefined' && availableProducts.length > 0) {
                 allProducts = availableProducts;
+                productSource = 'availableProducts';
             } else if (typeof products !== 'undefined' && products.length > 0) {
                 allProducts = products;
+                productSource = 'products';
             } else if (typeof currentProducts !== 'undefined' && currentProducts.length > 0) {
                 allProducts = currentProducts;
+                productSource = 'currentProducts';
             }
+
+            console.log(`📦 商品來源: ${productSource}, 數量: ${allProducts.length}`);
 
             // 確保資料已加載
             if (allProducts.length === 0) {
+                console.log('⏳ 嘗試載入商品資料...');
                 if (typeof loadProducts === 'function') {
                     await loadProducts();
                     allProducts = typeof products !== 'undefined' ? products : [];
+                    console.log(`✅ loadProducts 完成, products: ${allProducts.length}`);
                 } else if (typeof loadMyProducts === 'function') {
                     await loadMyProducts(); // KOL 後台
                     allProducts = typeof kolProducts !== 'undefined' ? kolProducts : [];
+                    console.log(`✅ loadMyProducts 完成, kolProducts: ${allProducts.length}`);
                 } else if (typeof fetchProducts === 'function') {
                     await fetchProducts(); // 管理後台的函數
                     allProducts = typeof currentProducts !== 'undefined' ? currentProducts : [];
+                    console.log(`✅ fetchProducts 完成, currentProducts: ${allProducts.length}`);
                 }
             }
 
@@ -639,6 +651,7 @@ const PageRenderer = {
             // 根據來源類型篩選商品
             if (comp.sourceType === 'manual' && comp.productIds && comp.productIds.length > 0) {
                 // 手動選擇：依照 ID 列表順序找出商品
+                console.log(`🎯 手動選擇模式, 商品IDs: ${comp.productIds.join(', ')}`);
                 comp.productIds.forEach(pid => {
                     const found = allProducts.find(p => String(p.id) === String(pid));
                     if (found) filtered.push(found);
@@ -646,17 +659,39 @@ const PageRenderer = {
             } else {
                 // 分類篩選 (預設)
                 filtered = allProducts;
-                if (comp.category && comp.category !== '全部') {
-                    filtered = allProducts.filter(p => p.category === comp.category);
+                const targetCategory = comp.category || '全部';
+                console.log(`📂 分類篩選模式, 目標分類: "${targetCategory}"`);
+
+                if (targetCategory && targetCategory !== '全部') {
+                    filtered = allProducts.filter(p => p.category === targetCategory);
+                    console.log(`   篩選後: ${filtered.length} 項商品 (分類匹配)`);
+
+                    // 如果分類完全匹配沒有結果，嘗試模糊匹配
+                    if (filtered.length === 0 && allProducts.length > 0) {
+                        console.log('   嘗試模糊匹配分類...');
+                        filtered = allProducts.filter(p =>
+                            p.category && p.category.includes(targetCategory)
+                        );
+                        console.log(`   模糊匹配後: ${filtered.length} 項商品`);
+                    }
                 }
+
                 // 只有自動篩選才需要限制數量，手動選擇則顯示全部已選
                 const limit = parseInt(comp.limit) || 4;
                 filtered = filtered.slice(0, limit);
             }
 
+            // 偵錯：列出可用的分類
+            if (filtered.length === 0 && allProducts.length > 0) {
+                const categories = [...new Set(allProducts.map(p => p.category).filter(Boolean))];
+                console.log('🔍 可用分類:', categories.join(', '));
+                console.log('🔍 前3項商品:', allProducts.slice(0, 3).map(p => `${p.name}(${p.category})`).join(', '));
+            }
+
             container.innerHTML = '';
             if (filtered.length === 0) {
                 const msg = comp.sourceType === 'manual' ? '尚未選擇展示商品' : '此分類暫無商品';
+                console.warn(`⚠️ ${msg} (allProducts: ${allProducts.length}, category: ${comp.category})`);
                 container.innerHTML = `<div class="empty-msg">${msg}</div>`;
                 return;
             }
@@ -781,7 +816,9 @@ const PageRenderer = {
 
             const price = document.createElement('div');
             price.style.cssText = 'font-weight:700; font-size:1.1rem; margin-bottom:12px; color:#333;';
-            price.textContent = 'NT$ ' + (p.price || 0);
+            // 優先使用 customPrice（KOL商品售價），否則使用 price
+            const displayPrice = p.customPrice || p.price || 0;
+            price.textContent = 'NT$ ' + displayPrice;
 
             const btn = document.createElement('button');
             if (isSoldOut) {
