@@ -11,6 +11,7 @@ let kolStoreInfo = {};
 let kolProducts = [];
 let kolOrders = [];
 let availableProducts = [];
+let selectedPickerIds = new Set(); // 新增：多選狀態
 
 // ============================================================
 // 初始化
@@ -68,6 +69,35 @@ function showToast(message, type = 'info', duration = 3000) {
         toast.style.animation = 'slideOut 0.3s ease';
         setTimeout(() => toast.remove(), 300);
     }, duration);
+}
+
+function showLoadingOverlay(message = '處理中...') {
+    let overlay = document.getElementById('loadingOverlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'loadingOverlay';
+        overlay.style.cssText = `
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 9999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: white; font-size: 1.2rem;
+        `;
+        overlay.innerHTML = '<div class="spinner" style="border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 15px;"></div><div id="loadingMessage"></div>';
+
+        // Add spinner animation style
+        const style = document.createElement('style');
+        style.textContent = '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
+        document.head.appendChild(style);
+
+        document.body.appendChild(overlay);
+    }
+    document.getElementById('loadingMessage').textContent = message;
+    overlay.style.display = 'flex';
+}
+
+function hideLoadingOverlay() {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) overlay.style.display = 'none';
 }
 
 function formatCurrency(num) {
@@ -331,6 +361,8 @@ function renderMyProducts(products) {
 async function openProductPicker() {
     const grid = document.getElementById('pickerProductGrid');
     grid.innerHTML = '<p style="text-align:center">載入商品中...</p>';
+    selectedPickerIds.clear(); // 清空選取狀態
+    updatePickerFooter(); // 更新底部按鈕
 
     openModal('productPickerModal');
 
@@ -364,9 +396,15 @@ function renderPickerProducts(products) {
     grid.innerHTML = products.map(p => {
         const imageUrl = (p.image || '').split(',')[0].trim() || 'https://via.placeholder.com/100';
         const alreadyAdded = kolProducts.some(kp => kp.id === p.id);
+        const isSelected = selectedPickerIds.has(p.id);
 
         return `
-        <div class="product-card ${alreadyAdded ? 'disabled' : ''}" onclick="${alreadyAdded ? '' : `selectProduct('${p.id}')`}">
+        <div class="product-card ${alreadyAdded ? 'disabled' : ''} ${isSelected ? 'selected' : ''}" 
+             onclick="${alreadyAdded ? '' : `toggleProductSelection('${p.id}')`}">
+             ${!alreadyAdded ? `
+             <div class="checkbox-overlay">
+                <input type="checkbox" ${isSelected ? 'checked' : ''} style="pointer-events:none;">
+             </div>` : ''}
             <img src="${imageUrl}" class="product-card-img">
             <div class="product-card-info">
                 <h4>${p.name}</h4>
@@ -379,25 +417,87 @@ function renderPickerProducts(products) {
     }).join('');
 }
 
+function toggleProductSelection(productId) {
+    if (selectedPickerIds.has(productId)) {
+        selectedPickerIds.delete(productId);
+    } else {
+        selectedPickerIds.add(productId);
+    }
+    renderPickerProducts(availableProducts); // 重新渲染以更新樣式
+    updatePickerFooter();
+}
+
+function updatePickerFooter() {
+    // 檢查是否已經有 footer，如果沒有則新增
+    let footer = document.getElementById('pickerFooter');
+    if (!footer) {
+        const modalContent = document.querySelector('#productPickerModal .modal-content');
+        if (modalContent) {
+            footer = document.createElement('div');
+            footer.id = 'pickerFooter';
+            footer.className = 'modal-actions';
+            footer.style.marginTop = '20px';
+            footer.style.borderTop = '1px solid #eee';
+            footer.style.paddingTop = '15px';
+            modalContent.appendChild(footer);
+        }
+    }
+
+    if (footer) {
+        const count = selectedPickerIds.size;
+        footer.innerHTML = `
+            <span style="flex:1; line-height:36px; color:#666;">已選擇 ${count} 項商品</span>
+            <button onclick="closeModal('productPickerModal')">取消</button>
+            <button class="accent-btn" onclick="batchAddProducts()" ${count === 0 ? 'disabled' : ''}>
+                確認新增 (${count})
+            </button>
+        `;
+    }
+}
+
+async function batchAddProducts() {
+    if (selectedPickerIds.size === 0) return;
+
+    const productsToAdd = Array.from(selectedPickerIds).map(id => {
+        const product = availableProducts.find(p => p.id === id);
+        return {
+            productId: id,
+            customPrice: product.price // 預設使用建議售價
+        };
+    });
+
+    if (!confirm(`確定要新增這 ${productsToAdd.length} 項商品嗎？\n預設售價將設定為官方建議售價。`)) return;
+
+    showLoadingOverlay('批量新增中...');
+
+    try {
+        // 這裡需要後端支援批量新增 API，或者我們循環呼叫單筆新增
+        // 為了效率，理想情況是後端支援。目前先用循環呼叫（臨時方案）
+        // TODO: 優化為單次 API 請求
+        let successCount = 0;
+        for (const item of productsToAdd) {
+            const result = await callKolApi('kolAddProduct', item);
+            if (result.success) successCount++;
+        }
+
+        hideLoadingOverlay();
+        showToast(`成功新增 ${successCount} 項商品`, 'success');
+        closeModal('productPickerModal');
+        loadMyProducts();
+        selectedPickerIds.clear();
+
+    } catch (err) {
+        hideLoadingOverlay();
+        showToast('批次新增過程發生錯誤', 'error');
+        console.error(err);
+    }
+}
+
+// 舊的單選邏輯保留給需要個別設定時使用 (如果需要)
 function selectProduct(productId) {
-    const product = availableProducts.find(p => p.id === productId);
-    if (!product) return;
-
-    closeModal('productPickerModal');
-
-    // 開啟設定價格 Modal
-    document.getElementById('priceProductId').value = productId;
-    document.getElementById('priceProductInfo').innerHTML = `
-        <strong>${product.name}</strong>
-        <p>${product.description || ''}</p>
-    `;
-    document.getElementById('priceWholesale').textContent = formatCurrency(product.wholesalePrice);
-    document.getElementById('priceCustom').value = product.price; // 預設用建議售價
-    updateProfitPreview();
-
-    document.getElementById('priceCustom').oninput = updateProfitPreview;
-
-    openModal('setPriceModal');
+    // ... Deprecated or Keep? 
+    // 目前改為 toggleProductSelection 流程，此函數可移除或保留兼容
+    toggleProductSelection(productId);
 }
 
 function updateProfitPreview() {

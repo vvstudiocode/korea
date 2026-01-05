@@ -158,23 +158,41 @@ const PageBuilder = {
                 if (response.ok) {
                     layoutData = await response.json();
                     console.log('✅ Layout loaded from GitHub');
+                } else {
+                    console.warn('⚠️ Layout fetch failed:', response.status);
+
+                    // Fallback: 如果是 KOL 商店且找不到專屬排版，則讀取預設排版
+                    if (this.storeId && response.status === 404) {
+                        console.log('🔄 Trying to load default global layout...');
+                        const defaultUrl = 'https://raw.githubusercontent.com/vvstudiocode/korea/main/layout.json?_=' + Date.now();
+                        const defRes = await fetch(defaultUrl);
+                        if (defRes.ok) {
+                            layoutData = await defRes.json();
+                            console.log('✅ Default Global Layout loaded');
+                        }
+                    }
                 }
-            } catch (e) {
-                console.warn('⚠️ GitHub fetch failed, trying GAS...');
+            } catch (err) {
+                console.error('GitHub fetch error:', err);
             }
 
-            // Fallback: 從 GAS 讀取
+            // 如果還是沒有資料，使用硬編碼預設值
             if (!layoutData) {
+                console.log('⚠️ Using hardcoded default layout');
+                layoutData = this.getDefaultLayout();
+            }
+
+            // Fallback: 從 GAS 讀取 (如果 GitHub 和硬編碼預設都失敗，或者 GAS 有更新的資料)
+            // 注意：這裡的邏輯是，如果 GitHub 成功載入，就不會再嘗試 GAS。
+            // 如果 GitHub 失敗（包括 404 且沒有預設），才會嘗試 GAS。
+            // 如果 GitHub 失敗且硬編碼預設被使用，GAS 也不會被嘗試。
+            // 根據需求，可能需要調整 GAS 載入的優先級。
+            // 目前的修改是讓硬編碼預設優先於 GAS 載入。
+            if (!layoutData.sections || layoutData.sections.length === 0) { // 檢查是否真的有內容
                 const data = await callApi('getSiteSettings');
                 if (data.success && data.data.settings.homepage_layout) {
                     console.log('✅ Layout loaded from GAS');
                     this.layout = JSON.parse(data.data.settings.homepage_layout);
-                    this.footer = null;
-                } else {
-                    this.layout = [
-                        { type: 'hero', title: 'Welcome to OMO Select', subtitle: 'Discover the best Korean products', image: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1200&q=80' },
-                        { type: 'categories' }
-                    ];
                     this.footer = null;
                 }
             } else {
@@ -198,6 +216,35 @@ const PageBuilder = {
         } finally {
             hideLoadingOverlay();
         }
+    },
+
+    getDefaultLayout: function () {
+        return {
+            sections: [
+                {
+                    type: "hero",
+                    title: "歡迎光臨我的賣場",
+                    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800",
+                    imageMobile: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600",
+                    buttonText: "立即選購",
+                    marginTop: 0,
+                    marginBottom: 20
+                },
+                {
+                    type: "products",
+                    title: "精選商品",
+                    category: "全部",
+                    limit: 4,
+                    marginTop: 0,
+                    marginBottom: 20
+                }
+            ],
+            footer: {
+                notices: [{ title: "購買須知", content: "本店為代購性質..." }],
+                socialLinks: {},
+                copyright: "© 2024 All Rights Reserved."
+            }
+        };
     },
 
     renderComponentsList: function () {
