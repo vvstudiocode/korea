@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastUpdated": "2026-01-05T17:02:26.541Z",
+  "lastUpdated": "2026-01-05T17:05:51.335Z",
   "sections": [
     {
       "type": "hero",
@@ -21,13 +21,23 @@
       "limit": 8,
       "marginTop": 0,
       "marginBottom": 20
+    },
+    {
+      "type": "product_list",
+      "marginTop": 0,
+      "marginBottom": 20,
+      "title": "商品列表",
+      "category": "全部",
+      "limit": 8,
+      "itemsDesktop": 4,
+      "itemsMobile": 2
     }
   ],
   "footer": {
     "notices": [
       {
         "title": "購買須知",
-        "content": "本店為代購性質，商品皆為正品。下單後約 7-14 個工作天到貨。"
+        "content": "本店為代購性質，商品皆為正品。下單後約 7 個工作天到貨。"
       }
     ],
     "socialLinks": {},
