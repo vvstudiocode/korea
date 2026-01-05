@@ -458,13 +458,19 @@ function updatePickerFooter() {
 async function batchAddProducts() {
     if (selectedPickerIds.size === 0) return;
 
+    // 安全過濾：確保商品存在
     const productsToAdd = Array.from(selectedPickerIds).map(id => {
         const product = availableProducts.find(p => p.id === id);
-        return {
+        return product ? {
             productId: id,
-            customPrice: product.price // 預設使用建議售價
-        };
-    });
+            customPrice: product.price || product.wholesalePrice || 0 // 增加 fallback
+        } : null;
+    }).filter(item => item !== null);
+
+    if (productsToAdd.length === 0) {
+        showToast('無法識別選取的商品，請重試', 'error');
+        return;
+    }
 
     if (!confirm(`確定要新增這 ${productsToAdd.length} 項商品嗎？\n預設售價將設定為官方建議售價。`)) return;
 
