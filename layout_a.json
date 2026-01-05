@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastUpdated": "2026-01-05T17:23:35.180Z",
+  "lastUpdated": "2026-01-05T17:40:12.255Z",
   "sections": [
     {
       "type": "hero",
@@ -42,5 +42,10 @@
     ],
     "socialLinks": {},
     "copyright": "© 2026 a. All Rights Reserved."
+  },
+  "global": {
+    "backgroundColor": "#ea1f1f",
+    "fontFamily": "Noto Sans TC",
+    "fontSize": "16px"
   }
 }
