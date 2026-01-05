@@ -34,7 +34,7 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    background: var(--primary-color);
 }
 
 .login-box {
@@ -115,7 +115,7 @@ body {
 /* 側邊欄 */
 .sidebar {
     width: var(--sidebar-width);
-    background: linear-gradient(180deg, var(--primary-color), var(--primary-dark));
+    background: var(--primary-color);
     color: white;
     display: flex;
     flex-direction: column;
@@ -731,6 +731,7 @@ body {
         grid-template-columns: 1fr;
     }
 }
+
 /* Product Picker Multi-select Styles */
 .product-card {
     position: relative;
@@ -755,7 +756,8 @@ body {
     top: 10px;
     right: 10px;
     z-index: 10;
-    pointer-events: none; /* Let click pass to card */
+    pointer-events: none;
+    /* Let click pass to card */
 }
 
 .checkbox-overlay input[type="checkbox"] {

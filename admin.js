@@ -2602,8 +2602,11 @@ async function handleStoreSubmit(e) {
 
     const subAction = editId ? 'updateStore' : 'createStore';
 
+    showLoading(true);
+
     try {
         const result = await callApi(subAction, { storeData });
+        showLoading(false);
         if (result.success) {
             showToast(editId ? '賣場更新成功' : '賣場建立成功', 'success');
             closeModal('storeModal');
@@ -2612,6 +2615,7 @@ async function handleStoreSubmit(e) {
             showToast('儲存失敗: ' + (result.error || '未知錯誤'), 'error');
         }
     } catch (err) {
+        showLoading(false);
         showToast('儲存失敗: ' + err, 'error');
     }
 }
