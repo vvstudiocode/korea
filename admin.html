@@ -45,6 +45,10 @@
                         class="text">首頁排版</span></li>
                 <li id="tab-purchasing" onclick="switchTab('purchasing')" data-tooltip="採買統計"><span
                         class="icon">◲</span><span class="text">採買統計</span></li>
+                <li id="tab-stores" onclick="switchTab('stores')" data-tooltip="賣場管理"><span class="icon">◉</span><span
+                        class="text">賣場管理</span></li>
+                <li id="tab-kolstats" onclick="switchTab('kolstats')" data-tooltip="團購業績"><span
+                        class="icon">◈</span><span class="text">團購業績</span></li>
 
             </ul>
             <button class="sidebar-collapse-btn" onclick="toggleDesktopSidebar()" title="收合選單">⟨</button>
@@ -257,6 +261,99 @@
                         <tbody id="purchasingStatsBody">
                             <tr>
                                 <td colspan="4" style="text-align:center">請選擇日期範圍後點擊篩選</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 賣場管理視圖 -->
+            <div id="storesView" class="view-section" style="display: none;">
+                <div class="view-header">
+                    <h2>賣場管理</h2>
+                    <div class="view-actions">
+                        <button class="btn-primary" onclick="openStoreModal()">+ 新增賣場</button>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>賣場 ID</th>
+                                <th>賣場名稱</th>
+                                <th>團購主</th>
+                                <th>電話</th>
+                                <th>狀態</th>
+                                <th>商品數</th>
+                                <th>建立時間</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="storesTableBody">
+                            <tr>
+                                <td colspan="8" style="text-align:center">載入中...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 團購業績視圖 -->
+            <div id="kolstatsView" class="view-section" style="display: none;">
+                <div class="view-header">
+                    <h2>團購業績總覽</h2>
+                    <div class="view-actions">
+                        <button class="btn-secondary" onclick="exportKolStats()">匯出報表</button>
+                    </div>
+                </div>
+
+                <div class="filter-bar">
+                    <div class="filter-group">
+                        <label>結算週期：</label>
+                        <select id="kolStatsMonth" onchange="loadKolStats()">
+                            <!-- 動態生成月份選項 -->
+                        </select>
+                        <button class="btn-small" onclick="loadKolStats()">查詢</button>
+                    </div>
+                </div>
+
+                <div class="stats-summary-cards">
+                    <div class="stats-card">
+                        <div class="stats-label">總銷售額</div>
+                        <div class="stats-value" id="kolTotalRevenue">NT$ 0</div>
+                    </div>
+                    <div class="stats-card">
+                        <div class="stats-label">總成本</div>
+                        <div class="stats-value" id="kolTotalCost">NT$ 0</div>
+                    </div>
+                    <div class="stats-card highlight">
+                        <div class="stats-label">總利潤</div>
+                        <div class="stats-value" id="kolTotalProfit">NT$ 0</div>
+                    </div>
+                    <div class="stats-card">
+                        <div class="stats-label">總訂單數</div>
+                        <div class="stats-value" id="kolTotalOrders">0</div>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>賣場名稱</th>
+                                <th>團購主</th>
+                                <th>銷售額</th>
+                                <th>批發成本</th>
+                                <th>利潤</th>
+                                <th>訂單數</th>
+                                <th>結算狀態</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="kolStatsTableBody">
+                            <tr>
+                                <td colspan="8" style="text-align:center">請選擇結算週期後點擊查詢</td>
                             </tr>
                         </tbody>
                     </table>
@@ -643,6 +740,112 @@
         </div>
     </div>
 
+    <!-- 賣場編輯 Modal -->
+    <div id="storeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="storeModalTitle">新增賣場</h3>
+                <button class="close-btn" onclick="closeModal('storeModal')">✕</button>
+            </div>
+            <form id="storeForm" onsubmit="handleStoreSubmit(event)">
+                <div class="modal-body">
+                    <input type="hidden" id="storeEditId">
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label>賣場 ID (唯一識別碼) *</label>
+                            <input type="text" id="storeId" required placeholder="例如: sharon-beauty">
+                            <small style="color:#888">建議用英文+數字，用於網址識別</small>
+                        </div>
+                        <div class="form-group half">
+                            <label>賣場名稱 *</label>
+                            <input type="text" id="storeName" required placeholder="例如: 莎朗精品代購">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label>團購主姓名 *</label>
+                            <input type="text" id="storeOwner" required>
+                        </div>
+                        <div class="form-group half">
+                            <label>聯絡電話</label>
+                            <input type="text" id="storePhone">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label>Email</label>
+                            <input type="email" id="storeEmail">
+                        </div>
+                        <div class="form-group half">
+                            <label>登入密碼 *</label>
+                            <input type="password" id="storePassword" placeholder="團購主登入用">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label>品牌主題色</label>
+                            <input type="color" id="storeThemeColor" value="#6366f1">
+                        </div>
+                        <div class="form-group half">
+                            <label>狀態</label>
+                            <select id="storeStatus">
+                                <option value="active">啟用</option>
+                                <option value="suspended">停用</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>匯款帳戶資訊</label>
+                        <input type="text" id="storeBankAccount" placeholder="例如: (012) 1234-5678-901">
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" onclick="closeModal('storeModal')">取消</button>
+                    <button type="submit" class="accent-btn">儲存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 庫存分配 Modal -->
+    <div id="assignStockModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>分配庫存給團購主</h3>
+                <button class="close-btn" onclick="closeModal('assignStockModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>選擇商品</label>
+                    <select id="assignProductSelect" onchange="loadProductStockInfo()">
+                        <option value="">-- 請選擇商品 --</option>
+                        <!-- 動態載入 -->
+                    </select>
+                </div>
+                <div id="productStockInfo"
+                    style="background:#f8f9fa; padding:1rem; border-radius:6px; margin-bottom:1rem;">
+                    <p>總庫存: <strong id="stockTotal">-</strong></p>
+                    <p>已分配: <strong id="stockAssigned">-</strong></p>
+                    <p>可分配: <strong id="stockAvailable">-</strong></p>
+                </div>
+                <div class="form-group">
+                    <label>選擇賣場</label>
+                    <select id="assignStoreSelect">
+                        <option value="">-- 請選擇賣場 --</option>
+                        <!-- 動態載入 -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>分配數量</label>
+                    <input type="number" id="assignQuantity" min="1" value="10">
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" onclick="closeModal('assignStockModal')">取消</button>
+                <button type="button" class="accent-btn" onclick="submitAssignStock()">確認分配</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Toast 通知容器 -->
     <div id="toastContainer" style="position: fixed; top: 20px; right: 20px; z-index: 10000;"></div>

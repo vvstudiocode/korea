@@ -12,6 +12,10 @@ let cart = [];
 let currentProduct = null;
 let currentCategory = 'all';
 
+// ===== KOL 商店模式 =====
+let currentStoreId = null;
+let currentStoreInfo = null;
+
 // ===== 初始化 =====
 document.addEventListener('DOMContentLoaded', () => {
     initializeApp();
@@ -22,7 +26,10 @@ document.addEventListener('DOMContentLoaded', () => {
  * 初始化應用程式
  */
 async function initializeApp() {
-    console.log('App Version: 2.3 (Dynamic Layout Sync)');
+    console.log('App Version: 2.4 (KOL Store Mode)');
+
+    // 0. 檢查是否為 KOL 商店模式
+    await initStoreMode();
 
     // 1. 如果有快取排版，立即隱藏預設區域
     const cachedLayout = localStorage.getItem('omo_cached_layout');
@@ -37,8 +44,81 @@ async function initializeApp() {
 
     // 2. 初始化頁面渲染器 (它內部會處理快取與遠端更新)
     if (typeof PageRenderer !== 'undefined') {
-        PageRenderer.init();
+        PageRenderer.init(currentStoreId);
     }
+}
+
+/**
+ * 初始化 KOL 商店模式
+ */
+async function initStoreMode() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const storeId = urlParams.get('store');
+
+    if (!storeId) {
+        console.log('📌 官方直營模式');
+        return;
+    }
+
+    console.log(`🏪 KOL 商店模式: ${storeId}`);
+    currentStoreId = storeId;
+
+    try {
+        // 獲取商店基本資訊 (含品牌色、Logo)
+        const response = await fetch(`${GAS_API_URL}?action=getStoreProducts&storeId=${storeId}`);
+        const result = await response.json();
+
+        if (result.success && result.data) {
+            currentStoreInfo = result.data.storeInfo || null;
+
+            if (currentStoreInfo) {
+                applyStoreTheme(currentStoreInfo);
+            }
+        } else {
+            console.warn('無法載入商店資訊，使用預設樣式');
+        }
+    } catch (error) {
+        console.error('載入商店資訊失敗:', error);
+    }
+}
+
+/**
+ * 套用 KOL 商店品牌主題
+ */
+function applyStoreTheme(storeInfo) {
+    if (!storeInfo) return;
+
+    // 套用品牌主題色
+    if (storeInfo.themeColor) {
+        document.documentElement.style.setProperty('--primary-color', storeInfo.themeColor);
+        document.documentElement.style.setProperty('--accent-color', storeInfo.themeColor);
+
+        // 更新 header 背景色 (可選)
+        const header = document.querySelector('header');
+        if (header) {
+            header.style.borderBottomColor = storeInfo.themeColor;
+        }
+    }
+
+    // 更新 Logo
+    if (storeInfo.logoUrl) {
+        const logo = document.querySelector('.logo img');
+        if (logo) {
+            logo.src = storeInfo.logoUrl;
+            logo.alt = storeInfo.storeName || 'Store Logo';
+        }
+    }
+
+    // 更新店名
+    if (storeInfo.storeName) {
+        const siteTitle = document.querySelector('.logo span, .site-title');
+        if (siteTitle) {
+            siteTitle.textContent = storeInfo.storeName;
+        }
+        document.title = `${storeInfo.storeName} | 韓國代購`;
+    }
+
+    console.log('✅ 已套用商店品牌樣式:', storeInfo.storeName);
 }
 
 /**
@@ -109,8 +189,19 @@ async function loadProducts() {
 
     // 2. 背景從 API 更新資料
     try {
-        const response = await fetch(`${GAS_API_URL}?action=getProducts`);
+        // 根據是否為 KOL 商店模式選擇 API
+        let apiUrl = `${GAS_API_URL}?action=getProducts`;
+        if (currentStoreId) {
+            apiUrl = `${GAS_API_URL}?action=getStoreProducts&storeId=${currentStoreId}`;
+        }
+
+        const response = await fetch(apiUrl);
         const result = await response.json();
+
+        // KOL 商店模式下，商品在 products 欄位
+        if (currentStoreId && result.data && result.data.products) {
+            result.data = result.data.products;
+        }
 
         if (result.success) {
             const newProducts = result.data;
@@ -224,7 +315,15 @@ function createProductCard(product) {
         <div class="image-slider-container"><img src="${mainImage}" class="slider-image" loading="lazy"></div>`;
 
     const hasOptions = product.options && Object.keys(product.options).length > 0;
-    const isSoldOut = typeof product.stock !== 'undefined' && Number(product.stock) <= 0;
+
+    // 判斷庫存邏輯：如果有規格，檢查是否有任何規格有庫存；否則檢查主庫存
+    let isSoldOut = false;
+    if (hasOptions && product.variants && Array.isArray(product.variants) && product.variants.length > 0) {
+        const hasVariantStock = product.variants.some(v => Number(v.stock) > 0);
+        isSoldOut = !hasVariantStock;
+    } else {
+        isSoldOut = typeof product.stock !== 'undefined' && Number(product.stock) <= 0;
+    }
 
     let buttonHtml;
     if (isSoldOut) {
@@ -786,15 +885,20 @@ async function handleOrderSubmit(e) {
             };
         });
 
+        // 根據是否為 KOL 商店模式選擇 API action
+        const orderAction = currentStoreId ? 'submitStoreOrder' : 'submitOrder';
+
         const payload = {
-            action: 'submitOrder',
+            action: orderAction,
             orderData: {
                 ...formData,
                 items: simplifiedItems,
                 shippingMethod: getShippingMethodName(), // 運送方式
                 shippingFee: getShippingFee(), // 運費
                 total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0) + getShippingFee(), // 總金額含運費
-                orderId: orderId
+                orderId: orderId,
+                storeId: currentStoreId || null, // KOL 商店 ID
+                orderType: currentStoreId ? 'kol' : 'direct' // 訂單類型
             }
         };
 

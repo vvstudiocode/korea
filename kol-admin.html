@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>團購主後台管理系統</title>
+    <link rel="stylesheet" href="kol-admin.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <!-- 登入頁面 -->
+    <div id="loginPage" class="login-container">
+        <div class="login-box">
+            <h2>🏪 團購主專區</h2>
+            <p class="login-subtitle">登入管理您的賣場</p>
+            <div class="form-group">
+                <label>賣場 ID</label>
+                <input type="text" id="kolStoreId" placeholder="輸入您的賣場 ID">
+            </div>
+            <div class="form-group">
+                <label>密碼</label>
+                <input type="password" id="kolPassword" placeholder="輸入密碼">
+            </div>
+            <button onclick="handleKolLogin()" id="loginBtn">登入</button>
+            <p id="loginError" class="error-msg"></p>
+        </div>
+    </div>
+
+    <!-- 主控台 -->
+    <div id="dashboardPage" class="dashboard-container" style="display: none;">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div id="storeLogoContainer"></div>
+                <h3 id="storeNameHeader">我的賣場</h3>
+            </div>
+            <ul class="nav-links">
+                <li id="tab-dashboard" class="active" onclick="kolSwitchTab('dashboard')">
+                    <span class="icon">◈</span><span class="text">業績總覽</span>
+                </li>
+                <li id="tab-products" onclick="kolSwitchTab('products')">
+                    <span class="icon">◇</span><span class="text">我的商品</span>
+                </li>
+                <li id="tab-orders" onclick="kolSwitchTab('orders')">
+                    <span class="icon">☷</span><span class="text">訂單管理</span>
+                </li>
+                <li id="tab-stats" onclick="kolSwitchTab('stats')">
+                    <span class="icon">◲</span><span class="text">業績統計</span>
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <button onclick="kolLogout()">登出</button>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <header class="top-bar">
+                <button class="hamburger-btn" onclick="toggleMobileSidebar()">☰</button>
+                <h2 id="pageTitle">業績總覽</h2>
+                <div class="header-actions">
+                    <a id="storeUrlLink" href="#" target="_blank" class="btn-outline">
+                        前往我的商店 ↗
+                    </a>
+                </div>
+            </header>
+
+            <!-- 1. 業績總覽 -->
+            <div id="dashboardView" class="view-section">
+                <div class="stats-grid">
+                    <div class="stat-card revenue">
+                        <div class="stat-info">
+                            <h3>本月銷售額</h3>
+                            <p class="stat-value" id="dashRevenue">NT$ 0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card cost">
+                        <div class="stat-info">
+                            <h3>批發成本</h3>
+                            <p class="stat-value" id="dashCost">NT$ 0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card profit highlight">
+                        <div class="stat-info">
+                            <h3>預估利潤</h3>
+                            <p class="stat-value" id="dashProfit">NT$ 0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card orders">
+                        <div class="stat-info">
+                            <h3>訂單數</h3>
+                            <p class="stat-value" id="dashOrders">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <h3>最近訂單</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>訂單編號</th>
+                                <th>客戶</th>
+                                <th>金額</th>
+                                <th>狀態</th>
+                                <th>日期</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentOrdersBody">
+                            <tr>
+                                <td colspan="5" class="loading-cell">載入中...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 2. 我的商品 -->
+            <div id="productsView" class="view-section" style="display: none;">
+                <div class="toolbar">
+                    <button class="btn-primary" onclick="openProductPicker()">+ 從商品庫選品</button>
+                    <button class="btn-secondary" onclick="openCreateOwnProduct()">+ 建立專屬商品</button>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>圖片</th>
+                                <th>商品名稱</th>
+                                <th>批發價</th>
+                                <th>我的售價</th>
+                                <th>利潤</th>
+                                <th>庫存</th>
+                                <th>已售</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="myProductsBody">
+                            <tr>
+                                <td colspan="8" class="loading-cell">載入中...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 3. 訂單管理 -->
+            <div id="ordersView" class="view-section" style="display: none;">
+                <div class="toolbar">
+                    <input type="text" id="kolOrderSearch" placeholder="🔍 搜尋訂單編號、客戶姓名..." oninput="filterKolOrders()">
+                    <select id="kolOrderStatus" onchange="filterKolOrders()">
+                        <option value="">全部狀態</option>
+                        <option value="待處理">待處理</option>
+                        <option value="已確認">已確認</option>
+                        <option value="已出貨">已出貨</option>
+                        <option value="已完成">已完成</option>
+                    </select>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>訂單編號</th>
+                                <th>日期</th>
+                                <th>客戶</th>
+                                <th>電話</th>
+                                <th>商品</th>
+                                <th>總額</th>
+                                <th>狀態</th>
+                            </tr>
+                        </thead>
+                        <tbody id="kolOrdersBody">
+                            <tr>
+                                <td colspan="7" class="loading-cell">載入中...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 4. 業績統計 -->
+            <div id="statsView" class="view-section" style="display: none;">
+                <div class="filter-bar">
+                    <div class="filter-group">
+                        <label>統計週期：</label>
+                        <select id="kolStatsMonth" onchange="loadKolMonthlyStats()">
+                            <!-- 動態生成 -->
+                        </select>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>總銷售額</h3>
+                        <p class="stat-value" id="statsRevenue">NT$ 0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>批發成本</h3>
+                        <p class="stat-value" id="statsCost">NT$ 0</p>
+                    </div>
+                    <div class="stat-card highlight">
+                        <h3>淨利潤</h3>
+                        <p class="stat-value" id="statsProfit">NT$ 0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>總訂單</h3>
+                        <p class="stat-value" id="statsOrderCount">0</p>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <h3>商品銷售排行</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>商品名稱</th>
+                                <th>規格</th>
+                                <th>銷售數量</th>
+                                <th>銷售額</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productRankingBody">
+                            <tr>
+                                <td colspan="4" class="loading-cell">載入中...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 商品選擇 Modal -->
+    <div id="productPickerModal" class="modal">
+        <div class="modal-content large-modal">
+            <div class="modal-header">
+                <h3>從商品庫選品</h3>
+                <button class="close-btn" onclick="closeModal('productPickerModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="search-bar">
+                    <input type="text" id="pickerSearchInput" placeholder="搜尋商品..." oninput="filterPickerProducts()">
+                </div>
+                <div class="product-grid" id="pickerProductGrid">
+                    <!-- 動態載入商品卡片 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 設定售價 Modal -->
+    <div id="setPriceModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>設定我的售價</h3>
+                <button class="close-btn" onclick="closeModal('setPriceModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="priceProductId">
+                <div class="product-info" id="priceProductInfo"></div>
+                <div class="form-group">
+                    <label>批發價 (成本)</label>
+                    <p id="priceWholesale" class="price-display">NT$ 0</p>
+                </div>
+                <div class="form-group">
+                    <label>我的售價 *</label>
+                    <input type="number" id="priceCustom" required>
+                </div>
+                <div class="form-group">
+                    <label>預估利潤</label>
+                    <p id="priceProfit" class="profit-display">NT$ 0</p>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button onclick="closeModal('setPriceModal')">取消</button>
+                <button class="accent-btn" onclick="confirmAddProduct()">確認新增</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast 容器 -->
+    <div id="toastContainer"></div>
+
+    <script src="kol-admin.js"></script>
+</body>
+
+</html>

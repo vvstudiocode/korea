@@ -189,6 +189,16 @@ function switchTab(tabId) {
             document.getElementById('statsEndDate').value = today;
         }
         loadPurchasingStats();
+    } else if (tabId === 'stores') {
+        document.getElementById('storesView').style.display = 'block';
+        document.getElementById('pageTitle').textContent = '賣場管理';
+        document.getElementById('batchActions').style.display = 'none';
+        loadStores();
+    } else if (tabId === 'kolstats') {
+        document.getElementById('kolstatsView').style.display = 'block';
+        document.getElementById('pageTitle').textContent = '團購業績總覽';
+        document.getElementById('batchActions').style.display = 'none';
+        initKolStatsMonthSelect();
     }
 
     // 手機版：選完分頁後自動收起側邊欄
@@ -2452,4 +2462,353 @@ function updateVariantImageSelects() {
         // 觸發預覽更新
         updateVariantImagePreview(select);
     });
+}
+
+window.addEventListener('beforeunload', function (e) {
+    // 檢查是否有待處理的更新
+    if (typeof pendingProductUpdates !== 'undefined' && pendingProductUpdates.length > 0) {
+        e.preventDefault();
+        e.returnValue = ''; // Chrome 需要此屬性
+        return '';
+    }
+});
+
+// ============================================================
+// 賣場管理系統 (Store Management)
+// ============================================================
+
+let currentStores = [];
+
+// 載入賣場列表
+function loadStores() {
+    const tbody = document.getElementById('storesTableBody');
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center">載入中...</td></tr>';
+
+    callApi('getStores')
+        .then(data => {
+            if (data.success) {
+                currentStores = data.data.stores || [];
+                renderStores(currentStores);
+            } else {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:red;">載入失敗</td></tr>';
+            }
+        })
+        .catch(err => {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:red;">載入失敗</td></tr>';
+            console.error(err);
+        });
+}
+
+// 渲染賣場列表
+function renderStores(stores) {
+    const tbody = document.getElementById('storesTableBody');
+
+    if (stores.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center">目前沒有賣場，請點擊「+ 新增賣場」建立第一個賣場</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = stores.map(store => {
+        const statusClass = store.status === 'active' ? 'status-active' : 'status-suspended';
+        const statusText = store.status === 'active' ? '啟用' : '停用';
+        const createdAt = store.createdAt ? new Date(store.createdAt).toLocaleDateString() : '-';
+
+        return `
+        <tr>
+            <td><code>${store.storeId}</code></td>
+            <td>
+                <span style="display:inline-block; width:12px; height:12px; background:${store.themeColor || '#6366f1'}; border-radius:50%; margin-right:5px;"></span>
+                ${store.storeName}
+            </td>
+            <td>${store.ownerName}</td>
+            <td>${store.phone || '-'}</td>
+            <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+            <td>-</td>
+            <td>${createdAt}</td>
+            <td>
+                <div style="display:flex; gap:5px; flex-wrap:wrap;">
+                    <button class="action-btn" onclick="openStoreModal('${store.storeId}')">編輯</button>
+                    <button class="action-btn" onclick="openAssignStockModal('${store.storeId}')">分配庫存</button>
+                    <button class="action-btn" onclick="viewStoreUrl('${store.storeId}')">前台</button>
+                    <button class="action-btn btn-danger" onclick="confirmDeleteStore('${store.storeId}')">刪除</button>
+                </div>
+            </td>
+        </tr>
+        `;
+    }).join('');
+}
+
+// 開啟賣場 Modal
+function openStoreModal(storeId = null) {
+    const modal = document.getElementById('storeModal');
+    const form = document.getElementById('storeForm');
+    const title = document.getElementById('storeModalTitle');
+
+    form.reset();
+    document.getElementById('storeEditId').value = '';
+
+    if (storeId) {
+        // 編輯模式
+        title.textContent = '編輯賣場';
+        const store = currentStores.find(s => s.storeId === storeId);
+        if (store) {
+            document.getElementById('storeEditId').value = storeId;
+            document.getElementById('storeId').value = store.storeId;
+            document.getElementById('storeId').readOnly = true; // 編輯時不可改 ID
+            document.getElementById('storeName').value = store.storeName || '';
+            document.getElementById('storeOwner').value = store.ownerName || '';
+            document.getElementById('storePhone').value = store.phone || '';
+            document.getElementById('storeEmail').value = store.email || '';
+            document.getElementById('storeThemeColor').value = store.themeColor || '#6366f1';
+            document.getElementById('storeStatus').value = store.status || 'active';
+            document.getElementById('storeBankAccount').value = store.bankAccount || '';
+            document.getElementById('storePassword').placeholder = '留空不變更';
+        }
+    } else {
+        // 新增模式
+        title.textContent = '新增賣場';
+        document.getElementById('storeId').readOnly = false;
+        document.getElementById('storePassword').placeholder = '團購主登入用';
+    }
+
+    openModal('storeModal');
+}
+
+// 處理賣場表單提交
+async function handleStoreSubmit(e) {
+    e.preventDefault();
+
+    const editId = document.getElementById('storeEditId').value;
+    const storeData = {
+        storeId: document.getElementById('storeId').value.trim(),
+        storeName: document.getElementById('storeName').value.trim(),
+        ownerName: document.getElementById('storeOwner').value.trim(),
+        phone: document.getElementById('storePhone').value.trim(),
+        email: document.getElementById('storeEmail').value.trim(),
+        themeColor: document.getElementById('storeThemeColor').value,
+        status: document.getElementById('storeStatus').value,
+        bankAccount: document.getElementById('storeBankAccount').value.trim()
+    };
+
+    const password = document.getElementById('storePassword').value;
+    if (password) {
+        storeData.password = password;
+    }
+
+    const subAction = editId ? 'updateStore' : 'createStore';
+
+    try {
+        const result = await callApi(subAction, { storeData });
+        if (result.success) {
+            showToast(editId ? '賣場更新成功' : '賣場建立成功', 'success');
+            closeModal('storeModal');
+            loadStores();
+        } else {
+            showToast('儲存失敗: ' + (result.error || '未知錯誤'), 'error');
+        }
+    } catch (err) {
+        showToast('儲存失敗: ' + err, 'error');
+    }
+}
+
+// 確認刪除賣場
+function confirmDeleteStore(storeId) {
+    if (!confirm(`確定要刪除賣場 "${storeId}" 嗎？\n\n此操作將同時刪除該賣場的所有商品設定。`)) return;
+
+    callApi('deleteStore', { storeId })
+        .then(data => {
+            if (data.success) {
+                showToast('賣場已刪除', 'success');
+                loadStores();
+            } else {
+                showToast('刪除失敗: ' + data.error, 'error');
+            }
+        })
+        .catch(err => showToast('刪除失敗', 'error'));
+}
+
+// 查看賣場前台網址
+function viewStoreUrl(storeId) {
+    const url = `https://vvstudiocode.github.io/korea/index.html?store=${storeId}`;
+    const msg = `賣場前台網址：\n${url}\n\n是否開啟？`;
+    if (confirm(msg)) {
+        window.open(url, '_blank');
+    }
+}
+
+// ============================================================
+// 庫存分配 (Stock Assignment)
+// ============================================================
+
+function openAssignStockModal(storeId = null) {
+    // 載入商品選項
+    const productSelect = document.getElementById('assignProductSelect');
+    productSelect.innerHTML = '<option value="">-- 請選擇商品 --</option>';
+
+    if (currentProducts.length === 0) {
+        // 載入商品
+        callApi('getProductsAdmin').then(data => {
+            if (data.success) {
+                currentProducts = data.data.products;
+                populateAssignProductSelect();
+            }
+        });
+    } else {
+        populateAssignProductSelect();
+    }
+
+    // 載入賣場選項
+    const storeSelect = document.getElementById('assignStoreSelect');
+    storeSelect.innerHTML = '<option value="">-- 請選擇賣場 --</option>';
+    currentStores.forEach(s => {
+        storeSelect.innerHTML += `<option value="${s.storeId}" ${s.storeId === storeId ? 'selected' : ''}>${s.storeName} (${s.ownerName})</option>`;
+    });
+
+    // 清除庫存資訊
+    document.getElementById('stockTotal').textContent = '-';
+    document.getElementById('stockAssigned').textContent = '-';
+    document.getElementById('stockAvailable').textContent = '-';
+
+    openModal('assignStockModal');
+}
+
+function populateAssignProductSelect() {
+    const select = document.getElementById('assignProductSelect');
+    select.innerHTML = '<option value="">-- 請選擇商品 --</option>';
+    currentProducts.forEach(p => {
+        select.innerHTML += `<option value="${p.id}">${p.name} (庫存: ${p.stock})</option>`;
+    });
+}
+
+function loadProductStockInfo() {
+    const productId = document.getElementById('assignProductSelect').value;
+    if (!productId) {
+        document.getElementById('stockTotal').textContent = '-';
+        document.getElementById('stockAssigned').textContent = '-';
+        document.getElementById('stockAvailable').textContent = '-';
+        return;
+    }
+
+    const product = currentProducts.find(p => p.id === productId);
+    if (product) {
+        document.getElementById('stockTotal').textContent = product.stock;
+        // TODO: 從賣場商品表計算已分配數量
+        document.getElementById('stockAssigned').textContent = '(需查詢)';
+        document.getElementById('stockAvailable').textContent = '(需查詢)';
+    }
+}
+
+async function submitAssignStock() {
+    const productId = document.getElementById('assignProductSelect').value;
+    const storeId = document.getElementById('assignStoreSelect').value;
+    const quantity = parseInt(document.getElementById('assignQuantity').value) || 0;
+
+    if (!productId || !storeId || quantity <= 0) {
+        showToast('請填寫完整資訊', 'warning');
+        return;
+    }
+
+    try {
+        const result = await callApi('assignStock', { productId, storeId, quantity });
+        if (result.success) {
+            showToast(`已分配 ${quantity} 個庫存給賣場`, 'success');
+            closeModal('assignStockModal');
+        } else {
+            showToast('分配失敗: ' + result.error, 'error');
+        }
+    } catch (err) {
+        showToast('分配失敗', 'error');
+    }
+}
+
+// ============================================================
+// 團購業績統計 (KOL Stats)
+// ============================================================
+
+function initKolStatsMonthSelect() {
+    const select = document.getElementById('kolStatsMonth');
+    select.innerHTML = '';
+
+    const now = new Date();
+    for (let i = 0; i < 12; i++) {
+        const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const year = date.getFullYear();
+        const month = date.getMonth() + 1;
+        const label = `${year}年${month}月`;
+        const value = `${year}-${String(month).padStart(2, '0')}`;
+        select.innerHTML += `<option value="${value}">${label}</option>`;
+    }
+
+    loadKolStats();
+}
+
+async function loadKolStats() {
+    const monthValue = document.getElementById('kolStatsMonth').value;
+    if (!monthValue) return;
+
+    const [year, month] = monthValue.split('-').map(Number);
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0);
+
+    const tbody = document.getElementById('kolStatsTableBody');
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center">載入中...</td></tr>';
+
+    try {
+        const result = await callApi('getAllKolStats', {
+            startDate: startDate.toISOString(),
+            endDate: endDate.toISOString()
+        });
+
+        if (result.success && result.data) {
+            renderKolStats(result.data);
+        } else {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:red;">載入失敗</td></tr>';
+        }
+    } catch (err) {
+        console.error(err);
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:red;">載入失敗</td></tr>';
+    }
+}
+
+function renderKolStats(data) {
+    const { stores, totals } = data;
+
+    // 更新總計卡片
+    document.getElementById('kolTotalRevenue').textContent = formatCurrency(totals.totalRevenue || 0);
+    document.getElementById('kolTotalCost').textContent = formatCurrency(totals.totalCost || 0);
+    document.getElementById('kolTotalProfit').textContent = formatCurrency(totals.totalProfit || 0);
+    document.getElementById('kolTotalOrders').textContent = totals.totalOrders || 0;
+
+    // 更新表格
+    const tbody = document.getElementById('kolStatsTableBody');
+
+    if (!stores || stores.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center">本月尚無團購業績</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = stores.map(s => `
+        <tr>
+            <td>${s.storeName}</td>
+            <td>${s.ownerName}</td>
+            <td style="color:#28a745; font-weight:500;">${formatCurrency(s.totalRevenue)}</td>
+            <td style="color:#888;">${formatCurrency(s.totalCost)}</td>
+            <td style="color:#6366f1; font-weight:600;">${formatCurrency(s.grossProfit)}</td>
+            <td>${s.orderCount}</td>
+            <td><span class="status-badge status-pending">待結算</span></td>
+            <td>
+                <button class="action-btn" onclick="viewKolDetail('${s.storeId}')">查看明細</button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function viewKolDetail(storeId) {
+    showToast('功能開發中...', 'info');
+    // TODO: 開啟該 KOL 的詳細業績 Modal
+}
+
+function exportKolStats() {
+    showToast('匯出功能開發中...', 'info');
+    // TODO: 匯出 CSV 或 Excel
 }

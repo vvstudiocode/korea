@@ -1,15 +1,23 @@
 /**
- * Modular Page Renderer (Visual Version) v2.0
+ * Modular Page Renderer (Visual Version) v2.1
  * - GitHub Direct Access for faster loading
  * - Footer section rendering
  * - Dynamic spacing support
+ * - KOL Store Mode support
  */
 const PageRenderer = {
     // GitHub Raw URL for layout config
     LAYOUT_URL: 'https://raw.githubusercontent.com/vvstudiocode/korea/main/layout.json',
 
-    init: async function () {
-        console.log('🚀 PageRenderer v2.0 Initialized');
+    // KOL 商店 ID (由 app.js 傳入)
+    currentStoreId: null,
+
+    init: async function (storeId = null) {
+        console.log('🚀 PageRenderer v2.1 Initialized' + (storeId ? ` (Store: ${storeId})` : ''));
+
+        // 儲存 storeId 供其他方法使用
+        this.currentStoreId = storeId;
+
         const container = document.getElementById('pageBuilderRoot');
         if (!container) return;
 
@@ -46,6 +54,7 @@ const PageRenderer = {
             }, 500); // 稍微延遲讓體驗更平順
         }
     },
+
 
     fetchLayout: async function () {
         // 預設排版 (fallback)
@@ -699,10 +708,16 @@ const PageRenderer = {
             const hasOptions = p.options && (typeof p.options === 'string' ? p.options !== '{}' : Object.keys(p.options).length > 0);
 
             // 判斷庫存狀態
-            // 確保 stock 為數字，若 undefined 則視為包含庫存 (因為有些舊資料可能沒這欄位)
-            // 但如果使用者明確希望 "設定0的時候變售完"，則必須檢查 0
-            const stockVal = Number(p.stock !== undefined ? p.stock : 999);
-            const isSoldOut = stockVal <= 0;
+            // 判斷庫存狀態
+            // 若有規格，檢查是否所有規格都已售完；否則檢查主庫存
+            let isSoldOut = false;
+            if (hasOptions && p.variants && Array.isArray(p.variants) && p.variants.length > 0) {
+                const hasVariantStock = p.variants.some(v => Number(v.stock) > 0);
+                isSoldOut = !hasVariantStock;
+            } else {
+                const stockVal = Number(p.stock !== undefined ? p.stock : 999);
+                isSoldOut = stockVal <= 0;
+            }
 
             let btnText;
             if (isSoldOut) {
