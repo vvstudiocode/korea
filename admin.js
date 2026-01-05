@@ -834,7 +834,8 @@ function openProductModal(productId = null) {
     // 重置圖片狀態
     modalImages = [];
     document.getElementById('imagePreviewContainer').innerHTML = '';
-    document.getElementById('uploadImagesBtn').style.display = 'none';
+    document.getElementById('imagePreviewContainer').innerHTML = '';
+    // document.getElementById('uploadImagesBtn').style.display = 'none'; // 已移除
 
     // 重置 variants
     currentProductVariants = [];
@@ -857,14 +858,22 @@ function openProductModal(productId = null) {
             document.getElementById('prodStatus').value = p.status;
             document.getElementById('prodDesc').value = p.description;
 
-            // 處理現有圖片
-            let imgVal = p.image || '';
-            if (imgVal) {
-                const urls = imgVal.split(',').filter(url => url.trim() !== '');
-                modalImages = urls.map(url => ({ type: 'existing', value: url }));
-                document.getElementById('prodImage').value = imgVal;
+            // 處理現有圖片 (優先讀取暫存的 modalImages)
+            if (p.modalImages && p.modalImages.length > 0) {
+                modalImages = p.modalImages;
+                // 更新 prodImage value (僅包含 existing 的，為了兼容)
+                const existing = modalImages.filter(i => i.type === 'existing').map(i => i.value);
+                document.getElementById('prodImage').value = existing.join(',');
             } else {
-                document.getElementById('prodImage').value = '';
+                let imgVal = p.image || '';
+                if (imgVal) {
+                    const urls = imgVal.split(',').filter(url => url.trim() !== '');
+                    modalImages = urls.map(url => ({ type: 'existing', value: url }));
+                    document.getElementById('prodImage').value = imgVal;
+                } else {
+                    modalImages = [];
+                    document.getElementById('prodImage').value = '';
+                }
             }
 
             // 渲染預覽 (包含現有圖片)
@@ -1005,6 +1014,8 @@ async function saveProductBatchChanges() {
 
                 const brand = item.brand || 'default';
 
+                const tempIdMap = {};
+
                 // 逐一處理 modalImages
                 for (let j = 0; j < item.modalImages.length; j++) {
                     const img = item.modalImages[j];
@@ -1020,6 +1031,10 @@ async function saveProductBatchChanges() {
                                 brand: brand
                             });
                             if (result.success && result.data.url) {
+                                // 記錄 tempId -> url 對照
+                                if (img.tempId) {
+                                    tempIdMap[img.tempId] = result.data.url;
+                                }
                                 img.type = 'existing';
                                 img.value = result.data.url;
                             }
@@ -1032,6 +1047,15 @@ async function saveProductBatchChanges() {
                     .filter(img => img.type === 'existing')
                     .map(img => img.value)
                     .join(',');
+
+                // 更新 variants 中的圖片連結 (將 tempId 替換為真實 URL)
+                if (item.variants && Array.isArray(item.variants)) {
+                    item.variants.forEach(v => {
+                        if (v.image && tempIdMap[v.image]) {
+                            v.image = tempIdMap[v.image];
+                        }
+                    });
+                }
 
                 delete item.modalImages;
                 delete item.newImages;
@@ -1134,11 +1158,17 @@ function handleImageSelect(event) {
     if (validFiles.length === 0) return;
 
     validFiles.forEach(file => {
-        modalImages.push({ type: 'new', value: file });
+        // 生成臨時 ID
+        const tempId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        modalImages.push({ type: 'new', value: file, tempId: tempId });
     });
 
     renderImagePreviews();
-    document.getElementById('uploadImagesBtn').style.display = 'block';
+    // 更新規格選單 (使用本地預覽)
+    updateVariantImageSelects();
+
+    // 清空 input，允許重複選擇同一檔案
+    event.target.value = '';
 }
 
 let imageDragSrcIndex = null;
@@ -1211,6 +1241,7 @@ function handleImageDragDrop(e) {
         modalImages.splice(imageDragSrcIndex, 1);
         modalImages.splice(targetIndex, 0, item);
         renderImagePreviews();
+        updateVariantImageSelects(); // 排序變更後更新選單
 
         // 更新隱藏的 prodImage (僅限現有的)
         const existing = modalImages.filter(i => i.type === 'existing').map(i => i.value);
@@ -1227,35 +1258,41 @@ function removeModalImage(index) {
     const existing = modalImages.filter(i => i.type === 'existing').map(i => i.value);
     document.getElementById('prodImage').value = existing.join(',');
 
-    if (!modalImages.some(img => img.type === 'new')) {
-        document.getElementById('uploadImagesBtn').style.display = 'none';
-    }
+    // 觸發規格選單更新 (因為移除圖片也需要更新)
+    updateVariantImageSelects();
 }
 
 async function uploadImagesToGitHub() {
-    if (selectedImages.length === 0) {
-        alert('請先選擇圖片');
-        return;
+    const newImagesCount = modalImages.filter(img => img.type === 'new').length;
+    if (newImagesCount === 0) return;
+
+    // 鎖定提交按鈕
+    const submitBtn = document.querySelector('#productForm button[type="submit"]');
+    const originalBtnText = submitBtn ? submitBtn.textContent : '儲存';
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = '圖片上傳中...';
     }
 
-    const btn = document.getElementById('uploadImagesBtn');
-    const btnText = document.getElementById('uploadBtnText');
-    const originalText = btnText.textContent;
+    // 顯示上傳狀態在 Upload Zone
+    const uploadZone = document.getElementById('uploadZone');
+    const originalZoneHTML = uploadZone.innerHTML;
+    const progressDiv = document.createElement('div');
+    progressDiv.style.color = 'blue';
+    progressDiv.style.fontWeight = 'bold';
+    progressDiv.textContent = '正在上傳圖片至 GitHub，請稍候...';
+    uploadZone.appendChild(progressDiv);
 
     // 取得品牌資訊
     const brand = document.getElementById('prodBrand').value.trim() || 'default';
 
-    btn.disabled = true;
-    btnText.textContent = '上傳中... 0%';
-
-    const uploadedUrls = [];
-
     try {
+        let uploadedCount = 0;
         for (let i = 0; i < modalImages.length; i++) {
             const img = modalImages[i];
             if (img.type === 'new') {
                 const file = img.value;
-                btnText.textContent = `上傳中... ${Math.round((i / modalImages.length) * 100)}%`;
+                progressDiv.textContent = `正在上傳 ${uploadedCount + 1}/${newImagesCount}: ${file.name}...`;
 
                 // 轉換為 Base64
                 const base64 = await fileToBase64(file);
@@ -1271,30 +1308,48 @@ async function uploadImagesToGitHub() {
                 if (result.success && result.data.url) {
                     img.type = 'existing';
                     img.value = result.data.url;
+                    uploadedCount++;
                 } else {
-                    throw new Error(result.error || '上傳失敗');
+                    console.error('上傳失敗', result);
+                    alert(`圖片 ${file.name} 上傳失敗: ${result.error}`);
+                    // 失敗的保持 new 狀態，或者移除？
+                    // 這裡暫時保留，用戶可以重試 (重新選擇)
                 }
             }
         }
 
-        // 成功：合併 URL
+        // 更新 prodImage
         const allUrls = modalImages.filter(i => i.type === 'existing').map(i => i.value).join(',');
         document.getElementById('prodImage').value = allUrls;
 
-        // 清空新選擇
-        btn.style.display = 'none';
+        // 如果全部成功
+        if (uploadedCount === newImagesCount) {
+            progressDiv.textContent = '所有圖片上傳完成！';
+            setTimeout(() => {
+                if (uploadZone.contains(progressDiv)) progressDiv.remove();
+            }, 2000);
+        }
 
-        alert(`圖片上傳並排序完成！`);
-        alert(`圖片上傳並排序完成！`);
         renderImagePreviews();
-        updateVariantImageSelects(); // 新增：圖片上傳後更新規格選單
+        updateVariantImageSelects(); // 圖片上傳後更新規格選單
 
     } catch (error) {
-        console.error('上傳失敗:', error);
-        alert('上傳失敗: ' + error.message);
+        console.error('上傳過程發生錯誤:', error);
+        alert('上傳過程發生錯誤: ' + error.message);
     } finally {
-        btn.disabled = false;
-        btnText.textContent = originalText;
+        // 還原按鈕
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalBtnText;
+        }
+        // 還原 Upload Zone (如果沒有在上面移除)
+        if (uploadZone.contains(progressDiv)) {
+            // 保留一下訊息再移除，或是直接還原
+            // 上面已經有 setTimeout 移除，這裡做個雙保險
+            if (uploadZone.innerHTML === originalZoneHTML) {
+                // do nothing
+            }
+        }
     }
 }
 
@@ -2221,12 +2276,15 @@ function updateVariantsTable() {
         const stock = existingVariant.stock !== undefined ? existingVariant.stock : defaultStock;
         const image = existingVariant.image || '';
 
-        // 產生圖片選擇下拉選單
+        // 產生圖片選擇下拉選單 (使用 modalImages)
         const imageOptions = ['<option value="">不指定</option>']
-            .concat(imageList.map((url, i) => {
-                const selected = url === image ? 'selected' : '';
-                const shortName = `圖片 ${i + 1}`;
-                return `<option value="${url}" ${selected}>${shortName}</option>`;
+            .concat(modalImages.map((img, i) => {
+                const isNew = img.type === 'new';
+                // 使用 tempId 或 url
+                const val = isNew ? img.tempId : img.value;
+                const selected = val === image ? 'selected' : '';
+                const shortName = `圖片 ${i + 1}${isNew ? ' (待上傳)' : ''}`;
+                return `<option value="${val}" ${selected}>${shortName}</option>`;
             }))
             .join('');
 
@@ -2265,10 +2323,23 @@ function updateVariantImagePreview(selectEl) {
 
     if (existingImg) existingImg.remove();
 
-    if (url) {
+    if (val) {
         const img = document.createElement('img');
-        img.src = url;
         img.className = 'variant-thumb';
+
+        // 檢查是否為 tempId
+        if (String(val).startsWith('temp_')) {
+            // 從 modalImages 查找
+            const target = modalImages.find(m => m.tempId === val);
+            if (target && target.preview) {
+                img.src = target.preview;
+            } else {
+                img.src = ''; // 尚未生成預覽
+            }
+        } else {
+            img.src = val;
+        }
+
         cell.insertBefore(img, selectEl);
     } else {
         const placeholder = document.createElement('div');
@@ -2361,16 +2432,19 @@ function updateVariantImageSelects() {
     const section = document.getElementById('variantsSection');
     if (section.style.display === 'none') return;
 
-    const imageList = getProductImageList();
+    // 使用 modalImages 作為來源，因為 prodImage value 此時可能還是空的或是舊的
     const selects = document.querySelectorAll('.variant-image-select');
 
     selects.forEach(select => {
         const currentVal = select.value;
         const imageOptions = ['<option value="">不指定</option>']
-            .concat(imageList.map((url, i) => {
-                const selected = url === currentVal ? 'selected' : '';
-                const shortName = `圖片 ${i + 1}`;
-                return `<option value="${url}" ${selected}>${shortName}</option>`;
+            .concat(modalImages.map((img, i) => {
+                const isNew = img.type === 'new';
+                // 對於 new，value 使用 tempId；對於 existing，使用 url
+                const val = isNew ? img.tempId : img.value;
+                const isSelected = val === currentVal ? 'selected' : '';
+                const shortName = `圖片 ${i + 1}${isNew ? ' (待上傳)' : ''}`;
+                return `<option value="${val}" ${isSelected}>${shortName}</option>`;
             }))
             .join('');
         select.innerHTML = imageOptions;
