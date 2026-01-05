@@ -211,6 +211,10 @@ function kolSwitchTab(tabId) {
         document.getElementById('statsView').style.display = 'block';
         document.getElementById('pageTitle').textContent = '業績統計';
         initStatsMonthSelect();
+    } else if (tabId === 'settings') {
+        document.getElementById('settingsView').style.display = 'block';
+        document.getElementById('pageTitle').textContent = '店舖設定';
+        loadProfileSettings();
     }
 }
 
@@ -589,4 +593,125 @@ function renderProductRanking(products) {
             <td>${formatCurrency(p.revenue)}</td>
         </tr>
     `).join('');
+}
+
+// ============================================================
+// 店舖設定
+// ============================================================
+
+async function loadProfileSettings() {
+    try {
+        const result = await callKolApi('kolGetProfile');
+        if (result.success && result.data) {
+            const profile = result.data;
+            document.getElementById('settingsStoreId').value = profile.storeId || '';
+            document.getElementById('settingsStoreName').value = profile.storeName || '';
+            document.getElementById('settingsOwnerName').value = profile.ownerName || '';
+            document.getElementById('settingsPhone').value = profile.phone || '';
+            document.getElementById('settingsEmail').value = profile.email || '';
+            document.getElementById('settingsThemeColor').value = profile.themeColor || '#6366f1';
+            document.getElementById('settingsThemeColorPicker').value = profile.themeColor || '#6366f1';
+            document.getElementById('settingsBankAccount').value = profile.bankAccount || '';
+
+            // 顏色選擇器同步
+            document.getElementById('settingsThemeColorPicker').oninput = function () {
+                document.getElementById('settingsThemeColor').value = this.value;
+            };
+            document.getElementById('settingsThemeColor').oninput = function () {
+                const color = this.value;
+                if (/^#[0-9A-Fa-f]{6}$/.test(color)) {
+                    document.getElementById('settingsThemeColorPicker').value = color;
+                }
+            };
+        } else {
+            showToast('載入資料失敗', 'error');
+        }
+    } catch (err) {
+        console.error('載入設定失敗', err);
+        showToast('載入設定失敗', 'error');
+    }
+}
+
+async function handleProfileUpdate(event) {
+    event.preventDefault();
+
+    const profileData = {
+        storeName: document.getElementById('settingsStoreName').value.trim(),
+        ownerName: document.getElementById('settingsOwnerName').value.trim(),
+        phone: document.getElementById('settingsPhone').value.trim(),
+        email: document.getElementById('settingsEmail').value.trim(),
+        themeColor: document.getElementById('settingsThemeColor').value.trim(),
+        bankAccount: document.getElementById('settingsBankAccount').value.trim()
+    };
+
+    const btn = event.target.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    btn.textContent = '儲存中...';
+
+    try {
+        const result = await callKolApi('kolUpdateProfile', { profileData });
+        if (result.success) {
+            showToast('資料已更新', 'success');
+
+            // 更新本地狀態
+            kolStoreInfo.storeName = profileData.storeName;
+            kolStoreInfo.themeColor = profileData.themeColor;
+            sessionStorage.setItem('kolStoreInfo', JSON.stringify(kolStoreInfo));
+
+            // 更新 header
+            document.getElementById('storeNameHeader').textContent = profileData.storeName;
+            if (profileData.themeColor) {
+                document.documentElement.style.setProperty('--primary-color', profileData.themeColor);
+            }
+        } else {
+            showToast('更新失敗: ' + result.error, 'error');
+        }
+    } catch (err) {
+        showToast('更新失敗', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = '儲存變更';
+    }
+}
+
+async function handlePasswordChange(event) {
+    event.preventDefault();
+
+    const currentPassword = document.getElementById('currentPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+
+    if (newPassword !== confirmPassword) {
+        showToast('新密碼與確認密碼不一致', 'warning');
+        return;
+    }
+
+    if (newPassword.length < 6) {
+        showToast('新密碼至少需要 6 個字元', 'warning');
+        return;
+    }
+
+    const btn = event.target.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    btn.textContent = '更新中...';
+
+    try {
+        const result = await callKolApi('kolChangePassword', { currentPassword, newPassword });
+        if (result.success) {
+            showToast('密碼已更新，請重新登入', 'success');
+            document.getElementById('passwordForm').reset();
+
+            // 登出讓使用者重新登入
+            setTimeout(() => {
+                kolLogout();
+            }, 2000);
+        } else {
+            showToast('更新失敗: ' + result.error, 'error');
+        }
+    } catch (err) {
+        showToast('更新失敗', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = '更新密碼';
+    }
 }

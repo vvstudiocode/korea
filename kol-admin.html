@@ -51,6 +51,9 @@
                 <li id="tab-stats" onclick="kolSwitchTab('stats')">
                     <span class="icon">◲</span><span class="text">業績統計</span>
                 </li>
+                <li id="tab-settings" onclick="kolSwitchTab('settings')">
+                    <span class="icon">⚙</span><span class="text">店舖設定</span>
+                </li>
             </ul>
             <div class="sidebar-footer">
                 <button onclick="kolLogout()">登出</button>
@@ -230,6 +233,68 @@
                             </tr>
                         </tbody>
                     </table>
+                </div>
+            </div>
+
+            <!-- 5. 店舖設定 -->
+            <div id="settingsView" class="view-section" style="display: none;">
+                <div class="settings-grid">
+                    <div class="section-card">
+                        <h3>🏪 賣場資料</h3>
+                        <form id="profileForm" onsubmit="handleProfileUpdate(event)">
+                            <div class="form-group">
+                                <label>賣場 ID</label>
+                                <input type="text" id="settingsStoreId" readonly class="readonly-input">
+                            </div>
+                            <div class="form-group">
+                                <label>賣場名稱</label>
+                                <input type="text" id="settingsStoreName" required>
+                            </div>
+                            <div class="form-group">
+                                <label>團購主姓名</label>
+                                <input type="text" id="settingsOwnerName" required>
+                            </div>
+                            <div class="form-group">
+                                <label>聯絡電話</label>
+                                <input type="tel" id="settingsPhone">
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" id="settingsEmail">
+                            </div>
+                            <div class="form-group">
+                                <label>品牌主題色 (#HEX)</label>
+                                <div class="color-input-group">
+                                    <input type="color" id="settingsThemeColorPicker" value="#6366f1">
+                                    <input type="text" id="settingsThemeColor" placeholder="#6366f1">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>匯款帳戶</label>
+                                <input type="text" id="settingsBankAccount" placeholder="銀行代碼 + 帳號">
+                            </div>
+                            <button type="submit" class="btn-primary">儲存變更</button>
+                        </form>
+                    </div>
+
+                    <div class="section-card">
+                        <h3>🔒 修改密碼</h3>
+                        <form id="passwordForm" onsubmit="handlePasswordChange(event)">
+                            <div class="form-group">
+                                <label>目前密碼</label>
+                                <input type="password" id="currentPassword" required>
+                            </div>
+                            <div class="form-group">
+                                <label>新密碼 (至少 6 字元)</label>
+                                <input type="password" id="newPassword" required minlength="6">
+                            </div>
+                            <div class="form-group">
+                                <label>確認新密碼</label>
+                                <input type="password" id="confirmPassword" required minlength="6">
+                            </div>
+                            <button type="submit" class="btn-primary">更新密碼</button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </main>
