@@ -255,8 +255,11 @@ function kolSwitchTab(tabId) {
     } else if (tabId === 'layout') {
         document.getElementById('builderSection').style.display = 'block';
         document.getElementById('pageTitle').textContent = '排版管理';
-        // PageBuilder.init 已經在 login 時呼叫過，這裡不需要重新 init
-        // 但如果有 resize 需求，可在此觸發
+        // 每次切換到排版管理都重新渲染（因為 init 時元素可能隱藏）
+        if (typeof PageBuilder !== 'undefined') {
+            PageBuilder.renderComponentsList();
+            PageBuilder.renderPreview();
+        }
         window.dispatchEvent(new Event('resize'));
     }
 }
@@ -395,12 +398,13 @@ function renderPickerProducts(products) {
 
     grid.innerHTML = products.map(p => {
         const imageUrl = (p.image || '').split(',')[0].trim() || 'https://via.placeholder.com/100';
-        const alreadyAdded = kolProducts.some(kp => kp.id === p.id);
-        const isSelected = selectedPickerIds.has(p.id);
+        const productId = String(p.id); // 統一轉為字串
+        const alreadyAdded = kolProducts.some(kp => String(kp.id) === productId);
+        const isSelected = selectedPickerIds.has(productId);
 
         return `
         <div class="product-card ${alreadyAdded ? 'disabled' : ''} ${isSelected ? 'selected' : ''}" 
-             onclick="${alreadyAdded ? '' : `toggleProductSelection('${p.id}')`}">
+             onclick="${alreadyAdded ? '' : `toggleProductSelection('${productId}')`}">
              ${!alreadyAdded ? `
              <div class="checkbox-overlay">
                 <input type="checkbox" ${isSelected ? 'checked' : ''} style="pointer-events:none;">
@@ -418,10 +422,11 @@ function renderPickerProducts(products) {
 }
 
 function toggleProductSelection(productId) {
-    if (selectedPickerIds.has(productId)) {
-        selectedPickerIds.delete(productId);
+    const id = String(productId); // 確保是字串
+    if (selectedPickerIds.has(id)) {
+        selectedPickerIds.delete(id);
     } else {
-        selectedPickerIds.add(productId);
+        selectedPickerIds.add(id);
     }
     renderPickerProducts(availableProducts); // 重新渲染以更新樣式
     updatePickerFooter();
