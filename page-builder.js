@@ -135,12 +135,27 @@ const PageBuilder = {
         }
 
         // 確保商品資料已載入 (用於預覽)
-        if (typeof products === 'undefined' || products.length === 0) {
-            if (typeof loadProducts === 'function') await loadProducts();
+        // 支援多種變數名稱：products (前端/admin), kolProducts (KOL後台), currentProducts (admin)
+        let hasProducts = false;
+        if (typeof products !== 'undefined' && products.length > 0) hasProducts = true;
+        if (typeof kolProducts !== 'undefined' && kolProducts.length > 0) hasProducts = true;
+        if (typeof currentProducts !== 'undefined' && currentProducts.length > 0) hasProducts = true;
+        if (typeof availableProducts !== 'undefined' && availableProducts.length > 0) hasProducts = true;
+
+        if (!hasProducts) {
+            // 嘗試載入商品
+            if (typeof loadProducts === 'function') {
+                await loadProducts();
+            } else if (typeof loadMyProducts === 'function') {
+                await loadMyProducts(); // KOL 後台
+            } else if (typeof fetchProducts === 'function') {
+                await fetchProducts(); // Admin 後台
+            }
         }
+
         await this.loadLayout();
 
-        // 監聽視窗縮放
+        // 監聯視窗縮放
         window.addEventListener('resize', () => {
             if (document.getElementById('builderSection').style.display !== 'none') {
                 this.updatePreviewScale();

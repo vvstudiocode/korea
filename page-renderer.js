@@ -83,13 +83,29 @@ const PageRenderer = {
             footer: null
         };
 
+        // 根據是否為 KOL 商店模式決定 layout URL
+        let layoutUrl = this.LAYOUT_URL;
+        if (this.currentStoreId) {
+            layoutUrl = `https://raw.githubusercontent.com/vvstudiocode/korea/main/layout_${this.currentStoreId}.json`;
+            console.log(`📦 Loading KOL layout: ${layoutUrl}`);
+        }
+
         try {
             // 優先從 GitHub Raw 直接讀取 (加上時間戳避免快取)
-            const response = await fetch(this.LAYOUT_URL + '?_=' + Date.now());
+            const response = await fetch(layoutUrl + '?_=' + Date.now());
             if (response.ok) {
                 const data = await response.json();
                 console.log('✅ Layout loaded from GitHub');
                 return data;
+            } else if (this.currentStoreId && response.status === 404) {
+                // KOL 專屬 layout 不存在，嘗試載入預設 layout
+                console.log('⚠️ KOL layout not found, trying default layout...');
+                const defaultRes = await fetch(this.LAYOUT_URL + '?_=' + Date.now());
+                if (defaultRes.ok) {
+                    const data = await defaultRes.json();
+                    console.log('✅ Default layout loaded');
+                    return data;
+                }
             }
         } catch (err) {
             console.warn('⚠️ GitHub fetch failed, trying GAS API...');
@@ -591,14 +607,27 @@ const PageRenderer = {
         if (!container) return;
 
         try {
-            // 兼容性處理：在後台使用 currentProducts，在前端使用 products
-            let allProducts = typeof products !== 'undefined' ? products : (typeof currentProducts !== 'undefined' ? currentProducts : []);
+            // 兼容性處理：支援多種商品資料來源
+            // 優先順序：kolProducts (KOL已選商品) > availableProducts (KOL可選商品) > products (前端) > currentProducts (admin)
+            let allProducts = [];
+            if (typeof kolProducts !== 'undefined' && kolProducts.length > 0) {
+                allProducts = kolProducts;
+            } else if (typeof availableProducts !== 'undefined' && availableProducts.length > 0) {
+                allProducts = availableProducts;
+            } else if (typeof products !== 'undefined' && products.length > 0) {
+                allProducts = products;
+            } else if (typeof currentProducts !== 'undefined' && currentProducts.length > 0) {
+                allProducts = currentProducts;
+            }
 
             // 確保資料已加載
             if (allProducts.length === 0) {
                 if (typeof loadProducts === 'function') {
                     await loadProducts();
-                    allProducts = products;
+                    allProducts = typeof products !== 'undefined' ? products : [];
+                } else if (typeof loadMyProducts === 'function') {
+                    await loadMyProducts(); // KOL 後台
+                    allProducts = typeof kolProducts !== 'undefined' ? kolProducts : [];
                 } else if (typeof fetchProducts === 'function') {
                     await fetchProducts(); // 管理後台的函數
                     allProducts = typeof currentProducts !== 'undefined' ? currentProducts : [];
