@@ -369,6 +369,8 @@ async function openProductPicker() {
 
     openModal('productPickerModal');
 
+    showLoadingOverlay('載入商品列表...');
+
     try {
         const result = await callKolApi('kolGetProducts');
         if (result.success && result.data) {
@@ -377,6 +379,8 @@ async function openProductPicker() {
         }
     } catch (err) {
         grid.innerHTML = '<p style="color:red;">載入失敗</p>';
+    } finally {
+        hideLoadingOverlay();
     }
 }
 
@@ -465,7 +469,7 @@ async function batchAddProducts() {
 
     // 安全過濾：確保商品存在
     const productsToAdd = Array.from(selectedPickerIds).map(id => {
-        const product = availableProducts.find(p => p.id === id);
+        const product = availableProducts.find(p => String(p.id) === id);
         return product ? {
             productId: id,
             customPrice: product.price || product.wholesalePrice || 0 // 增加 fallback
@@ -531,6 +535,8 @@ async function confirmAddProduct() {
         return;
     }
 
+    showLoadingOverlay('新增商品中...');
+
     try {
         const result = await callKolApi('kolAddProduct', { productId, customPrice });
         if (result.success) {
@@ -542,6 +548,8 @@ async function confirmAddProduct() {
         }
     } catch (err) {
         showToast('新增失敗', 'error');
+    } finally {
+        hideLoadingOverlay();
     }
 }
 
@@ -558,6 +566,8 @@ async function editProductPrice(productId) {
         return;
     }
 
+    showLoadingOverlay('更新價格中...');
+
     try {
         const result = await callKolApi('kolUpdateProduct', { productId, customPrice: price });
         if (result.success) {
@@ -568,11 +578,15 @@ async function editProductPrice(productId) {
         }
     } catch (err) {
         showToast('更新失敗', 'error');
+    } finally {
+        hideLoadingOverlay();
     }
 }
 
 async function removeProduct(productId) {
     if (!confirm('確定要下架此商品嗎？')) return;
+
+    showLoadingOverlay('下架中...');
 
     try {
         const result = await callKolApi('kolRemoveProduct', { productId });
@@ -584,6 +598,8 @@ async function removeProduct(productId) {
         }
     } catch (err) {
         showToast('下架失敗', 'error');
+    } finally {
+        hideLoadingOverlay();
     }
 }
 

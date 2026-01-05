@@ -3,8 +3,9 @@
 gas-backend/
 layout.json
 layout_*.json
-*.log
+*.DS_Store
 node_modules/
+gas-backend/
 
 # 商品圖片（由後台上傳到 GitHub，不追蹤本地）
 images/
