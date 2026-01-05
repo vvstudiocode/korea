@@ -102,16 +102,25 @@ function hideLoadingOverlay() {
 
 // API 呼叫輔助函數 (for PageBuilder)
 function callApi(subAction, payload = {}) {
+    // 映射舊的 action 名稱到新的 KOL action
+    const actionMap = {
+        'saveLayoutToGitHub': 'kolSaveLayout'
+    };
+
+    const mappedAction = actionMap[subAction] || subAction;
+
+    const requestBody = {
+        action: 'kolAction',
+        subAction: mappedAction,
+        storeId: kolStoreId,
+        token: kolToken,
+        ...payload
+    };
+
     return fetch(GAS_API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({
-            action: 'kolAction',
-            subAction: subAction,
-            storeId: kolStoreId,
-            token: kolToken,
-            ...payload
-        })
+        body: JSON.stringify(requestBody)
     }).then(res => res.json());
 }
 
@@ -407,16 +416,31 @@ function renderRecentOrders(orders) {
 
 async function loadMyProducts() {
     const tbody = document.getElementById('myProductsBody');
-    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center">載入中...</td></tr>';
+    if (tbody) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center">載入中...</td></tr>';
+    }
 
     try {
         const result = await callKolApi('kolGetMyProducts');
+        console.log('📦 kolGetMyProducts 結果:', result);
+
         if (result.success && result.data) {
             kolProducts = result.data.products || [];
-            renderMyProducts(kolProducts);
+            console.log(`✅ 載入 ${kolProducts.length} 項商品:`, kolProducts.slice(0, 2));
+            if (tbody) {
+                renderMyProducts(kolProducts);
+            }
+        } else {
+            console.error('❌ 載入商品失敗:', result.error);
+            if (tbody) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:red;">載入失敗: ' + (result.error || '未知錯誤') + '</td></tr>';
+            }
         }
     } catch (err) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:red;">載入失敗</td></tr>';
+        console.error('❌ loadMyProducts 錯誤:', err);
+        if (tbody) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:red;">載入失敗</td></tr>';
+        }
     }
 }
 

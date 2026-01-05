@@ -190,6 +190,10 @@ body {
     margin-left: var(--sidebar-width);
     padding: 0;
     min-height: 100vh;
+    width: calc(100% - var(--sidebar-width));
+    max-width: 100%;
+    transition: margin-left 0.3s ease, width 0.3s ease;
+    box-sizing: border-box;
 }
 
 .top-bar {
@@ -235,7 +239,9 @@ body {
 }
 
 .view-section {
-    padding: 2rem;
+    padding: 1.5rem 1.25rem;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 /* 統計卡片 */
@@ -972,11 +978,12 @@ body.sidebar-open {
 
     /* 主內容區過渡 */
     .main-content {
-        transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .dashboard-container.sidebar-collapsed .main-content {
         margin-left: 70px;
+        width: calc(100% - 70px);
     }
 }
 
