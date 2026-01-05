@@ -1285,7 +1285,9 @@ async function uploadImagesToGitHub() {
         btn.style.display = 'none';
 
         alert(`圖片上傳並排序完成！`);
+        alert(`圖片上傳並排序完成！`);
         renderImagePreviews();
+        updateVariantImageSelects(); // 新增：圖片上傳後更新規格選單
 
     } catch (error) {
         console.error('上傳失敗:', error);
@@ -2204,6 +2206,7 @@ function updateVariantsTable() {
 
     // 取得預設價格和庫存
     const defaultPrice = Number(document.getElementById('prodPrice').value) || 0;
+    const defaultCost = Number(document.getElementById('prodCost').value) || 0; // 預設成本
     const defaultStock = Number(document.getElementById('prodStock').value) || 99;
 
     // 取得商品圖片列表 (供圖片選擇)
@@ -2214,6 +2217,7 @@ function updateVariantsTable() {
         // 嘗試找到現有的 variant 資料
         const existingVariant = currentProductVariants.find(v => v.spec === spec) || {};
         const price = existingVariant.price !== undefined ? existingVariant.price : defaultPrice;
+        const cost = existingVariant.cost !== undefined ? existingVariant.cost : defaultCost; // 成本
         const stock = existingVariant.stock !== undefined ? existingVariant.stock : defaultStock;
         const image = existingVariant.image || '';
 
@@ -2243,6 +2247,7 @@ function updateVariantsTable() {
                     </div>
                 </td>
                 <td class="variant-spec">${spec}</td>
+                <td><input type="number" class="variant-cost" value="${cost}" min="0"></td>
                 <td><input type="number" class="variant-price" value="${price}" min="0"></td>
                 <td><input type="number" class="variant-stock" value="${stock}" min="0"></td>
             </tr>
@@ -2295,11 +2300,12 @@ function getVariantsData() {
     rows.forEach(row => {
         const spec = row.dataset.spec;
         const price = Number(row.querySelector('.variant-price').value) || 0;
+        const cost = Number(row.querySelector('.variant-cost').value) || 0; // 收集成本
         const stock = Number(row.querySelector('.variant-stock').value) || 0;
         const imageSelect = row.querySelector('.variant-image-select');
         const image = imageSelect ? imageSelect.value : '';
 
-        variants.push({ spec, price, stock, image });
+        variants.push({ spec, price, cost, stock, image });
     });
 
     return variants;
@@ -2348,3 +2354,28 @@ document.addEventListener('DOMContentLoaded', () => {
     setupSpecBuilderListeners();
 });
 
+/**
+ * 在圖片上傳成功後，即時刷新規格表格中的圖片下拉選單
+ */
+function updateVariantImageSelects() {
+    const section = document.getElementById('variantsSection');
+    if (section.style.display === 'none') return;
+
+    const imageList = getProductImageList();
+    const selects = document.querySelectorAll('.variant-image-select');
+
+    selects.forEach(select => {
+        const currentVal = select.value;
+        const imageOptions = ['<option value="">不指定</option>']
+            .concat(imageList.map((url, i) => {
+                const selected = url === currentVal ? 'selected' : '';
+                const shortName = `圖片 ${i + 1}`;
+                return `<option value="${url}" ${selected}>${shortName}</option>`;
+            }))
+            .join('');
+        select.innerHTML = imageOptions;
+
+        // 觸發預覽更新
+        updateVariantImagePreview(select);
+    });
+}
