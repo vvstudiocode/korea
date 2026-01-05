@@ -634,7 +634,7 @@ function renderProducts(products) {
     });
 
     tbody.innerHTML = displayProducts.map(p => {
-        const profit = (p.price || 0) - (p.cost || 0);
+        const profit = (p.wholesalePrice || 0) - (p.cost || 0); // 總部利潤 = 批發價 - 成本
         // 如果有多張圖片，只顯示第一張
         const imageUrl = (p.image || "").split(',')[0].trim();
 
@@ -645,6 +645,7 @@ function renderProducts(products) {
             <td>${p.name} ${p._isNew ? '(新)' : ''}</td>
             <td>${p.price}</td>
             <td style="color: #888;">${p.cost || 0}</td>
+            <td style="color: #6366f1;">${p.wholesalePrice || 0}</td>
             <td style="color: #28a745; font-weight: 500;">${profit}</td>
             <td style="color: #aaa; font-size:0.9em;">₩${p.priceKrw || 0}</td>
             <td>${p.stock}</td>
@@ -863,6 +864,7 @@ function openProductModal(productId = null) {
             document.getElementById('prodBrand').value = p.brand || '';
             document.getElementById('prodPrice').value = p.price;
             document.getElementById('prodCost').value = p.cost;
+            document.getElementById('prodWholesalePrice').value = p.wholesalePrice || 0;
             document.getElementById('prodPriceKrw').value = p.priceKrw || 0;
             document.getElementById('prodStock').value = p.stock;
             document.getElementById('prodStatus').value = p.status;
@@ -949,6 +951,7 @@ async function handleProductSubmit(e) {
             brand: document.getElementById('prodBrand').value.trim() || '',
             price: Number(document.getElementById('prodPrice').value),
             cost: Number(document.getElementById('prodCost').value),
+            wholesalePrice: Number(document.getElementById('prodWholesalePrice').value) || 0,
             priceKrw: Number(document.getElementById('prodPriceKrw').value),
             stock: Number(document.getElementById('prodStock').value),
             status: document.getElementById('prodStatus').value,

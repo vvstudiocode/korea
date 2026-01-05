@@ -54,6 +54,9 @@
                 <li id="tab-settings" onclick="kolSwitchTab('settings')">
                     <span class="icon">⚙</span><span class="text">店舖設定</span>
                 </li>
+                <li id="tab-layout" onclick="kolSwitchTab('layout')">
+                    <span class="icon">🎨</span><span class="text">排版管理</span>
+                </li>
             </ul>
             <div class="sidebar-footer">
                 <button onclick="kolLogout()">登出</button>
@@ -273,30 +276,63 @@
                                 <label>匯款帳戶</label>
                                 <input type="text" id="settingsBankAccount" placeholder="銀行代碼 + 帳號">
                             </div>
-                            <button type="submit" class="btn-primary">儲存變更</button>
-                        </form>
-                    </div>
 
-                    <div class="section-card">
-                        <h3>🔒 修改密碼</h3>
-                        <form id="passwordForm" onsubmit="handlePasswordChange(event)">
-                            <div class="form-group">
-                                <label>目前密碼</label>
-                                <input type="password" id="currentPassword" required>
+                            <div class="section-card">
+                                <h3>🔑 修改密碼</h3>
+                                <form id="passwordForm" onsubmit="handlePasswordChange(event)">
+                                    <div class="form-group">
+                                        <label>目前密碼</label>
+                                        <input type="password" id="currentPassword" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>新密碼</label>
+                                        <input type="password" id="newPassword" required minlength="6">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>確認新密碼</label>
+                                        <input type="password" id="confirmPassword" required minlength="6">
+                                    </div>
+                                    <button type="submit" class="btn-primary">確認修改</button>
+                                </form>
                             </div>
-                            <div class="form-group">
-                                <label>新密碼 (至少 6 字元)</label>
-                                <input type="password" id="newPassword" required minlength="6">
-                            </div>
-                            <div class="form-group">
-                                <label>確認新密碼</label>
-                                <input type="password" id="confirmPassword" required minlength="6">
-                            </div>
-                            <button type="submit" class="btn-primary">更新密碼</button>
-                        </form>
                     </div>
                 </div>
-            </div>
+
+                <!-- 6. 排版管理 (Page Builder) -->
+                <div id="builderSection" class="view-section"
+                    style="display: none; padding: 0; height: calc(100vh - 70px);">
+                    <div class="visual-builder">
+                        <!-- 左側：編輯區 -->
+                        <div class="builder-sidebar">
+                            <div class="components-list" id="builderComponentsList">
+                                <!-- 由 page-builder.js 動態產生 -->
+                            </div>
+                            <div class="sidebar-footer">
+                                <button class="save-btn" id="saveLayoutBtn"
+                                    onclick="PageBuilder.saveLayout()">儲存排版</button>
+                            </div>
+                        </div>
+
+                        <!-- 右側：預覽區 -->
+                        <div class="builder-preview">
+                            <div class="preview-toolbar">
+                                <div class="device-toggles">
+                                    <button class="device-btn active" id="view-desktop"
+                                        onclick="PageBuilder.setPreviewMode('desktop')">💻 電腦版</button>
+                                    <button class="device-btn" id="view-mobile"
+                                        onclick="PageBuilder.setPreviewMode('mobile')">📱 手機版</button>
+                                </div>
+                                <div class="preview-status">即時預覽中</div>
+                            </div>
+                            <div class="preview-viewport" id="previewViewport">
+                                <div class="preview-container" id="pageBuilderPreviewRoot">
+                                    <!-- 由 page-renderer.js 動態渲染 -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
         </main>
     </div>
 
@@ -348,9 +384,60 @@
         </div>
     </div>
 
+    <!-- Page Builder Add Component Modal -->
+    <div class="modal" id="addCompModal">
+        <div class="modal-content" style="width: 500px;">
+            <h3>選擇要新增的區塊類型</h3>
+            <div class="component-selector">
+                <div class="comp-type-btn" onclick="PageBuilder.addComponent('hero'); closeModal('addCompModal')">
+                    <span class="icon"></span><span>首頁大圖</span>
+                </div>
+                <div class="comp-type-btn" onclick="PageBuilder.addComponent('categories'); closeModal('addCompModal')">
+                    <span class="icon"></span><span>分類導覽</span>
+                </div>
+                <div class="comp-type-btn" onclick="PageBuilder.addComponent('products'); closeModal('addCompModal')">
+                    <span class="icon"></span><span>輪播圖</span>
+                </div>
+                <div class="comp-type-btn"
+                    onclick="PageBuilder.addComponent('product_list'); closeModal('addCompModal')">
+                    <span class="icon"></span><span>商品列表</span>
+                </div>
+                <div class="comp-type-btn"
+                    onclick="PageBuilder.addComponent('image_carousel'); closeModal('addCompModal')">
+                    <span class="icon"></span><span>圖片輪播</span>
+                </div>
+                <div class="comp-type-btn"
+                    onclick="PageBuilder.addComponent('single_image'); closeModal('addCompModal')">
+                    <span class="icon"></span><span>單張圖片</span>
+                </div>
+                <div class="comp-type-btn"
+                    onclick="PageBuilder.addComponent('text_combination'); closeModal('addCompModal')">
+                    <span class="icon"></span><span>文字組合</span>
+                </div>
+                <div class="comp-type-btn"
+                    onclick="PageBuilder.addComponent('custom_code'); closeModal('addCompModal')">
+                    <span class="icon"></span><span>程式碼</span>
+                </div>
+                <div class="comp-type-btn"
+                    onclick="PageBuilder.addComponent('info_section'); closeModal('addCompModal')">
+                    <span class="icon"></span><span>圖文介紹</span>
+                </div>
+                <div class="comp-type-btn"
+                    onclick="PageBuilder.addComponent('announcement'); closeModal('addCompModal')">
+                    <span class="icon"></span><span>公告欄</span>
+                </div>
+            </div>
+            <div class="modal-actions" style="margin-top:2rem;">
+                <button onclick="closeModal('addCompModal')">取消</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast 容器 -->
     <div id="toastContainer"></div>
 
+    <script src="page-renderer.js"></script>
+    <script src="page-builder.js"></script>
     <script src="kol-admin.js"></script>
 </body>
 

@@ -186,7 +186,13 @@ function showDashboard() {
     }
 
     // 載入儀表板資料
+    // 載入儀表板資料
     loadDashboardData();
+
+    // 初始化排版編輯器 (如果有的話)
+    if (typeof PageBuilder !== 'undefined') {
+        PageBuilder.init(kolStoreId);
+    }
 }
 
 function kolSwitchTab(tabId) {
@@ -214,7 +220,14 @@ function kolSwitchTab(tabId) {
     } else if (tabId === 'settings') {
         document.getElementById('settingsView').style.display = 'block';
         document.getElementById('pageTitle').textContent = '店舖設定';
+        document.getElementById('pageTitle').textContent = '店舖設定';
         loadProfileSettings();
+    } else if (tabId === 'layout') {
+        document.getElementById('builderSection').style.display = 'block';
+        document.getElementById('pageTitle').textContent = '排版管理';
+        // PageBuilder.init 已經在 login 時呼叫過，這裡不需要重新 init
+        // 但如果有 resize 需求，可在此觸發
+        window.dispatchEvent(new Event('resize'));
     }
 }
 

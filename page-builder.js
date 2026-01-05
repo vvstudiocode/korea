@@ -113,13 +113,27 @@ const PageBuilder = {
     editingIndex: null,
     editingFooter: false,
     previewMode: 'desktop',
+    footer: null,
+    editingIndex: null,
+    editingFooter: false,
+    previewMode: 'desktop',
     debounceTimer: null,
+    storeId: null, // 新增：支援 KOL 賣場 ID
 
     // GitHub 設定 (與後端保持一致)
     LAYOUT_URL: 'https://raw.githubusercontent.com/vvstudiocode/korea/main/layout.json',
 
-    init: async function () {
-        console.log('🎨 Visual PageBuilder v2.0 Initialized');
+    init: async function (storeIdOpt = null) {
+        console.log('🎨 Visual PageBuilder v2.0 Initialized', storeIdOpt ? `for Store: ${storeIdOpt}` : 'Global');
+        this.storeId = storeIdOpt; // 設定賣場 ID
+
+        // 如果有指定賣場，更新 URL
+        if (this.storeId) {
+            this.LAYOUT_URL = `https://raw.githubusercontent.com/vvstudiocode/korea/main/layout_${this.storeId}.json`;
+        } else {
+            this.LAYOUT_URL = 'https://raw.githubusercontent.com/vvstudiocode/korea/main/layout.json';
+        }
+
         // 確保商品資料已載入 (用於預覽)
         if (typeof products === 'undefined' || products.length === 0) {
             if (typeof loadProducts === 'function') await loadProducts();
@@ -1130,7 +1144,8 @@ const PageBuilder = {
 
             // 透過 GAS API 寫入 GitHub
             const data = await callApi('saveLayoutToGitHub', {
-                content: JSON.stringify(layoutData, null, 2)
+                content: JSON.stringify(layoutData, null, 2),
+                storeId: this.storeId
             });
 
             if (data.success) {
