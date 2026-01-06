@@ -106,7 +106,7 @@ body {
 
 /* 側邊欄 */
 .sidebar {
-    width: 260px;
+    width: 180px;
     background: var(--bg-dark);
     color: var(--white);
     display: flex;
@@ -136,7 +136,7 @@ body {
 }
 
 .nav-links li {
-    padding: 10px 24px;
+    padding: 8px 24px;
     cursor: pointer;
     transition: all 0.25s ease;
     color: #bdc3c7;
