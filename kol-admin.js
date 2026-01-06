@@ -1227,6 +1227,34 @@ function renderProductRanking(products) {
 // 店舖設定
 // ============================================================
 
+function handleKolLogoSelect(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        const preview = document.getElementById('kolLogoPreview');
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+        document.getElementById('removeKolLogoBtn').style.display = 'block';
+        document.getElementById('kolLogoUploadZone').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+}
+
+function removeKolLogo() {
+    document.getElementById('kolLogoFile').value = '';
+    document.getElementById('kolLogoPreview').src = '';
+    document.getElementById('kolLogoPreview').style.display = 'none';
+    document.getElementById('removeKolLogoBtn').style.display = 'none';
+    document.getElementById('kolLogoUploadZone').style.display = 'block';
+
+    // 如果想要清空原本的，可以清空 hidden input
+    // 但通常使用者可能只是想取消"更換"，若原本有圖，應該恢復顯示？
+    // 這裡簡化為清空，若使用者儲存則會變成無 Logo
+    document.getElementById('settingsLogoUrl').value = '';
+}
+
 async function loadProfileSettings() {
     try {
         const result = await callKolApi('kolGetProfile');
@@ -1240,6 +1268,17 @@ async function loadProfileSettings() {
             document.getElementById('settingsThemeColor').value = profile.themeColor || '#6366f1';
             document.getElementById('settingsThemeColorPicker').value = profile.themeColor || '#6366f1';
             document.getElementById('settingsBankAccount').value = profile.bankAccount || '';
+
+            // Logo
+            if (profile.logoUrl) {
+                document.getElementById('settingsLogoUrl').value = profile.logoUrl;
+                document.getElementById('kolLogoPreview').src = profile.logoUrl;
+                document.getElementById('kolLogoPreview').style.display = 'block';
+                document.getElementById('removeKolLogoBtn').style.display = 'block';
+                document.getElementById('kolLogoUploadZone').style.display = 'none';
+            } else {
+                removeKolLogo();
+            }
 
             // 顏色選擇器同步
             document.getElementById('settingsThemeColorPicker').oninput = function () {
@@ -1269,14 +1308,42 @@ async function handleProfileUpdate(event) {
         phone: document.getElementById('settingsPhone').value.trim(),
         email: document.getElementById('settingsEmail').value.trim(),
         themeColor: document.getElementById('settingsThemeColor').value.trim(),
-        bankAccount: document.getElementById('settingsBankAccount').value.trim()
+        bankAccount: document.getElementById('settingsBankAccount').value.trim(),
+        logoUrl: document.getElementById('settingsLogoUrl').value
     };
 
     const btn = event.target.querySelector('button[type="submit"]');
+    const originalText = btn.textContent;
     btn.disabled = true;
     btn.textContent = '儲存中...';
 
     try {
+        // Logo Upload
+        const logoFile = document.getElementById('kolLogoFile').files[0];
+        if (logoFile) {
+            const base64 = await new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.readAsDataURL(logoFile);
+            });
+            const base64Content = base64.split(',')[1];
+
+            // callKolApi for upload
+            // 注意: code.gs 需要 kolUploadImage 返回 brand
+            const uploadRes = await callKolApi('kolUploadImage', {
+                fileName: logoFile.name,
+                content: base64Content,
+                mimeType: logoFile.type,
+                brand: profileData.storeName
+            });
+
+            if (uploadRes.success) {
+                profileData.logoUrl = uploadRes.data.url;
+            } else {
+                throw new Error('Logo 上傳失敗: ' + uploadRes.error);
+            }
+        }
+
         const result = await callKolApi('kolUpdateProfile', { profileData });
         if (result.success) {
             showToast('資料已更新', 'success');
@@ -1284,6 +1351,7 @@ async function handleProfileUpdate(event) {
             // 更新本地狀態
             kolStoreInfo.storeName = profileData.storeName;
             kolStoreInfo.themeColor = profileData.themeColor;
+            kolStoreInfo.logoUrl = profileData.logoUrl; // Update Token/Info logic usually doesn't store logoUrl but let's keep it sync
             sessionStorage.setItem('kolStoreInfo', JSON.stringify(kolStoreInfo));
 
             // 更新 header
@@ -1291,14 +1359,24 @@ async function handleProfileUpdate(event) {
             if (profileData.themeColor) {
                 document.documentElement.style.setProperty('--primary-color', profileData.themeColor);
             }
+            // Update Logo in sidebar if exists
+            const logoContainer = document.getElementById('storeLogoContainer');
+            if (logoContainer) {
+                if (profileData.logoUrl) {
+                    logoContainer.innerHTML = `<img src="${profileData.logoUrl}" style="width:50px; height:50px; border-radius:50%; object-fit:cover; margin-bottom:0.5rem;">`;
+                } else {
+                    logoContainer.innerHTML = '';
+                }
+            }
+
         } else {
             showToast('更新失敗: ' + result.error, 'error');
         }
     } catch (err) {
-        showToast('更新失敗', 'error');
+        showToast('更新失敗: ' + err.message, 'error');
     } finally {
         btn.disabled = false;
-        btn.textContent = '儲存變更';
+        btn.textContent = originalText; // Restore text
     }
 }
 

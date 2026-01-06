@@ -142,12 +142,12 @@ body {
 
 .nav-links {
     list-style: none;
-    padding: 1rem 0;
+    padding: 0.5rem 0;
     flex: 1;
 }
 
 .nav-links li {
-    padding: 0.9rem 1.5rem;
+    padding: 0.7rem 1.5rem;
     cursor: pointer;
     display: flex;
     align-items: center;

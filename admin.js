@@ -2543,6 +2543,32 @@ function renderStores(stores) {
     }).join('');
 }
 
+// 處理賣場 Logo 選擇
+function handleStoreLogoSelect(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // 預覽
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        const preview = document.getElementById('storeLogoPreview');
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+        document.getElementById('removeLogoBtn').style.display = 'block';
+        document.getElementById('storeLogoUploadZone').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+}
+
+function removeStoreLogo() {
+    document.getElementById('storeLogoFile').value = '';
+    document.getElementById('storeLogoPreview').src = '';
+    document.getElementById('storeLogoPreview').style.display = 'none';
+    document.getElementById('removeLogoBtn').style.display = 'none';
+    document.getElementById('storeLogoUploadZone').style.display = 'block';
+    document.getElementById('storeLogoUrl').value = ''; // 清空 URL
+}
+
 // 開啟賣場 Modal
 function openStoreModal(storeId = null) {
     const modal = document.getElementById('storeModal');
@@ -2551,6 +2577,7 @@ function openStoreModal(storeId = null) {
 
     form.reset();
     document.getElementById('storeEditId').value = '';
+    removeStoreLogo(); // 重置 Logo UI
 
     if (storeId) {
         // 編輯模式
@@ -2568,6 +2595,15 @@ function openStoreModal(storeId = null) {
             document.getElementById('storeStatus').value = store.status || 'active';
             document.getElementById('storeBankAccount').value = store.bankAccount || '';
             document.getElementById('storePassword').placeholder = '留空不變更';
+
+            // 設定 Logo
+            if (store.logoUrl) {
+                document.getElementById('storeLogoUrl').value = store.logoUrl;
+                document.getElementById('storeLogoPreview').src = store.logoUrl;
+                document.getElementById('storeLogoPreview').style.display = 'block';
+                document.getElementById('removeLogoBtn').style.display = 'block';
+                document.getElementById('storeLogoUploadZone').style.display = 'none';
+            }
         }
     } else {
         // 新增模式
@@ -2592,7 +2628,8 @@ async function handleStoreSubmit(e) {
         email: document.getElementById('storeEmail').value.trim(),
         themeColor: document.getElementById('storeThemeColor').value,
         status: document.getElementById('storeStatus').value,
-        bankAccount: document.getElementById('storeBankAccount').value.trim()
+        bankAccount: document.getElementById('storeBankAccount').value.trim(),
+        logoUrl: document.getElementById('storeLogoUrl').value
     };
 
     const password = document.getElementById('storePassword').value;
@@ -2605,6 +2642,28 @@ async function handleStoreSubmit(e) {
     showLoadingOverlay(editId ? '更新賣場...' : '建立賣場...');
 
     try {
+        // 處理 Logo 上傳
+        const logoFile = document.getElementById('storeLogoFile').files[0];
+        if (logoFile) {
+            // 上傳 Logic
+            const base64 = await fileToBase64(logoFile);
+            const base64Content = base64.split(',')[1];
+
+            // 使用 storeName 作為 brand folder
+            const uploadResult = await callApi('uploadImageToGitHub', {
+                fileName: logoFile.name,
+                content: base64Content,
+                mimeType: logoFile.type,
+                brand: storeData.storeName // 根據需求：path = image/product/kol名稱/...
+            });
+
+            if (uploadResult.success) {
+                storeData.logoUrl = uploadResult.data.url;
+            } else {
+                throw new Error('Logo 上傳失敗: ' + uploadResult.error);
+            }
+        }
+
         const result = await callApi(subAction, { storeData });
         hideLoadingOverlay();
         if (result.success) {
