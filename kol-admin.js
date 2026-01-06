@@ -1304,3 +1304,35 @@ async function handlePasswordChange(event) {
         btn.textContent = '更新密碼';
     }
 }
+
+// Image Upload Helper
+function uploadToGitHub(file) {
+    return new Promise((resolve, reject) => {
+        if (!file) {
+            reject(new Error('No file provided'));
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = async function (e) {
+            try {
+                const base64Content = e.target.result;
+                const result = await callKolApi('kolUploadImage', {
+                    storeId: kolStoreId,
+                    imageBase64: base64Content,
+                    fileName: file.name
+                });
+
+                if (result.success) {
+                    resolve(result.data); // Should contain { url: ... }
+                } else {
+                    reject(new Error(result.error || 'Upload failed'));
+                }
+            } catch (err) {
+                reject(err);
+            }
+        };
+        reader.onerror = () => reject(new Error('File reading failed'));
+        reader.readAsDataURL(file);
+    });
+}
