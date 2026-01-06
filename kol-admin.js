@@ -286,6 +286,12 @@ async function kolSwitchTab(tabId) {
             await loadMyProducts();
         }
 
+        // 確保 PageRenderer 知道現在是 KOL 模式 (防止載入總部商品或重新 fetch)
+        if (typeof PageRenderer !== 'undefined') {
+            PageRenderer.currentStoreId = kolStoreId;
+            console.log('🎨 設定 PageRenderer.currentStoreId =', kolStoreId);
+        }
+
         // 每次切換到排版管理都重新初始化（因為 init 時元素可能隱藏）
         if (typeof PageBuilder !== 'undefined') {
             // 如果尚未初始化，重新執行 init
@@ -1094,21 +1100,60 @@ function renderKolOrders(orders) {
         return;
     }
 
-    tbody.innerHTML = orders.map(o => {
-        const items = (o.items || []).map(i => `${i.name} x${i.qty}`).join(', ');
+
+    tbody.innerHTML = orders.map((o, idx) => {
+        const totalItems = (o.items || []).reduce((sum, i) => sum + (Number(i.qty) || 0), 0);
+        const firstItem = (o.items || [])[0] ? (o.items[0].name + (o.items.length > 1 ? ` 等 ${totalItems} 件商品` : '')) : '無商品';
+
+        // 詳細清單 HTML
+        const detailsHtml = (o.items || []).map(i => `
+            <div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px dashed #eee; font-size:13px;">
+                <span>${i.name} ${i.spec ? `(${i.spec})` : ''}</span>
+                <span>x${i.qty}</span>
+            </div>
+        `).join('');
+
         return `
-        <tr>
+        <tr class="order-main-row">
             <td>${o.orderId}</td>
             <td>${o.date || '-'}</td>
             <td>${o.customerName}</td>
             <td>${o.customerPhone}</td>
-            <td style="max-width:200px; overflow:hidden; text-overflow:ellipsis;">${items}</td>
+            <td style="max-width:200px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:120px;">${firstItem}</span>
+                    <button class="btn-text" onclick="toggleOrderDetails('order-details-${idx}')" style="font-size:12px; color:#6366f1;">
+                        展開
+                    </button>
+                </div>
+            </td>
             <td>${formatCurrency(o.total)}</td>
             <td><span class="status-badge">${o.status}</span></td>
+        </tr>
+        <tr id="order-details-${idx}" class="order-details-row" style="display:none; background:#f9fafb;">
+            <td colspan="7">
+                <div style="padding:10px 20px;">
+                    <h5 style="margin:0 0 10px 0; color:#4b5563;">訂單明細</h5>
+                    ${detailsHtml}
+                    <div style="margin-top:10px; font-size:13px; color:#666;">
+                        <strong>備註：</strong> ${o.note || '無'} | 
+                        <strong>寄送：</strong> ${o.shippingMethod} ${o.storeName || ''} ${o.storeCode || ''}
+                    </div>
+                </div>
+            </td>
         </tr>
         `;
     }).join('');
 }
+
+function toggleOrderDetails(id) {
+    const el = document.getElementById(id);
+    if (el) {
+        const isHidden = el.style.display === 'none';
+        el.style.display = isHidden ? 'table-row' : 'none';
+    }
+}
+
 
 // ============================================================
 // 業績統計

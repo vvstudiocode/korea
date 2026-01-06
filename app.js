@@ -212,8 +212,18 @@ async function loadProducts() {
             // 🔥 清空products避免PageRenderer fallback載入總部商品
             window.products = [];
             products = []; // 本地變數也清空
+
+            // 下一行賦值導致 result.data 變成陣列
             result.data = result.data.products;
-            console.log(`✅ KOL模式:已設置 ${result.data.products.length} 個商品到 kolProducts, products已清空`);
+
+            // 修正 Log 錯誤: result.data 現在是陣列，沒有 products 屬性了
+            console.log(`✅ KOL模式:已設置 ${result.data.length} 個商品到 kolProducts, products已清空`);
+
+            // 更新載入畫面名稱 (如果有商店資訊)
+            if (currentStoreInfo && currentStoreInfo.storeName) {
+                const loadingText = document.querySelector('.loading-text');
+                if (loadingText) loadingText.textContent = currentStoreInfo.storeName;
+            }
         }
 
         if (result.success) {
