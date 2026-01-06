@@ -108,10 +108,10 @@ body {
 
 /* 主控台 */
 .dashboard-container {
-    /* display: flex;  移除 flex，避免與 fixed sidebar 衝突 */
-    min-height: 100vh;
-    overflow-x: hidden;
-    /* 防止水平滾動 */
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+    /* 防止整個頁面捲動 */
 }
 
 /* 側邊欄 */
@@ -121,25 +121,87 @@ body {
     color: white;
     display: flex;
     flex-direction: column;
-    position: fixed;
-    height: 100vh;
+    position: relative;
+    /* 改回 relative 以配合 flex */
+    min-height: 100vh;
     z-index: 100;
-    transition: transform 0.3s;
-    left: 0;
-    top: 0;
+    transition: width 0.3s;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
 }
 
-/* ... skipped sidebar header ... */
+.sidebar-header {
+    padding: 1.5rem;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-header h3 {
+    font-size: 1.1rem;
+    margin-top: 0.5rem;
+}
+
+.nav-links {
+    list-style: none;
+    padding: 1rem 0;
+    flex: 1;
+}
+
+.nav-links li {
+    padding: 0.9rem 1.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    transition: background 0.3s;
+}
+
+.nav-links li:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.nav-links li.active {
+    background: rgba(255, 255, 255, 0.2);
+    border-left: 3px solid white;
+}
+
+.nav-links .icon {
+    font-size: 1.2rem;
+}
+
+.sidebar-footer {
+    padding: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-footer button {
+    width: 100%;
+    padding: 0.7rem;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.sidebar-footer button:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
 /* 主內容區 */
 .main-content {
-    margin-left: var(--sidebar-width);
-    min-height: 100vh;
+    flex: 1;
+    /* 佔滿剩餘空間 */
+    margin-left: 0;
+    /* 移除 margin-left */
     width: auto;
-    /* 讓 margin-left 自動計算剩餘寬度 */
-    max-width: 100%;
-    transition: margin-left 0.3s ease;
+    height: 100vh;
+    overflow: hidden;
+    /* 內部捲動 */
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
     box-sizing: border-box;
-    /* flex: 1; 移除 */
 }
 
 .top-bar {
@@ -188,6 +250,8 @@ body {
     padding: 1rem;
     max-width: 100%;
     box-sizing: border-box;
+    flex-grow: 1;
+    overflow-y: auto;
 }
 
 /* 統計卡片 */

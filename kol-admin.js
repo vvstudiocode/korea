@@ -687,9 +687,6 @@ function openEditMyProduct(productId) {
         </div>
     `;
 
-    // 填入數值
-    document.getElementById('editProductPrice').value = product.customPrice;
-    document.getElementById('editProductStock').value = product.availableStock || 0; // 顯示可用庫存
     document.getElementById('editProductStatus').value = product.status;
 
     // 根據同樣邏輯設定庫存欄位

@@ -443,32 +443,11 @@
                 <h3>編輯商品</h3>
                 <button class="close-btn" onclick="closeModal('editProductModal')">✕</button>
             </div>
-            <div class="modal-body">
-                <input type="hidden" id="editProductId">
-                <div class="product-info" id="editProductInfo"></div>
-
-                <div class="form-group">
-                    <label>我的售價</label>
-                    <input type="number" id="editProductPrice" required>
-                </div>
-
-                <div class="form-group">
-                    <label>庫存數量</label>
-                    <input type="number" id="editProductStock" placeholder="自建商品可修改">
-                    <small class="hint-text" id="editStockHint">選品庫存由總部管理，無法修改</small>
-                </div>
-
-                <div class="form-group">
-                    <label>狀態</label>
-                    <select id="editProductStatus">
-                        <option value="active">上架</option>
-                        <option value="inactive">下架</option>
-                    </select>
-                </div>
+            <div class="modal-body" id="editProductModalBody">
+                <!-- 動態注入內容 -->
             </div>
-            <div class="modal-actions">
-                <button onclick="closeModal('editProductModal')">取消</button>
-                <button class="accent-btn" onclick="saveMyProduct()">儲存變更</button>
+            <div class="modal-actions" id="editProductModalActions">
+                <!-- 動態注入按鈕 -->
             </div>
         </div>
     </div>
