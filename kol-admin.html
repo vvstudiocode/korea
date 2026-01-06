@@ -484,9 +484,15 @@
             <form id="createOwnProductForm" onsubmit="submitOwnProduct(event)">
                 <div class="modal-body">
                     <div class="form-row">
-                        <div class="form-group half">
+                        <div class="form-group" style="width:100%;">
                             <label>商品名稱 *</label>
-                            <input type="text" id="ownProdName" required>
+                            <input type="text" id="ownProdName" required style="width:100%;">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label>品牌</label>
+                            <input type="text" id="ownProdBrand" placeholder="例如: Nike">
                         </div>
                         <div class="form-group half">
                             <label>分類</label>

@@ -711,7 +711,42 @@ function openEditMyProduct(productId) {
         stockInput.value = product.availableStock; // 顯示可用庫存
     }
 
+    // 設置按鈕區
+    const actionsDiv = document.querySelector('#editProductModal .modal-actions');
+    if (actionsDiv) {
+        actionsDiv.innerHTML = `
+            <button class="btn-secondary" style="color:var(--danger-color); border-color:var(--danger-color);" onclick="removeMyProduct('${product.id}')">刪除商品</button>
+            <button class="accent-btn" onclick="saveMyProduct()">儲存變更</button>
+        `;
+    }
+
     openModal('editProductModal');
+}
+
+async function removeMyProduct(productId) {
+    if (!confirm('確定要刪除此商品嗎？此動作無法復原。')) return;
+
+    showLoadingOverlay('刪除商品中...');
+
+    try {
+        const result = await callKolApi('kolRemoveProduct', {
+            storeId: kolStoreId,
+            productId: productId
+        });
+
+        if (result.success) {
+            showToast('商品已刪除', 'success');
+            closeModal('editProductModal');
+            loadMyProducts();
+        } else {
+            showToast('刪除失敗: ' + result.error, 'error');
+        }
+    } catch (err) {
+        showToast('刪除失敗', 'error');
+        console.error(err);
+    } finally {
+        hideLoadingOverlay();
+    }
 }
 
 async function saveMyProduct() {
@@ -777,6 +812,7 @@ function openCreateOwnProduct() {
     // 重置表單
     document.getElementById('createOwnProductForm').reset();
     document.getElementById('ownProductImagePreview').innerHTML = '';
+    if (document.getElementById('ownProdBrand')) document.getElementById('ownProdBrand').value = '';
     ownProductFiles = [];
 
     // 重置規格
@@ -992,6 +1028,7 @@ async function submitOwnProduct(event) {
         const productData = {
             name: name,
             category: document.getElementById('ownProdCategory').value,
+            brand: document.getElementById('ownProdBrand').value.trim(), // 收集品牌
             price: parseInt(price),
             wholesalePrice: parseInt(document.getElementById('ownProdCost').value) || 0,
             stock: parseInt(stock),
