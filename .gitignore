@@ -3,7 +3,7 @@
 gas-backend/
 layout.json
 layout_*.json
-*.DS_Store
+*.log
 node_modules/
 gas-backend/
 

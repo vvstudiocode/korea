@@ -5,6 +5,103 @@
  * - Dynamic spacing support
  * - KOL Store Mode support
  */
+
+// ----------------------------------------------------
+// 訂單查詢功能
+// ----------------------------------------------------
+window.handleOrderSearch = async function () {
+    const input = document.getElementById('orderPhoneInput');
+    const resultDiv = document.getElementById('orderResult');
+    const phone = input.value.trim();
+
+    if (!phone) {
+        alert('請輸入手機號碼');
+        return;
+    }
+
+    // 顯示 Loading
+    const btn = document.querySelector('.search-btn'); // 假設按鈕有此 class
+    const originalBtnText = btn ? btn.textContent : '查詢';
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = '查詢中...';
+    }
+
+    resultDiv.innerHTML = '<div style="padding:20px; text-align:center; color:#666;"><div class="loading-spinner" style="margin:0 auto 10px;"></div>正在查詢訂單資料...</div>';
+    resultDiv.style.display = 'block';
+
+    try {
+        let orders = [];
+        // 優先使用全局的 callApi 函數，如果存在
+        if (typeof callApi === 'function') {
+            const response = await callApi('searchOrder', { phone: phone });
+            if (response && response.success && Array.isArray(response.data)) {
+                orders = response.data;
+            } else {
+                console.warn('callApi searchOrder returned unexpected data:', response);
+            }
+        } else if (typeof GAS_API_URL !== 'undefined') {
+            // 如果沒有 callApi，直接使用 fetch 呼叫 GAS API
+            const response = await fetch(`${GAS_API_URL}?action=searchOrder&phone=${encodeURIComponent(phone)}`);
+            if (response.ok) {
+                const result = await response.json();
+                if (result.success && Array.isArray(result.data)) {
+                    orders = result.data;
+                } else {
+                    console.warn('Direct fetch searchOrder returned unexpected data:', result);
+                }
+            } else {
+                throw new Error(`API request failed with status ${response.status}`);
+            }
+        } else {
+            throw new Error('API endpoint or callApi function not found.');
+        }
+
+        if (orders.length === 0) {
+            resultDiv.innerHTML = '<div style="padding:20px; text-align:center; color:#666;">查無訂單資料。</div>';
+        } else {
+            let html = '<div class="order-results-container">';
+            orders.forEach(order => {
+                const statusColor = {
+                    '待處理': 'orange',
+                    '已確認': 'blue',
+                    '已出貨': 'green',
+                    '已完成': 'green',
+                    '已取消': 'red'
+                }[order.status] || 'gray';
+
+                html += `
+                    <div class="order-card">
+                        <h3>訂單號碼: ${order.orderId}</h3>
+                        <p><strong>商店名稱:</strong> ${order.storeName || 'N/A'}</p>
+                        <p><strong>訂單狀態:</strong> <span style="color:${statusColor}; font-weight:bold;">${order.status}</span></p>
+                        <p><strong>訂單總額:</strong> NT$ ${order.totalAmount ? order.totalAmount.toLocaleString() : '0'}</p>
+                        <p><strong>收件地址:</strong> ${order.address || 'N/A'}</p>
+                        <div class="order-items">
+                            <h4>商品明細:</h4>
+                            <ul>
+                                ${order.items && order.items.length > 0 ? order.items.map(item => `
+                                    <li>${item.name} x ${item.quantity} (${item.price ? 'NT$' + item.price.toLocaleString() : 'N/A'})</li>
+                                `).join('') : '<li>無商品明細</li>'}
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            resultDiv.innerHTML = html;
+        }
+    } catch (e) {
+        console.error('Order search error:', e);
+        resultDiv.innerHTML = `<div style="color:red; text-align:center; padding:20px;">查詢錯誤: ${e.message}</div>`;
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = originalBtnText;
+        }
+    }
+};
+
 const PageRenderer = {
     // GitHub Raw URL for layout config
     LAYOUT_URL: 'https://raw.githubusercontent.com/vvstudiocode/korea/main/layout.json',
