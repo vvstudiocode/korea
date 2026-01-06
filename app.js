@@ -71,6 +71,17 @@ async function initStoreMode() {
         return;
     }
 
+    // KOL模式: 立即清空載入畫面文字，避免顯示預設的 OMO Select
+    const loadingTexts = document.querySelectorAll('.loading-text, .loading-screen h2, #loadingText');
+    loadingTexts.forEach(el => {
+        el.textContent = ''; // 清空文字，只留轉圈圈
+    });
+
+    // 或者顯示載入中...
+    // document.querySelector('.loading-text').textContent = 'Loading...';
+
+    currentStoreId = storeId;
+
     console.log(`🏪 KOL 商店模式: ${storeId}`);
     currentStoreId = storeId;
 

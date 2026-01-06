@@ -1122,7 +1122,6 @@ function renderKolOrders(orders) {
             <td style="max-width:200px;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:120px;">${firstItem}</span>
-                    <span style="font-size:12px; color:#999;">▼</span>
                 </div>
             </td>
             <td>${formatCurrency(o.total)}</td>

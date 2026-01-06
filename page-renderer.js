@@ -998,15 +998,23 @@ const PageRenderer = {
                 btn.disabled = true;
             } else {
                 btn.className = 'card-add-btn';
-                btn.style.cssText = 'width:100%; padding:12px; background:#D68C94; color:white; border:none; border-radius:30px; cursor:pointer; font-weight:500; transition: background 0.3s;';
-                btn.onclick = (e) => {
-                    e.stopPropagation();
+                btn.style.cssText = 'width:100%; padding:12px; background:#D68C94; color:white; border:none; border-radius:30px; cursor:pointer; font-weight:500; transition: background 0.3s; position: relative; z-index: 20;'; // Added z-index
+
+                // 修正按鈕點擊事件，確保不冒泡且有效
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation(); // 阻止冒泡到卡片
+                    console.log('🛒 Button Clicked for:', p.id);
+
                     if (hasOptions) {
-                        if (typeof showProductDetail === 'function') showProductDetail(p.id);
+                        if (typeof window.showProductDetail === 'function') window.showProductDetail(p.id);
+                        else if (typeof showProductDetail === 'function') showProductDetail(p.id);
                     } else {
-                        if (typeof addToCartById === 'function') addToCartById(p.id);
+                        // 如果無規格，直接加入購物車或打開詳情(目前統一打開詳情較安全)
+                        // 若要直接加入:
+                        if (typeof window.addToCartById === 'function') window.addToCartById(p.id);
+                        else if (typeof addToCartById === 'function') addToCartById(p.id);
                     }
-                };
+                });
             }
             btn.textContent = btnText;
 
