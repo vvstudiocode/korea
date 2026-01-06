@@ -713,262 +713,264 @@ const PageRenderer = {
             : section.querySelector('.products-grid');
         if (!container) return;
 
-        try {
-            // 兼容性處理：支援多種商品資料來源
-            // 優先順序：根據模式決定
-            // KOL Mode: ONLY kolProducts
-            if (this.currentStoreId) {
-                if (typeof kolProducts !== 'undefined' && kolProducts.length > 0) {
-                    allProducts = kolProducts;
-                    productSource = 'kolProducts (Strict)';
-                } else {
-                    // 嘗試從全域尋找 (app.js 可能已載入到 window.products 但其實是 kol data)
-                    // 但為了保險，若在 KOL 模式，我們不應回退到預設的 HQ products，除非確定它是 KOL 的資料
-                    if (typeof products !== 'undefined' && products.length > 0 && products[0].storeId === this.currentStoreId) {
-                        allProducts = products;
-                        productSource = 'products (KOL Verified)';
-                    }
-                }
+        // 兼容性處理：支援多種商品資料來源
+        let allProducts = [];
+        let productSource = 'none';
+
+        // 優先順序：根據模式決定
+        // KOL Mode: ONLY kolProducts
+        if (this.currentStoreId) {
+            if (typeof kolProducts !== 'undefined' && kolProducts.length > 0) {
+                allProducts = kolProducts;
+                productSource = 'kolProducts (Strict)';
             } else {
-                // Official Mode
-                if (typeof products !== 'undefined' && products.length > 0) {
+                // 嘗試從全域尋找 (app.js 可能已載入到 window.products 但其實是 kol data)
+                // 但為了保險，若在 KOL 模式，我們不應回退到預設的 HQ products，除非確定它是 KOL 的資料
+                if (typeof products !== 'undefined' && products.length > 0 && products[0].storeId === this.currentStoreId) {
                     allProducts = products;
-                    productSource = 'products';
-                } else if (typeof availableProducts !== 'undefined' && availableProducts.length > 0) {
-                    // 後台預覽模式可能用到
-                    allProducts = availableProducts;
-                    productSource = 'availableProducts';
-                } else if (typeof currentProducts !== 'undefined' && currentProducts.length > 0) {
-                    allProducts = currentProducts;
-                    productSource = 'currentProducts';
+                    productSource = 'products (KOL Verified)';
                 }
             }
-
-            console.log(`📦 商品來源: ${productSource}, 數量: ${allProducts.length}`);
-
-            // 確保資料已加載
-            if (allProducts.length === 0) {
-                console.log('⏳ 嘗試載入商品資料...');
-                if (typeof loadProducts === 'function') {
-                    await loadProducts();
-                    allProducts = typeof products !== 'undefined' ? products : [];
-                    console.log(`✅ loadProducts 完成, products: ${allProducts.length}`);
-                } else if (typeof loadMyProducts === 'function') {
-                    await loadMyProducts(); // KOL 後台
-                    allProducts = typeof kolProducts !== 'undefined' ? kolProducts : [];
-                    console.log(`✅ loadMyProducts 完成, kolProducts: ${allProducts.length}`);
-                } else if (typeof fetchProducts === 'function') {
-                    await fetchProducts(); // 管理後台的函數
-                    allProducts = typeof currentProducts !== 'undefined' ? currentProducts : [];
-                    console.log(`✅ fetchProducts 完成, currentProducts: ${allProducts.length}`);
-                }
+        } else {
+            // Official Mode
+            if (typeof products !== 'undefined' && products.length > 0) {
+                allProducts = products;
+                productSource = 'products';
+            } else if (typeof availableProducts !== 'undefined' && availableProducts.length > 0) {
+                // 後台預覽模式可能用到
+                allProducts = availableProducts;
+                productSource = 'availableProducts';
+            } else if (typeof currentProducts !== 'undefined' && currentProducts.length > 0) {
+                allProducts = currentProducts;
+                productSource = 'currentProducts';
             }
-
-            let filtered = [];
-
-            // 根據來源類型篩選商品
-            if (comp.sourceType === 'manual' && comp.productIds && comp.productIds.length > 0) {
-                // 手動選擇：依照 ID 列表順序找出商品
-                console.log(`🎯 手動選擇模式, 商品IDs: ${comp.productIds.join(', ')}`);
-                comp.productIds.forEach(pid => {
-                    const found = allProducts.find(p => String(p.id) === String(pid));
-                    if (found) filtered.push(found);
-                });
-            } else {
-                // 分類篩選 (預設)
-                filtered = allProducts;
-                const targetCategory = comp.category || '全部';
-                console.log(`📂 分類篩選模式, 目標分類: "${targetCategory}"`);
-
-                if (targetCategory && targetCategory !== '全部') {
-                    filtered = allProducts.filter(p => p.category === targetCategory);
-                    console.log(`   篩選後: ${filtered.length} 項商品 (分類匹配)`);
-
-                    // 如果分類完全匹配沒有結果，嘗試模糊匹配
-                    if (filtered.length === 0 && allProducts.length > 0) {
-                        console.log('   嘗試模糊匹配分類...');
-                        filtered = allProducts.filter(p =>
-                            p.category && p.category.includes(targetCategory)
-                        );
-                        console.log(`   模糊匹配後: ${filtered.length} 項商品`);
-                    }
-                }
-
-                // 只有自動篩選才需要限制數量，手動選擇則顯示全部已選
-                const limit = parseInt(comp.limit) || 4;
-                filtered = filtered.slice(0, limit);
-            }
-
-            // 偵錯：列出可用的分類
-            if (filtered.length === 0 && allProducts.length > 0) {
-                const categories = [...new Set(allProducts.map(p => p.category).filter(Boolean))];
-                console.log('🔍 可用分類:', categories.join(', '));
-                console.log('🔍 前3項商品:', allProducts.slice(0, 3).map(p => `${p.name}(${p.category})`).join(', '));
-            }
-
-            container.innerHTML = '';
-            if (filtered.length === 0) {
-                const msg = comp.sourceType === 'manual' ? '尚未選擇展示商品' : '此分類暫無商品';
-                console.warn(`⚠️ ${msg} (allProducts: ${allProducts.length}, category: ${comp.category})`);
-                container.innerHTML = `<div class="empty-msg">${msg}</div>`;
-                return;
-            }
-
-            filtered.forEach(p => {
-                // 確保 p.id 存在且 p.image 是字串
-                if (!p.id) p.id = 'PID-' + Math.random().toString(36).substr(2, 5);
-                const card = this.createFallbackProductCard(p);
-                container.appendChild(card);
-            });
-
-            // 為輪播添加觸控滑動支援
-            if (useCarousel) {
-                this.initCarouselTouch(container);
-            }
-        } catch (err) {
-            console.error('Failed to load products for section:', err);
-            container.innerHTML = '<div class="error-msg">載入失敗</div>';
         }
-    },
+
+        console.log(`📦 商品來源: ${productSource}, 數量: ${allProducts.length}`);
+
+        // 確保資料已加載
+        if (allProducts.length === 0) {
+            console.log('⏳ 嘗試載入商品資料...');
+            if (typeof loadProducts === 'function') {
+                await loadProducts();
+                allProducts = typeof products !== 'undefined' ? products : [];
+                console.log(`✅ loadProducts 完成, products: ${allProducts.length}`);
+            } else if (typeof loadMyProducts === 'function') {
+                await loadMyProducts(); // KOL 後台
+                allProducts = typeof kolProducts !== 'undefined' ? kolProducts : [];
+                console.log(`✅ loadMyProducts 完成, kolProducts: ${allProducts.length}`);
+            } else if (typeof fetchProducts === 'function') {
+                await fetchProducts(); // 管理後台的函數
+                allProducts = typeof currentProducts !== 'undefined' ? currentProducts : [];
+                console.log(`✅ fetchProducts 完成, currentProducts: ${allProducts.length}`);
+            }
+        }
+
+        let filtered = [];
+
+        // 根據來源類型篩選商品
+        if (comp.sourceType === 'manual' && comp.productIds && comp.productIds.length > 0) {
+            // 手動選擇：依照 ID 列表順序找出商品
+            console.log(`🎯 手動選擇模式, 商品IDs: ${comp.productIds.join(', ')}`);
+            comp.productIds.forEach(pid => {
+                const found = allProducts.find(p => String(p.id) === String(pid));
+                if (found) filtered.push(found);
+            });
+        } else {
+            // 分類篩選 (預設)
+            filtered = allProducts;
+            const targetCategory = comp.category || '全部';
+            console.log(`📂 分類篩選模式, 目標分類: "${targetCategory}"`);
+
+            if (targetCategory && targetCategory !== '全部') {
+                filtered = allProducts.filter(p => p.category === targetCategory);
+                console.log(`   篩選後: ${filtered.length} 項商品 (分類匹配)`);
+
+                // 如果分類完全匹配沒有結果，嘗試模糊匹配
+                if (filtered.length === 0 && allProducts.length > 0) {
+                    console.log('   嘗試模糊匹配分類...');
+                    filtered = allProducts.filter(p =>
+                        p.category && p.category.includes(targetCategory)
+                    );
+                    console.log(`   模糊匹配後: ${filtered.length} 項商品`);
+                }
+            }
+
+            // 只有自動篩選才需要限制數量，手動選擇則顯示全部已選
+            const limit = parseInt(comp.limit) || 4;
+            filtered = filtered.slice(0, limit);
+        }
+
+        // 偵錯：列出可用的分類
+        if (filtered.length === 0 && allProducts.length > 0) {
+            const categories = [...new Set(allProducts.map(p => p.category).filter(Boolean))];
+            console.log('🔍 可用分類:', categories.join(', '));
+            console.log('🔍 前3項商品:', allProducts.slice(0, 3).map(p => `${p.name}(${p.category})`).join(', '));
+        }
+
+        container.innerHTML = '';
+        if (filtered.length === 0) {
+            const msg = comp.sourceType === 'manual' ? '尚未選擇展示商品' : '此分類暫無商品';
+            console.warn(`⚠️ ${msg} (allProducts: ${allProducts.length}, category: ${comp.category})`);
+            container.innerHTML = `<div class="empty-msg">${msg}</div>`;
+            return;
+        }
+
+        filtered.forEach(p => {
+            // 確保 p.id 存在且 p.image 是字串
+            if (!p.id) p.id = 'PID-' + Math.random().toString(36).substr(2, 5);
+            const card = this.createFallbackProductCard(p);
+            container.appendChild(card);
+        });
+
+        // 為輪播添加觸控滑動支援
+        if (useCarousel) {
+            this.initCarouselTouch(container);
+        }
+    } catch(err) {
+        console.error('Failed to load products for section:', err);
+        container.innerHTML = '<div class="error-msg">載入失敗</div>';
+    }
+},
 
     // 輪播滑動功能
     scrollCarousel: function (btn, direction) {
         const wrapper = btn.closest('.products-carousel-wrapper');
-        const carousel = wrapper.querySelector('.products-carousel');
-        const scrollAmount = 300; // 每次滾動的距離
-        carousel.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
+const carousel = wrapper.querySelector('.products-carousel');
+const scrollAmount = 300; // 每次滾動的距離
+carousel.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
     },
 
-    // 觸控滑動支援
-    initCarouselTouch: function (carousel) {
-        let isDown = false;
-        let startX;
-        let scrollLeft;
+// 觸控滑動支援
+initCarouselTouch: function (carousel) {
+    let isDown = false;
+    let startX;
+    let scrollLeft;
 
-        carousel.addEventListener('mousedown', (e) => {
-            isDown = true;
-            carousel.style.cursor = 'grabbing';
-            startX = e.pageX - carousel.offsetLeft;
-            scrollLeft = carousel.scrollLeft;
-        });
+    carousel.addEventListener('mousedown', (e) => {
+        isDown = true;
+        carousel.style.cursor = 'grabbing';
+        startX = e.pageX - carousel.offsetLeft;
+        scrollLeft = carousel.scrollLeft;
+    });
 
-        carousel.addEventListener('mouseleave', () => {
-            isDown = false;
-            carousel.style.cursor = 'grab';
-        });
+    carousel.addEventListener('mouseleave', () => {
+        isDown = false;
+        carousel.style.cursor = 'grab';
+    });
 
-        carousel.addEventListener('mouseup', () => {
-            isDown = false;
-            carousel.style.cursor = 'grab';
-        });
+    carousel.addEventListener('mouseup', () => {
+        isDown = false;
+        carousel.style.cursor = 'grab';
+    });
 
-        carousel.addEventListener('mousemove', (e) => {
-            if (!isDown) return;
-            e.preventDefault();
-            const x = e.pageX - carousel.offsetLeft;
-            const walk = (x - startX) * 2;
-            carousel.scrollLeft = scrollLeft - walk;
-        });
-    },
+    carousel.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - carousel.offsetLeft;
+        const walk = (x - startX) * 2;
+        carousel.scrollLeft = scrollLeft - walk;
+    });
+},
 
-    createFallbackProductCard: function (p) {
-        const card = document.createElement('div');
-        card.className = 'product-card system-card';
-        card.style.cssText = 'display:block; width:100%; text-align:center; cursor:pointer; background:transparent;';
-        card.setAttribute('data-id', p.id);
-        card.onclick = () => { if (typeof showProductDetail === 'function') showProductDetail(p.id); };
+createFallbackProductCard: function (p) {
+    const card = document.createElement('div');
+    card.className = 'product-card system-card';
+    card.style.cssText = 'display:block; width:100%; text-align:center; cursor:pointer; background:transparent;';
+    card.setAttribute('data-id', p.id);
+    card.onclick = () => { if (typeof showProductDetail === 'function') showProductDetail(p.id); };
 
-        try {
-            // 圖片網址處理
-            let imageUrl = 'https://via.placeholder.com/400?text=No+Image';
-            const rawImg = p.image || p.prodImage || p.img || '';
-            const imgStr = String(rawImg).trim();
-            if (imgStr && imgStr !== '' && imgStr !== 'undefined' && imgStr !== 'null') {
-                imageUrl = imgStr.split(',')[0].trim();
-            }
-
-            const hasOptions = p.options && (typeof p.options === 'string' ? p.options !== '{}' : Object.keys(p.options).length > 0);
-
-            // 判斷庫存狀態
-            // 判斷庫存狀態
-            // 若有規格，檢查是否所有規格都已售完；否則檢查主庫存
-            let isSoldOut = false;
-            if (hasOptions && p.variants && Array.isArray(p.variants) && p.variants.length > 0) {
-                const hasVariantStock = p.variants.some(v => Number(v.stock) > 0);
-                isSoldOut = !hasVariantStock;
-            } else {
-                const stockVal = Number(p.stock !== undefined ? p.stock : 999);
-                isSoldOut = stockVal <= 0;
-            }
-
-            let btnText;
-            if (isSoldOut) {
-                btnText = '已售完';
-            } else {
-                btnText = hasOptions ? '選擇規格' : '加入購物車';
-            }
-
-            // 使用 DOM 建立元素避免 HTML 跳脫問題
-            const imgBox = document.createElement('div');
-            imgBox.className = 'card-img-box';
-            imgBox.style.cssText = 'width:100%; aspect-ratio:1/1; background:#f5f5f5; border-radius:12px; overflow:hidden; margin-bottom:15px; position:relative;';
-
-            const img = document.createElement('img');
-            img.src = imageUrl;
-            img.alt = p.name || '';
-            img.loading = 'lazy';
-            img.style.cssText = 'width:100%; height:100%; object-fit:cover; display:block;';
-            img.onerror = function () {
-                this.style.display = 'none';
-                this.parentElement.innerHTML = '<div style="padding:80px 10px; color:#999;">⚠️ 圖片載入失敗</div>';
-            };
-            imgBox.appendChild(img);
-
-            const infoBox = document.createElement('div');
-            infoBox.className = 'card-info-box';
-            infoBox.style.cssText = 'padding:0; width:100%;';
-
-            const title = document.createElement('h3');
-            title.style.cssText = 'font-size:1.1rem; font-weight:500; margin-bottom:8px; height:2.8em; line-height:1.4; overflow:hidden; color:#333; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;';
-            title.textContent = p.name || '';
-
-            const price = document.createElement('div');
-            price.style.cssText = 'font-weight:700; font-size:1.1rem; margin-bottom:12px; color:#333;';
-            // 優先使用 customPrice（KOL商品售價），否則使用 price
-            const displayPrice = p.customPrice || p.price || 0;
-            price.textContent = 'NT$ ' + displayPrice;
-
-            const btn = document.createElement('button');
-            if (isSoldOut) {
-                btn.className = 'card-add-btn sold-out';
-                btn.style.cssText = 'width:100%; padding:12px; background:#ccc; color:#fff; border:none; border-radius:30px; cursor:not-allowed; font-weight:500;';
-                btn.disabled = true;
-            } else {
-                btn.className = 'card-add-btn';
-                btn.style.cssText = 'width:100%; padding:12px; background:#D68C94; color:white; border:none; border-radius:30px; cursor:pointer; font-weight:500; transition: background 0.3s;';
-                btn.onclick = (e) => {
-                    e.stopPropagation();
-                    if (hasOptions) {
-                        if (typeof showProductDetail === 'function') showProductDetail(p.id);
-                    } else {
-                        if (typeof addToCartById === 'function') addToCartById(p.id);
-                    }
-                };
-            }
-            btn.textContent = btnText;
-
-            infoBox.appendChild(title);
-            infoBox.appendChild(price);
-            infoBox.appendChild(btn);
-
-            card.appendChild(imgBox);
-            card.appendChild(infoBox);
-
-        } catch (e) {
-            console.error('Render Card Error:', e);
-            card.innerHTML = `<div style="padding:20px; border:1px solid red; color:red;">商品渲染錯誤: ${p ? p.name : 'Unknown'}</div>`;
+    try {
+        // 圖片網址處理
+        let imageUrl = 'https://via.placeholder.com/400?text=No+Image';
+        const rawImg = p.image || p.prodImage || p.img || '';
+        const imgStr = String(rawImg).trim();
+        if (imgStr && imgStr !== '' && imgStr !== 'undefined' && imgStr !== 'null') {
+            imageUrl = imgStr.split(',')[0].trim();
         }
 
-        return card;
+        const hasOptions = p.options && (typeof p.options === 'string' ? p.options !== '{}' : Object.keys(p.options).length > 0);
+
+        // 判斷庫存狀態
+        // 判斷庫存狀態
+        // 若有規格，檢查是否所有規格都已售完；否則檢查主庫存
+        let isSoldOut = false;
+        if (hasOptions && p.variants && Array.isArray(p.variants) && p.variants.length > 0) {
+            const hasVariantStock = p.variants.some(v => Number(v.stock) > 0);
+            isSoldOut = !hasVariantStock;
+        } else {
+            const stockVal = Number(p.stock !== undefined ? p.stock : 999);
+            isSoldOut = stockVal <= 0;
+        }
+
+        let btnText;
+        if (isSoldOut) {
+            btnText = '已售完';
+        } else {
+            btnText = hasOptions ? '選擇規格' : '加入購物車';
+        }
+
+        // 使用 DOM 建立元素避免 HTML 跳脫問題
+        const imgBox = document.createElement('div');
+        imgBox.className = 'card-img-box';
+        imgBox.style.cssText = 'width:100%; aspect-ratio:1/1; background:#f5f5f5; border-radius:12px; overflow:hidden; margin-bottom:15px; position:relative;';
+
+        const img = document.createElement('img');
+        img.src = imageUrl;
+        img.alt = p.name || '';
+        img.loading = 'lazy';
+        img.style.cssText = 'width:100%; height:100%; object-fit:cover; display:block;';
+        img.onerror = function () {
+            this.style.display = 'none';
+            this.parentElement.innerHTML = '<div style="padding:80px 10px; color:#999;">⚠️ 圖片載入失敗</div>';
+        };
+        imgBox.appendChild(img);
+
+        const infoBox = document.createElement('div');
+        infoBox.className = 'card-info-box';
+        infoBox.style.cssText = 'padding:0; width:100%;';
+
+        const title = document.createElement('h3');
+        title.style.cssText = 'font-size:1.1rem; font-weight:500; margin-bottom:8px; height:2.8em; line-height:1.4; overflow:hidden; color:#333; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;';
+        title.textContent = p.name || '';
+
+        const price = document.createElement('div');
+        price.style.cssText = 'font-weight:700; font-size:1.1rem; margin-bottom:12px; color:#333;';
+        // 優先使用 customPrice（KOL商品售價），否則使用 price
+        const displayPrice = p.customPrice || p.price || 0;
+        price.textContent = 'NT$ ' + displayPrice;
+
+        const btn = document.createElement('button');
+        if (isSoldOut) {
+            btn.className = 'card-add-btn sold-out';
+            btn.style.cssText = 'width:100%; padding:12px; background:#ccc; color:#fff; border:none; border-radius:30px; cursor:not-allowed; font-weight:500;';
+            btn.disabled = true;
+        } else {
+            btn.className = 'card-add-btn';
+            btn.style.cssText = 'width:100%; padding:12px; background:#D68C94; color:white; border:none; border-radius:30px; cursor:pointer; font-weight:500; transition: background 0.3s;';
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                if (hasOptions) {
+                    if (typeof showProductDetail === 'function') showProductDetail(p.id);
+                } else {
+                    if (typeof addToCartById === 'function') addToCartById(p.id);
+                }
+            };
+        }
+        btn.textContent = btnText;
+
+        infoBox.appendChild(title);
+        infoBox.appendChild(price);
+        infoBox.appendChild(btn);
+
+        card.appendChild(imgBox);
+        card.appendChild(infoBox);
+
+    } catch (e) {
+        console.error('Render Card Error:', e);
+        card.innerHTML = `<div style="padding:20px; border:1px solid red; color:red;">商品渲染錯誤: ${p ? p.name : 'Unknown'}</div>`;
     }
+
+    return card;
+}
 };

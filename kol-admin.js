@@ -523,11 +523,10 @@ function renderPickerProducts(products) {
 
         return `
         <div class="product-card ${alreadyAdded ? 'disabled' : ''} ${isSelected ? 'selected' : ''}" 
-             style="cursor: default; pointer-events: none; opacity: 0.7;">
+             onclick="${alreadyAdded ? '' : `toggleProductSelection('${productId}')`}">
              ${!alreadyAdded ? `
              <div class="checkbox-overlay">
-                <input type="checkbox" ${isSelected ? 'checked' : ''} style="pointer-events:none; display:none;">
-                <span style="color:red; font-size:0.8em; background:white; padding:2px 5px; border-radius:4px; box-shadow:0 0 2px rgba(0,0,0,0.2);">暫停選擇</span>
+                <input type="checkbox" ${isSelected ? 'checked' : ''} style="pointer-events:none;">
              </div>` : ''}
             <img src="${imageUrl}" class="product-card-img">
             <div class="product-card-info">
