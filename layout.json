@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastUpdated": "2026-01-06T03:48:24.351Z",
+  "lastUpdated": "2026-01-06T13:13:49.532Z",
   "sections": [
     {
       "type": "product_list",
@@ -40,5 +40,10 @@
         "content": "採購時程：代購人員將於 1/7~1/14採購。若遇商品缺貨、斷貨或限購，將第一時間通知您。\n運送時程：商品採買後將統一 1/16寄出"
       }
     ]
+  },
+  "global": {
+    "backgroundColor": "#f9dcdc",
+    "fontFamily": "Noto Sans TC",
+    "fontSize": "16px"
   }
 }
