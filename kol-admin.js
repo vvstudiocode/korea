@@ -243,6 +243,7 @@ function showDashboard() {
 
     // 設定 Header
     document.getElementById('storeNameHeader').textContent = kolStoreInfo.storeName || '我的賣場';
+    document.title = kolStoreInfo.storeName || '團購主後台管理系統';
     document.getElementById('storeUrlLink').href = `https://vvstudiocode.github.io/korea/index.html?store=${kolStoreId}`;
 
     // 套用主題色
@@ -317,6 +318,14 @@ async function kolSwitchTab(tabId) {
         }
         window.dispatchEvent(new Event('resize'));
     }
+
+    // 切換 Tab 後滾動到最上方
+    const currentViewId = tabId === 'layout' ? 'builderSection' : (tabId === 'dashboard' ? 'dashboardView' : tabId + 'View');
+    const viewEl = document.getElementById(currentViewId);
+    if (viewEl) {
+        viewEl.scrollTop = 0;
+    }
+    window.scrollTo(0, 0);
 }
 
 function toggleMobileSidebar() {
