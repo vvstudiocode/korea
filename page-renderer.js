@@ -715,22 +715,33 @@ const PageRenderer = {
 
         try {
             // 兼容性處理：支援多種商品資料來源
-            // 優先順序：kolProducts (KOL已選商品) > availableProducts (KOL可選商品) > products (前端) > currentProducts (admin)
-            let allProducts = [];
-            let productSource = 'none';
-
-            if (typeof kolProducts !== 'undefined' && kolProducts.length > 0) {
-                allProducts = kolProducts;
-                productSource = 'kolProducts';
-            } else if (typeof availableProducts !== 'undefined' && availableProducts.length > 0) {
-                allProducts = availableProducts;
-                productSource = 'availableProducts';
-            } else if (typeof products !== 'undefined' && products.length > 0) {
-                allProducts = products;
-                productSource = 'products';
-            } else if (typeof currentProducts !== 'undefined' && currentProducts.length > 0) {
-                allProducts = currentProducts;
-                productSource = 'currentProducts';
+            // 優先順序：根據模式決定
+            // KOL Mode: ONLY kolProducts
+            if (this.currentStoreId) {
+                if (typeof kolProducts !== 'undefined' && kolProducts.length > 0) {
+                    allProducts = kolProducts;
+                    productSource = 'kolProducts (Strict)';
+                } else {
+                    // 嘗試從全域尋找 (app.js 可能已載入到 window.products 但其實是 kol data)
+                    // 但為了保險，若在 KOL 模式，我們不應回退到預設的 HQ products，除非確定它是 KOL 的資料
+                    if (typeof products !== 'undefined' && products.length > 0 && products[0].storeId === this.currentStoreId) {
+                        allProducts = products;
+                        productSource = 'products (KOL Verified)';
+                    }
+                }
+            } else {
+                // Official Mode
+                if (typeof products !== 'undefined' && products.length > 0) {
+                    allProducts = products;
+                    productSource = 'products';
+                } else if (typeof availableProducts !== 'undefined' && availableProducts.length > 0) {
+                    // 後台預覽模式可能用到
+                    allProducts = availableProducts;
+                    productSource = 'availableProducts';
+                } else if (typeof currentProducts !== 'undefined' && currentProducts.length > 0) {
+                    allProducts = currentProducts;
+                    productSource = 'currentProducts';
+                }
             }
 
             console.log(`📦 商品來源: ${productSource}, 數量: ${allProducts.length}`);

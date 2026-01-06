@@ -201,6 +201,8 @@ async function loadProducts() {
         // KOL 商店模式下，商品在 products 欄位
         if (currentStoreId && result.data && result.data.products) {
             result.data = result.data.products;
+            // 清除可能存在的 HQ products 防止混淆
+            window.products = [];
         }
 
         if (result.success) {
