@@ -1334,12 +1334,12 @@ async function handleProfileUpdate(event) {
             const base64Content = base64.split(',')[1];
 
             // callKolApi for upload
-            // 注意: code.gs 需要 kolUploadImage 返回 brand
+            // Backend expects: imageBase64 (full string), fileName. storeId is injected by callKolApi.
             const uploadRes = await callKolApi('kolUploadImage', {
                 fileName: logoFile.name,
-                content: base64Content,
-                mimeType: logoFile.type,
-                brand: profileData.storeName
+                imageBase64: base64, // Pass full base64 string
+                // mimeType and brand are not used by backend kolUploadImage/handleKolAction logic for this call specifically
+                // but we pass fileName which is used.
             });
 
             if (uploadRes.success) {
