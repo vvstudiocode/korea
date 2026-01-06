@@ -300,66 +300,49 @@
                                 <label>匯款帳戶</label>
                                 <input type="text" id="settingsBankAccount" placeholder="銀行代碼 + 帳號">
                             </div>
-
-                            <div class="section-card">
-                                <h3>🔑 修改密碼</h3>
-                                <form id="passwordForm" onsubmit="handlePasswordChange(event)">
-                                    <div class="form-group">
-                                        <label>目前密碼</label>
-                                        <input type="password" id="currentPassword" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>新密碼</label>
-                                        <input type="password" id="newPassword" required minlength="6">
-                                    </div>
-                                    <div class="form-group">
-                                        <label>確認新密碼</label>
-                                        <input type="password" id="confirmPassword" required minlength="6">
-                                    </div>
-                                    <button type="submit" class="btn-primary">確認修改</button>
-                                </form>
-                            </div>
                             <button type="submit" class="btn-primary" style="margin-top: 20px;">儲存設定</button>
                         </form>
                     </div>
+
+
+                </div>
+            </div>
+    </div>
+
+    <!-- 6. 排版管理 (Page Builder) -->
+    <div id="builderSection" class="view-section" style="display: none; padding: 0; height: calc(100vh - 70px);">
+        <div class="visual-builder">
+            <!-- 左側：編輯區 -->
+            <div class="builder-sidebar">
+                <div class="components-list" id="builderComponentsList">
+                    <!-- 由 page-builder.js 動態產生 -->
+                </div>
+                <div class="sidebar-footer">
+                    <button class="save-btn" id="saveLayoutBtn" onclick="PageBuilder.saveLayout()">儲存排版</button>
                 </div>
             </div>
 
-            <!-- 6. 排版管理 (Page Builder) -->
-            <div id="builderSection" class="view-section"
-                style="display: none; padding: 0; height: calc(100vh - 70px);">
-                <div class="visual-builder">
-                    <!-- 左側：編輯區 -->
-                    <div class="builder-sidebar">
-                        <div class="components-list" id="builderComponentsList">
-                            <!-- 由 page-builder.js 動態產生 -->
-                        </div>
-                        <div class="sidebar-footer">
-                            <button class="save-btn" id="saveLayoutBtn" onclick="PageBuilder.saveLayout()">儲存排版</button>
-                        </div>
+            <!-- 右側：預覽區 -->
+            <div class="builder-preview">
+                <div class="preview-toolbar">
+                    <div class="device-toggles">
+                        <button class="device-btn active" id="view-desktop"
+                            onclick="PageBuilder.setPreviewMode('desktop')">💻 電腦版</button>
+                        <button class="device-btn" id="view-mobile" onclick="PageBuilder.setPreviewMode('mobile')">📱
+                            手機版</button>
                     </div>
-
-                    <!-- 右側：預覽區 -->
-                    <div class="builder-preview">
-                        <div class="preview-toolbar">
-                            <div class="device-toggles">
-                                <button class="device-btn active" id="view-desktop"
-                                    onclick="PageBuilder.setPreviewMode('desktop')">💻 電腦版</button>
-                                <button class="device-btn" id="view-mobile"
-                                    onclick="PageBuilder.setPreviewMode('mobile')">📱 手機版</button>
-                            </div>
-                            <div class="preview-status">即時預覽中</div>
-                        </div>
-                        <div class="preview-viewport" id="previewViewport">
-                            <div class="preview-container" id="pageBuilderPreviewRoot">
-                                <!-- 由 page-renderer.js 動態渲染 -->
-                            </div>
-                        </div>
+                    <div class="preview-status">即時預覽中</div>
+                </div>
+                <div class="preview-viewport" id="previewViewport">
+                    <div class="preview-container" id="pageBuilderPreviewRoot">
+                        <!-- 由 page-renderer.js 動態渲染 -->
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
 
-        </main>
+    </main>
     </div>
 
     <!-- 商品選擇 Modal -->

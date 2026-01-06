@@ -109,6 +109,11 @@ function callApi(subAction, payload = {}) {
 
     const mappedAction = actionMap[subAction] || subAction;
 
+    // 防止 payload 中的 storeId 為 null/undefined 覆蓋原本的 kolStoreId
+    if (payload.storeId === null || payload.storeId === undefined) {
+        delete payload.storeId;
+    }
+
     const requestBody = {
         action: 'kolAction',
         subAction: mappedAction,
@@ -1380,47 +1385,7 @@ async function handleProfileUpdate(event) {
     }
 }
 
-async function handlePasswordChange(event) {
-    event.preventDefault();
 
-    const currentPassword = document.getElementById('currentPassword').value;
-    const newPassword = document.getElementById('newPassword').value;
-    const confirmPassword = document.getElementById('confirmPassword').value;
-
-    if (newPassword !== confirmPassword) {
-        showToast('新密碼與確認密碼不一致', 'warning');
-        return;
-    }
-
-    if (newPassword.length < 6) {
-        showToast('新密碼至少需要 6 個字元', 'warning');
-        return;
-    }
-
-    const btn = event.target.querySelector('button[type="submit"]');
-    btn.disabled = true;
-    btn.textContent = '更新中...';
-
-    try {
-        const result = await callKolApi('kolChangePassword', { currentPassword, newPassword });
-        if (result.success) {
-            showToast('密碼已更新，請重新登入', 'success');
-            document.getElementById('passwordForm').reset();
-
-            // 登出讓使用者重新登入
-            setTimeout(() => {
-                kolLogout();
-            }, 2000);
-        } else {
-            showToast('更新失敗: ' + result.error, 'error');
-        }
-    } catch (err) {
-        showToast('更新失敗', 'error');
-    } finally {
-        btn.disabled = false;
-        btn.textContent = '更新密碼';
-    }
-}
 
 // Image Upload Helper
 function uploadToGitHub(file) {

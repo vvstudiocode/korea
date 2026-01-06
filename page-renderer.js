@@ -493,7 +493,7 @@ const PageRenderer = {
             <div class="hero-banner ${uid}">
                 <div class="hero-bg-desktop" style="background-image: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.4)), url('${imgDesktop}')"></div>
                 <div class="hero-bg-mobile" style="background-image: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.4)), url('${imgMobile}')"></div>
-                <div class="hero-content" style="text-align: ${align}; align-items: ${alignItems}">
+                <div class="hero-content" style="text-align: ${align}; align-items: ${alignItems}; color: ${comp.textColor || '#ffffff'};">
                     <h1>${comp.title || ''}</h1>
                     <p>${comp.subtitle || ''}</p>
                     ${comp.buttonText ? `<a href="${comp.buttonLink || '#'}" class="cta-button">${comp.buttonText}</a>` : ''}
