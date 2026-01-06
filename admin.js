@@ -70,18 +70,47 @@ function showLoadingOverlay() {
         loadingOverlay = document.createElement('div');
         loadingOverlay.id = 'loadingOverlay';
         loadingOverlay.className = 'loading-overlay';
-        loadingOverlay.innerHTML = `<video autoplay loop muted playsinline style="width: 150px; height: 150px; object-fit: contain;">
-            <source src="https://raw.githubusercontent.com/vvstudiocode/korea/main/omoloading.mp4" type="video/mp4">
-        </video>`;
+
+        // 使用 CSS Spinner，確保後台樣式正確
+        loadingOverlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        `;
+
+        loadingOverlay.innerHTML = `
+            <div class="spinner" style="
+                width: 40px; 
+                height: 40px; 
+                border: 4px solid #f3f3f3; 
+                border-top: 4px solid #3498db; 
+                border-radius: 50%; 
+                animation: adminSpin 1s linear infinite;">
+            </div>
+            <style>
+                @keyframes adminSpin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+            </style>
+        `;
         document.body.appendChild(loadingOverlay);
     }
-    loadingOverlay.classList.add('active');
+    loadingOverlay.style.display = 'flex';
 }
 
 function hideLoadingOverlay() {
     const loadingOverlay = document.getElementById('loadingOverlay');
     if (loadingOverlay) {
-        loadingOverlay.classList.remove('active');
+        loadingOverlay.style.display = 'none';
     }
 }
 
@@ -591,7 +620,7 @@ function fetchProducts(force = false) {
     const tbody = document.getElementById('productsTableBody');
     if (!force) tbody.innerHTML = '<tr><td colspan="11" class="loading-cell">載入中...</td></tr>';
 
-    callApi('getProductsAdmin', { _t: Date.now() })
+    return callApi('getProductsAdmin', { _t: Date.now() })
         .then(data => {
             if (data.success) {
                 currentProducts = data.data.products;

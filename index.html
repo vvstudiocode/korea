@@ -15,7 +15,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: #ffffff;
+            background: #fcfbfb;
             z-index: 9999;
             display: flex;
             flex-direction: column;
@@ -29,32 +29,12 @@
             pointer-events: none;
         }
 
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #D68C94;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 15px;
-        }
-
         .loading-text {
             color: #D68C94;
             font-family: 'Playfair Display', serif;
             font-size: 1.2rem;
             letter-spacing: 2px;
             font-weight: 600;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
         }
     </style>
     <link rel="stylesheet" href="page-renderer.css?v=1.0">
@@ -68,7 +48,11 @@
 <body>
     <!-- Loading Overlay -->
     <div id="loadingOverlay">
-        <div class="spinner"></div>
+        <video autoplay loop muted playsinline style="width: 150px; height: 150px; object-fit: contain;">
+            <source
+                src="https://raw.githubusercontent.com/vvstudiocode/korea/main/ce3ffe25-03c7-4f87-bfac-be6495d83780.mp4"
+                type="video/mp4">
+        </video>
         <div class="loading-text">OMO Select</div>
     </div>
     <!-- 導航列 -->
