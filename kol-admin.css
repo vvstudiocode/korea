@@ -1192,6 +1192,10 @@ body.sidebar-open {
 /* Visual Page Builder Layout */
 .visual-builder {
     display: flex;
+    flex-wrap: nowrap;
+    /* 確保不換行 */
+    width: 100%;
+    /* 佔滿容器寬度 */
     height: 100%;
     overflow: hidden;
     position: relative;

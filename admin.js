@@ -70,7 +70,9 @@ function showLoadingOverlay() {
         loadingOverlay = document.createElement('div');
         loadingOverlay.id = 'loadingOverlay';
         loadingOverlay.className = 'loading-overlay';
-        loadingOverlay.innerHTML = `<div class="spinner"></div>`;
+        loadingOverlay.innerHTML = `<video autoplay loop muted playsinline style="width: 150px; height: 150px; object-fit: contain;">
+            <source src="https://raw.githubusercontent.com/vvstudiocode/korea/main/omoloading.mp4" type="video/mp4">
+        </video>`;
         document.body.appendChild(loadingOverlay);
     }
     loadingOverlay.classList.add('active');
