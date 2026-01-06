@@ -698,18 +698,20 @@ function openEditMyProduct(productId) {
     const stockHint = document.getElementById('editStockHint');
 
     if (isOwn) {
-        stockInput.disabled = false;
-        stockHint.style.display = 'none';
         stockInput.placeholder = "設定庫存數量";
+        stockHint.style.display = 'none';
         // 對於自建商品，這裡是顯示 assignedStock 比較合理，因為 availableStock 是計算出來的
         // 不過後端 logic 是 update stock => assignedStock
         stockInput.value = product.assignedStock || 0;
     } else {
-        stockInput.disabled = true;
+        stockInput.placeholder = "設定庫存 (會影響可用庫存)";
         stockHint.style.display = 'block';
-        stockHint.textContent = "選品庫存由總部統一分配，無法修改";
+        stockHint.textContent = "修改庫存會更新總部分配數量，請謹慎調整";
         stockInput.value = product.availableStock; // 顯示可用庫存
     }
+
+    // 現在不論選品或自建，都允許修改庫存
+    stockInput.disabled = false;
 
     // 設置按鈕區
     const actionsDiv = document.querySelector('#editProductModal .modal-actions');
@@ -768,13 +770,12 @@ async function saveMyProduct() {
         status: status
     };
 
-    // 自建商品才允許更新庫存
-    if (product.type === 'own') {
-        if (isNaN(stock) || stock < 0) {
-            showToast('請輸入有效的庫存', 'warning');
-            return;
-        }
+    // 所有商品都允許更新庫存
+    if (!isNaN(stock) && stock >= 0) {
         updates.stock = stock;
+    } else if (stock < 0) {
+        showToast('請輸入有效的庫存', 'warning');
+        return;
     }
 
     showLoadingOverlay('儲存商品變更...');
