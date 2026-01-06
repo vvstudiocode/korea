@@ -68,17 +68,24 @@ async function initStoreMode() {
         const response = await fetch(`${GAS_API_URL}?action=getStoreProducts&storeId=${storeId}`);
         const result = await response.json();
 
+        console.log('📦 getStoreProducts API 響應:', result);
+
         if (result.success && result.data) {
+            // 商店資訊在 result.data.storeInfo
             currentStoreInfo = result.data.storeInfo || null;
 
             if (currentStoreInfo) {
+                console.log('✅ 商店資訊:', currentStoreInfo);
                 applyStoreTheme(currentStoreInfo);
+            } else {
+                console.warn('⚠️ result.data.storeInfo 為空');
             }
         } else {
-            console.warn('無法載入商店資訊，使用預設樣式');
+            console.warn('⚠️ 無法載入商店資訊，使用預設樣式');
+            console.warn('   API響應:', result);
         }
     } catch (error) {
-        console.error('載入商店資訊失敗:', error);
+        console.error('❌ 載入商店資訊失敗:', error);
     }
 }
 
@@ -198,11 +205,12 @@ async function loadProducts() {
         const response = await fetch(apiUrl);
         const result = await response.json();
 
-        // KOL 商店模式下，商品在 products 欄位
+        // KOL 商店模式下,商品在 result.data.products
         if (currentStoreId && result.data && result.data.products) {
+            // ⭐️ 關鍵修復:將KOL商品存到 kolProducts 變數供 PageRenderer 使用!
+            window.kolProducts = result.data.products;
             result.data = result.data.products;
-            // 清除可能存在的 HQ products 防止混淆
-            window.products = [];
+            console.log(`✅ 已將 ${result.data.length} 個KOL商品存到 window.kolProducts`);
         }
 
         if (result.success) {

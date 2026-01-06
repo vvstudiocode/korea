@@ -757,10 +757,17 @@ const PageRenderer = {
             // 確保資料已加載
             if (allProducts.length === 0) {
                 console.log('⏳ 嘗試載入商品資料...');
-                if (typeof loadProducts === 'function') {
+
+                // KOL模式: 需要重新調用loadProducts以確保kolProducts被填充
+                if (this.currentStoreId && typeof loadProducts === 'function') {
+                    await loadProducts(); // 會設置 window.kolProducts
+                    allProducts = typeof kolProducts !== 'undefined' ? kolProducts : [];
+                    console.log(`✅ loadProducts 完成 (KOL模式), kolProducts: ${allProducts.length}`);
+                } else if (typeof loadProducts === 'function') {
+                    // 總部模式: 一般的商品載入
                     await loadProducts();
                     allProducts = typeof products !== 'undefined' ? products : [];
-                    console.log(`✅ loadProducts 完成, products: ${allProducts.length}`);
+                    console.log(`✅ loadProducts 完成 (總部模式), products: ${allProducts.length}`);
                 } else if (typeof loadMyProducts === 'function') {
                     await loadMyProducts(); // KOL 後台
                     allProducts = typeof kolProducts !== 'undefined' ? kolProducts : [];
