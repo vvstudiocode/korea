@@ -209,22 +209,30 @@ async function loadProducts() {
         if (currentStoreId && result.data && result.data.products) {
             // ⭐️ 關鍵修復:將KOL商品存到 kolProducts 變數供 PageRenderer 使用!
             window.kolProducts = result.data.products;
+            // 🔥 清空products避免PageRenderer fallback載入總部商品
+            window.products = [];
+            products = []; // 本地變數也清空
             result.data = result.data.products;
-            console.log(`✅ 已將 ${result.data.length} 個KOL商品存到 window.kolProducts`);
+            console.log(`✅ KOL模式:已設置 ${result.data.products.length} 個商品到 kolProducts, products已清空`);
         }
 
         if (result.success) {
-            const newProducts = result.data;
-
-            // 如果資料有變化，更新顯示
-            if (JSON.stringify(newProducts) !== JSON.stringify(products)) {
-                console.log('🔄 更新商品資料');
-                products = newProducts;
-                saveProductsToCache(products);
-                displayProductsProgressive();
+            // KOL模式:不更新products(避免覆蓋空陣列)
+            if (currentStoreId) {
+                console.log('✅ KOL模式:商品已載入到 kolProducts,跳過 products 更新');
+                // PageRenderer會使用 kolProducts,所以不需要 displayProductsProgressive
             } else {
-                console.log('✅ 商品資料無變化');
-                saveProductsToCache(products); // 更新快取時間
+                // 總部模式:正常更新products
+                const newProducts = result.data;
+                if (JSON.stringify(newProducts) !== JSON.stringify(products)) {
+                    console.log('🔄 更新商品資料');
+                    products = newProducts;
+                    saveProductsToCache(products);
+                    displayProductsProgressive();
+                } else {
+                    console.log('✅ 商品資料無變化');
+                    saveProductsToCache(products);
+                }
             }
         } else if (!cached && productsGrid) {
             productsGrid.innerHTML = `<div class="loading">載入失敗：${result.error}</div>`;

@@ -25,7 +25,8 @@
 .section-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0 1.5rem;
+    padding: 0 10px;
+    /* 減少左右邊距至 10px */
 }
 
 /* Announcement Bar */
@@ -216,6 +217,8 @@
 .product-image {
     width: 100%;
     aspect-ratio: 1/1;
+    height: auto;
+    /* 確保高度自動跟隨寬度 */
     overflow: hidden;
     border-radius: 12px;
     background: #f0f0f0;
@@ -372,12 +375,14 @@
     /* 手機版商品兩個一排 */
     .products-grid {
         grid-template-columns: repeat(2, 1fr) !important;
-        gap: 1rem;
+        gap: 12px;
+        /* 稍微減少間距讓卡片更大 */
     }
 
     .product-card .card-img-box,
     .product-image {
-        min-height: 140px;
+        /* 移除固定最小高度，完全依賴 aspect-ratio */
+        min-height: auto;
     }
 
     .product-name,
@@ -394,8 +399,10 @@
 
     .product-btn,
     .product-card button {
-        padding: 10px;
-        font-size: 0.8rem;
+        padding: 8px 12px;
+        font-size: 0.85rem;
+        /* 稍微調大一點按鈕文字 */
+        width: 100%;
     }
 }
 
