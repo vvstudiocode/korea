@@ -906,9 +906,30 @@ const PageRenderer = {
     createFallbackProductCard: function (p) {
         const card = document.createElement('div');
         card.className = 'product-card system-card';
-        card.style.cssText = 'display:block; width:100%; text-align:center; cursor:pointer; background:transparent;';
+        // 強制 cursor: pointer 確保可點擊
+        card.style.cssText = 'display:block; width:100%; text-align:center; cursor:pointer; background:transparent; position:relative; z-index:10;';
         card.setAttribute('data-id', p.id);
-        card.onclick = () => { if (typeof showProductDetail === 'function') showProductDetail(p.id); };
+
+        // 綁定點擊事件 (使用 addEventListener 以免被覆蓋)
+        const clickHandler = (e) => {
+            // 阻止冒泡防止多重觸發，但允許內部按鈕運作
+            // if (e.target.closest('button')) return; // 如果有點擊到按鈕，通常按鈕自己有 stopPropagation
+
+            console.log('🖱️ Card Clicked:', p.id, p.name);
+            if (typeof window.showProductDetail === 'function') {
+                window.showProductDetail(p.id);
+            } else if (typeof showProductDetail === 'function') {
+                showProductDetail(p.id);
+            } else {
+                console.error('❌ showProductDetail function missing!');
+                alert('無法開啟商品詳情，請重新整理頁面試試');
+            }
+        };
+
+        card.addEventListener('click', clickHandler);
+        // 保留 onclick 作為 fallback
+        card.onclick = clickHandler;
+
 
         try {
             // 圖片網址處理

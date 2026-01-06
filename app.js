@@ -26,7 +26,9 @@ document.addEventListener('DOMContentLoaded', () => {
  * 初始化應用程式
  */
 async function initializeApp() {
-    console.log('App Version: 2.4 (KOL Store Mode)');
+    console.log('App Version: 2.5 (KOL Scroll Fix)');
+    // 進入頁面時捲動至頂部
+    window.scrollTo(0, 0);
 
     // 0. 檢查是否為 KOL 商店模式
     await initStoreMode();
@@ -36,6 +38,11 @@ async function initializeApp() {
     if (cachedLayout) {
         const defaultSection = document.querySelector('.products-section');
         if (defaultSection) defaultSection.style.display = 'none';
+    }
+
+    // 確保 showProductDetail 全域可用
+    if (typeof showProductDetail === 'function') {
+        window.showProductDetail = showProductDetail;
     }
 
     await loadProducts();
