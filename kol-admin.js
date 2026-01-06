@@ -25,6 +25,12 @@ document.addEventListener('DOMContentLoaded', () => {
         kolToken = savedToken;
         kolStoreId = savedStoreId;
         kolStoreInfo = JSON.parse(sessionStorage.getItem('kolStoreInfo') || '{}');
+
+        // Ensure PageRenderer knows the storeId immediately
+        if (typeof PageRenderer !== 'undefined') {
+            PageRenderer.currentStoreId = kolStoreId;
+        }
+
         showDashboard();
     }
 });
