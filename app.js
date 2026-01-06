@@ -419,7 +419,15 @@ function displayProducts() {
  * 直接從卡片加入購物車 (僅限無規格商品)
  */
 function addToCartById(productId) {
-    const product = products.find(p => String(p.id) === String(productId));
+    // 優先檢查是否有 KOL 專屬商品列表
+    let targetProducts = products;
+    if (typeof kolProducts !== 'undefined' && kolProducts.length > 0) {
+        targetProducts = kolProducts;
+    } else if (typeof window.kolProducts !== 'undefined' && window.kolProducts.length > 0) {
+        targetProducts = window.kolProducts;
+    }
+
+    const product = targetProducts.find(p => String(p.id) === String(productId));
     if (product) {
         if (typeof product.stock !== 'undefined' && Number(product.stock) <= 0) {
             alert('此商品已售完');
@@ -427,6 +435,12 @@ function addToCartById(productId) {
         }
         // **修改**：無規格商品傳入空的 selectedOptions
         addToCart(product, 1, {});
+    } else {
+        console.error('❌ addToCartById: 找不到商品', productId);
+        // 如果找不到，嘗試打開詳情讓它去 fallback 找
+        if (typeof showProductDetail === 'function') {
+            showProductDetail(productId);
+        }
     }
 }
 
