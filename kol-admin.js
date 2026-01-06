@@ -1114,7 +1114,7 @@ function renderKolOrders(orders) {
         `).join('');
 
         return `
-        <tr class="order-main-row">
+        <tr class="order-main-row" onclick="toggleOrderDetails('order-details-${idx}')" style="cursor: pointer;">
             <td>${o.orderId}</td>
             <td>${o.date || '-'}</td>
             <td>${o.customerName}</td>
@@ -1122,9 +1122,7 @@ function renderKolOrders(orders) {
             <td style="max-width:200px;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:120px;">${firstItem}</span>
-                    <button class="btn-text" onclick="toggleOrderDetails('order-details-${idx}')" style="font-size:12px; color:#6366f1;">
-                        展開
-                    </button>
+                    <span style="font-size:12px; color:#999;">▼</span>
                 </div>
             </td>
             <td>${formatCurrency(o.total)}</td>

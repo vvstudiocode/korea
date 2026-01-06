@@ -232,8 +232,9 @@ async function loadProducts() {
 
             // 更新載入畫面名稱 (如果有商店資訊)
             if (currentStoreInfo && currentStoreInfo.storeName) {
-                const loadingText = document.querySelector('.loading-text');
-                if (loadingText) loadingText.textContent = currentStoreInfo.storeName;
+                // 嘗試多種選擇器以確保更新
+                const loadingTexts = document.querySelectorAll('.loading-text, .loading-screen h2, #loadingText');
+                loadingTexts.forEach(el => el.textContent = currentStoreInfo.storeName);
             }
         }
 
@@ -435,7 +436,7 @@ function showProductDetail(productId) {
     if (!product) {
         console.error('❌ showProductDetail: 找不到商品', productId);
         // Fallback: 嘗試從所有可能的來源再次尋找
-        const all potentialSources = [products, window.kolProducts, window.products].filter(Array.isArray).flat();
+        const potentialSources = [products, window.kolProducts, window.products].filter(Array.isArray).flat();
         const fallbackProduct = potentialSources.find(p => String(p.id) === String(productId));
         if (fallbackProduct) {
             console.log('✅ Fallback 找到商品:', fallbackProduct.name);
