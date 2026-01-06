@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastUpdated": "2026-01-05T17:40:12.255Z",
+  "lastUpdated": "2026-01-06T03:55:25.965Z",
   "sections": [
     {
       "type": "hero",
@@ -28,7 +28,7 @@
       "marginBottom": 20,
       "title": "商品列表",
       "category": "全部",
-      "limit": 8,
+      "limit": 999,
       "itemsDesktop": 4,
       "itemsMobile": 2
     }
@@ -44,7 +44,7 @@
     "copyright": "© 2026 a. All Rights Reserved."
   },
   "global": {
-    "backgroundColor": "#ea1f1f",
+    "backgroundColor": "#ffffff",
     "fontFamily": "Noto Sans TC",
     "fontSize": "16px"
   }
