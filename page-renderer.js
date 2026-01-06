@@ -71,18 +71,28 @@ window.handleOrderSearch = async function () {
                 }[order.status] || 'gray';
 
                 html += `
-                    <div class="order-card">
-                        <h3>訂單號碼: ${order.orderId}</h3>
-                        <p><strong>商店名稱:</strong> ${order.storeName || 'N/A'}</p>
-                        <p><strong>訂單狀態:</strong> <span style="color:${statusColor}; font-weight:bold;">${order.status}</span></p>
-                        <p><strong>訂單總額:</strong> NT$ ${order.totalAmount ? order.totalAmount.toLocaleString() : '0'}</p>
-                        <p><strong>收件地址:</strong> ${order.address || 'N/A'}</p>
-                        <div class="order-items">
-                            <h4>商品明細:</h4>
-                            <ul>
+                    <div class="order-card" style="border:1px solid #eee; border-radius:8px; padding:15px; margin-bottom:15px; background:white; box-shadow:0 2px 4px rgba(0,0,0,0.05);">
+                        <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:10px; border-bottom:1px solid #f5f5f5; padding-bottom:10px;">
+                            <h3 style="margin:0; font-size:1.1em; color:#333;">#${order.id}</h3>
+                            <span style="background:${statusColor}; color:white; padding:2px 8px; border-radius:12px; font-size:0.8em;">${order.status}</span>
+                        </div>
+                        <div style="font-size:0.9em; color:#666; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                            <p><strong>商店:</strong> ${order.storeName || '總部'}</p>
+                            <p><strong>日期:</strong> ${order.date ? new Date(order.date).toLocaleString() : 'N/A'}</p>
+                            <p><strong>收件人:</strong> ${order.recipient || 'N/A'}</p>
+                            <p><strong>總額:</strong> <span style="color:var(--primary-color, #ff4d4f); font-weight:bold;">NT$ ${order.total ? order.total.toLocaleString() : '0'}</span></p>
+                        </div>
+                        <p style="font-size:0.9em; color:#666; margin-top:5px;"><strong>配送地址:</strong> ${order.address || 'N/A'}</p>
+                        
+                        <div class="order-items" style="margin-top:10px; padding-top:10px; border-top:1px dashed #eee;">
+                            <h4 style="font-size:0.9em; margin:0 0 5px 0; color:#333;">商品明細:</h4>
+                            <ul style="list-style:none; padding:0; margin:0; font-size:0.85em;">
                                 ${order.items && order.items.length > 0 ? order.items.map(item => `
-                                    <li>${item.name} x ${item.quantity} (${item.price ? 'NT$' + item.price.toLocaleString() : 'N/A'})</li>
-                                `).join('') : '<li>無商品明細</li>'}
+                                    <li style="display:flex; justify-content:space-between; margin-bottom:3px; color:#555;">
+                                        <span>${item.name} ${item.spec ? '(' + item.spec + ')' : ''}</span>
+                                        <span>x${item.qty}</span>
+                                    </li>
+                                `).join('') : '<li style="color:#999;">無商品明細</li>'}
                             </ul>
                         </div>
                     </div>
