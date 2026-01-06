@@ -726,10 +726,10 @@ const PageRenderer = {
                     productSource = 'kolProducts (Strict)';
                 } else {
                     // 嘗試從全域尋找 (app.js 可能已載入到 window.products 但其實是 kol data)
-                    // 但為了保險，若在 KOL 模式，我們不應回退到預設的 HQ products，除非確定它是 KOL 的資料
-                    if (typeof products !== 'undefined' && products.length > 0 && products[0].storeId === this.currentStoreId) {
+                    // app.js 已確保在 KOL 模式下 products 被清除或更新為 KOL 商品，且不含 storeId 屬性，故移除 storeId 檢查
+                    if (typeof products !== 'undefined' && products.length > 0) {
                         allProducts = products;
-                        productSource = 'products (KOL Verified)';
+                        productSource = 'products (KOL Trusted)';
                     }
                 }
             } else {
