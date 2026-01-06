@@ -1,4 +1,6 @@
 {
+  "version": "1.0",
+  "lastUpdated": "2026-01-06T16:31:02.516Z",
   "sections": [
     {
       "type": "hero",
@@ -32,8 +34,8 @@
     "copyright": "© 2026 LUMI 趙的仙選. All Rights Reserved."
   },
   "global": {
-    "backgroundColor": "#ffffff",
-    "fontFamily": "Noto Sans TC",
+    "backgroundColor": "#e4bef9",
+    "fontFamily": "Arial",
     "fontSize": "16px"
   }
 }
