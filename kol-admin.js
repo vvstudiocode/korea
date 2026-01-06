@@ -523,10 +523,11 @@ function renderPickerProducts(products) {
 
         return `
         <div class="product-card ${alreadyAdded ? 'disabled' : ''} ${isSelected ? 'selected' : ''}" 
-             onclick="${alreadyAdded ? '' : `toggleProductSelection('${productId}')`}">
+             style="cursor: default; pointer-events: none; opacity: 0.7;">
              ${!alreadyAdded ? `
              <div class="checkbox-overlay">
-                <input type="checkbox" ${isSelected ? 'checked' : ''} style="pointer-events:none;">
+                <input type="checkbox" ${isSelected ? 'checked' : ''} style="pointer-events:none; display:none;">
+                <span style="color:red; font-size:0.8em; background:white; padding:2px 5px; border-radius:4px; box-shadow:0 0 2px rgba(0,0,0,0.2);">暫停選擇</span>
              </div>` : ''}
             <img src="${imageUrl}" class="product-card-img">
             <div class="product-card-info">
@@ -689,7 +690,6 @@ function openEditMyProduct(productId) {
 
     document.getElementById('editProductStatus').value = product.status;
 
-    // 根據同樣邏輯設定庫存欄位
     const isOwn = product.type === 'own';
     const stockInput = document.getElementById('editProductStock');
     const stockHint = document.getElementById('editStockHint');
@@ -697,18 +697,16 @@ function openEditMyProduct(productId) {
     if (isOwn) {
         stockInput.placeholder = "設定庫存數量";
         stockHint.style.display = 'none';
-        // 對於自建商品，這裡是顯示 assignedStock 比較合理，因為 availableStock 是計算出來的
-        // 不過後端 logic 是 update stock => assignedStock
         stockInput.value = product.assignedStock || 0;
+        stockInput.disabled = false;
     } else {
-        stockInput.placeholder = "設定庫存 (會影響可用庫存)";
+        // Selected Product (HQ Managed)
+        stockInput.placeholder = "庫存由總部管理";
         stockHint.style.display = 'block';
-        stockHint.textContent = "修改庫存會更新總部分配數量，請謹慎調整";
-        stockInput.value = product.availableStock; // 顯示可用庫存
+        stockHint.textContent = "此商品庫存與總部同步，無法手動修改";
+        stockInput.value = product.availableStock; // This now comes from HQ stock via backend
+        stockInput.disabled = true; // Make Read-only
     }
-
-    // 現在不論選品或自建，都允許修改庫存
-    stockInput.disabled = false;
 
     // 設置按鈕區
     const actionsDiv = document.querySelector('#editProductModal .modal-actions');
