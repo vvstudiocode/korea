@@ -28,9 +28,13 @@ document.addEventListener('DOMContentLoaded', () => {
 async function initializeApp() {
     console.log('App Version: 2.5 (KOL Scroll Fix)');
     // 進入頁面時捲動至頂部
+    if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+    }
     window.scrollTo(0, 0);
 
     // 0. 檢查是否為 KOL 商店模式
+
     await initStoreMode();
 
     // 1. 如果有快取排版，立即隱藏預設區域
@@ -418,12 +422,34 @@ function addToCartById(productId) {
  * 顯示商品詳情
  */
 function showProductDetail(productId) {
-    const product = products.find(p => String(p.id) === String(productId));
-    if (!product) return;
+    // 優先檢查是否有 KOL 專屬商品列表，否則使用一般商品列表
+    let targetProducts = products;
+    if (typeof kolProducts !== 'undefined' && kolProducts.length > 0) {
+        targetProducts = kolProducts;
+    } else if (typeof window.kolProducts !== 'undefined' && window.kolProducts.length > 0) {
+        targetProducts = window.kolProducts;
+    }
 
-    currentProduct = product;
+    const product = targetProducts.find(p => String(p.id) === String(productId));
 
-    const images = product.image ? product.image.split(',').map(url => url.trim()) : [];
+    if (!product) {
+        console.error('❌ showProductDetail: 找不到商品', productId);
+        // Fallback: 嘗試從所有可能的來源再次尋找
+        const all potentialSources = [products, window.kolProducts, window.products].filter(Array.isArray).flat();
+        const fallbackProduct = potentialSources.find(p => String(p.id) === String(productId));
+        if (fallbackProduct) {
+            console.log('✅ Fallback 找到商品:', fallbackProduct.name);
+            // 遞迴調用自己並確保 logic 正確，或者直接使用 fallbackProduct
+            // 為避免遞迴風險，直接繼續執行
+            currentProduct = fallbackProduct;
+        } else {
+            return;
+        }
+    } else {
+        currentProduct = product;
+    }
+
+    const images = (currentProduct.image || '').split(',').map(url => url.trim());
     let imageHtml = images.length > 1 ? `
         <div class="image-slider-container">
             <div class="image-slider">${images.map(img => `<img src="${img}" class="slider-image">`).join('')}</div>
@@ -432,9 +458,10 @@ function showProductDetail(productId) {
         <div class="image-slider-container"><img src="${images.length > 0 ? images[0] : 'https://via.placeholder.com/300'}" class="slider-image"></div>`;
 
     document.querySelector('.product-detail-image').innerHTML = imageHtml;
-    document.getElementById('modalProductName').textContent = product.name;
-    document.getElementById('modalProductPrice').textContent = `NT$ ${product.price}`;
-    document.getElementById('modalProductDescription').textContent = product.description || '暫無描述';
+    document.getElementById('modalProductName').textContent = currentProduct.name;
+    document.getElementById('modalProductPrice').textContent = `NT$ ${currentProduct.price}`;
+    document.getElementById('modalProductDescription').textContent = currentProduct.description || '暫無描述';
+
     document.getElementById('modalQuantity').value = 1;
 
     // 動態產生商品選項（根據 variants 判斷庫存）
