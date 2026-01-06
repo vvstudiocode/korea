@@ -714,26 +714,30 @@ const PageRenderer = {
         if (!container) return;
 
         try {
-            // 兼容性處理：支援多種商品資料來源
+            // 兼容性處理:支援多種商品資料來源
             let allProducts = [];
             let productSource = 'none';
 
-            // 優先順序：根據模式決定
-            // KOL Mode: ONLY kolProducts
+            // 優先順序:根據模式決定
+            // KOL Mode: ONLY kolProducts (絕對不使用總部商品)
             if (this.currentStoreId) {
+                console.log(`🏪 KOL模式: storeId=${this.currentStoreId}`);
+
                 if (typeof kolProducts !== 'undefined' && kolProducts.length > 0) {
                     allProducts = kolProducts;
                     productSource = 'kolProducts (Strict)';
+                    console.log(`✅ 使用KOL商品: ${allProducts.length} 項`);
                 } else {
-                    // 嘗試從全域尋找 (app.js 可能已載入到 window.products 但其實是 kol data)
-                    // app.js 已確保在 KOL 模式下 products 被清除或更新為 KOL 商品，且不含 storeId 屬性，故移除 storeId 檢查
-                    if (typeof products !== 'undefined' && products.length > 0) {
-                        allProducts = products;
-                        productSource = 'products (KOL Trusted)';
-                    }
+                    // ⚠️ KOL模式下,如果沒有商品則保持空陣列
+                    // 不再fallback到總部商品!
+                    allProducts = [];
+                    productSource = 'kolProducts (Empty - No Fallback)';
+                    console.warn('⚠️ KOL尚未選擇任何商品,將顯示空狀態');
+                    console.warn('   提示: 請先到「我的商品」頁面選擇要販售的商品');
                 }
             } else {
                 // Official Mode
+                console.log('🏢 總部模式');
                 if (typeof products !== 'undefined' && products.length > 0) {
                     allProducts = products;
                     productSource = 'products';
@@ -745,6 +749,7 @@ const PageRenderer = {
                     allProducts = currentProducts;
                     productSource = 'currentProducts';
                 }
+                console.log(`✅ 使用總部商品: ${allProducts.length} 項`);
             }
 
             console.log(`📦 商品來源: ${productSource}, 數量: ${allProducts.length}`);
@@ -811,8 +816,25 @@ const PageRenderer = {
 
             container.innerHTML = '';
             if (filtered.length === 0) {
-                const msg = comp.sourceType === 'manual' ? '尚未選擇展示商品' : '此分類暫無商品';
-                console.warn(`⚠️ ${msg} (allProducts: ${allProducts.length}, category: ${comp.category})`);
+                // 根據模式顯示不同的提示訊息
+                let msg = '';
+                if (this.currentStoreId) {
+                    // KOL模式:引導用戶選擇商品
+                    if (allProducts.length === 0) {
+                        msg = `
+                            <div style="text-align:center; padding:40px 20px; color:#666;">
+                                <h3 style="margin-bottom:15px;">📦 尚未選擇商品</h3>
+                                <p>請先到「我的商品」頁面從商品庫選擇要販售的商品</p>
+                            </div>
+                        `;
+                    } else {
+                        msg = comp.sourceType === 'manual' ? '尚未選擇展示商品' : '此分類暫無商品';
+                    }
+                } else {
+                    // 總部模式
+                    msg = comp.sourceType === 'manual' ? '尚未選擇展示商品' : '此分類暫無商品';
+                }
+                console.warn(`⚠️ ${msg} (allProducts: ${allProducts.length}, filtered: ${filtered.length}, category: ${comp.category})`);
                 container.innerHTML = `<div class="empty-msg">${msg}</div>`;
                 return;
             }
