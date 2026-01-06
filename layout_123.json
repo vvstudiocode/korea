@@ -1,4 +1,6 @@
 {
+  "version": "1.0",
+  "lastUpdated": "2026-01-06T10:07:07.596Z",
   "sections": [
     {
       "type": "hero",
@@ -12,13 +14,14 @@
       "marginBottom": 20
     },
     {
-      "type": "products",
-      "title": "精選商品",
-      "sourceType": "category",
+      "type": "product_list",
+      "marginTop": 0,
+      "marginBottom": 20,
+      "title": "商品列表",
       "category": "全部",
       "limit": 8,
-      "marginTop": 0,
-      "marginBottom": 20
+      "itemsDesktop": 4,
+      "itemsMobile": 2
     }
   ],
   "footer": {
