@@ -1977,6 +1977,11 @@ tr.dragging {
             padding: 1rem;
             width: 100%;
             overflow-x: hidden;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            flex: 1;
+            /* Ensure it takes available space */
+            min-height: 0;
         }
     }
 
@@ -2054,5 +2059,11 @@ tr.dragging {
             padding: 1rem;
             width: 100%;
             overflow-x: hidden;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
         }
     }

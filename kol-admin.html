@@ -37,6 +37,7 @@
     <div id="dashboardPage" class="dashboard-container" style="display: none;">
         <nav class="sidebar">
             <div class="sidebar-header">
+                <button class="mobile-close-sidebar" onclick="closeMobileSidebar()">×</button>
                 <div id="storeLogoContainer"></div>
                 <h3 id="storeNameHeader">我的賣場</h3>
             </div>
@@ -56,9 +57,6 @@
                 <!-- 移除了排版管理，改為頁尾設定 -->
                 <li id="tab-footer" onclick="kolSwitchTab('footer')" data-tooltip="頁尾設定">
                     <span class="icon">T</span><span class="text">頁尾設定</span>
-                </li>
-                <li id="tab-layout" onclick="kolSwitchTab('layout')" data-tooltip="排版管理" style="display: none;">
-                    <span class="icon">◫</span><span class="text">排版管理</span>
                 </li>
             </ul>
             <button class="sidebar-collapse-btn" onclick="toggleDesktopSidebar()" title="收合選單">⟨</button>

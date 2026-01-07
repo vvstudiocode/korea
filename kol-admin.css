@@ -669,20 +669,68 @@ body {
 /* RWD */
 @media (max-width: 768px) {
     .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
         transform: translateX(-100%);
-        width: 280px;
+        width: 260px;
+        z-index: 1000;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .sidebar.active {
         transform: translateX(0);
+        box-shadow: 5px 0 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .sidebar.active+.sidebar-overlay {
+        display: block;
+        opacity: 1;
     }
 
     .main-content {
         margin-left: 0;
+        width: 100%;
     }
 
     .hamburger-btn {
         display: block;
+        font-size: 1.5rem;
+        background: none;
+        border: none;
+        cursor: pointer;
+    }
+
+    .mobile-close-sidebar {
+        display: block;
+        position: absolute;
+        right: 15px;
+        top: 15px;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        font-size: 1.2rem;
+        line-height: 28px;
+        text-align: center;
+        cursor: pointer;
+        z-index: 101;
     }
 
     .stats-grid {

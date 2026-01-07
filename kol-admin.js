@@ -262,6 +262,11 @@ function showDashboard() {
 }
 
 async function kolSwitchTab(tabId) {
+    // 手機版切換時自動縮回側邊欄
+    if (window.innerWidth <= 768) {
+        closeMobileSidebar();
+    }
+
     document.querySelectorAll('.nav-links li').forEach(li => li.classList.remove('active'));
     document.querySelector(`#tab-${tabId}`).classList.add('active');
 
