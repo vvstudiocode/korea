@@ -39,6 +39,8 @@ body {
     background-color: var(--bg-light);
     color: var(--text-main);
     height: 100vh;
+    height: 100dvh;
+    /* 使用動態視窗高度，防止手機工具列蓋住內容 */
     overflow: hidden;
     /* 儀表板通常不讓整個 body 捲動 */
 }
@@ -102,6 +104,7 @@ body {
 .dashboard-container {
     display: flex;
     height: 100vh;
+    height: 100dvh;
 }
 
 /* 側邊欄 */
@@ -606,8 +609,10 @@ body {
     background: #fff;
 }
 
-/* 讓 Form 佔據剩餘空間並成為 Flex Container */
-#productForm {
+/* 讓 Form 佔據剩餘空間並成為 Flex Container (支援產品與賣場等所有視窗) */
+.modal-content form,
+#productForm,
+#storeForm {
     display: flex;
     flex-direction: column;
     flex: 1;
@@ -1975,6 +1980,8 @@ tr.dragging {
         /* Ensure content doesn't overflow horizontally causing body scroll */
         .view-section {
             padding: 1rem;
+            padding-bottom: 100px;
+            /* 增加底部間距，防止被手機瀏覽器工具列擋住 */
             width: 100%;
             overflow-x: hidden;
             overflow-y: auto;
@@ -2057,6 +2064,8 @@ tr.dragging {
 
         .view-section {
             padding: 1rem;
+            padding-bottom: 120px;
+            /* 再次確保底部有足夠空間捲動 */
             width: 100%;
             overflow-x: hidden;
             overflow-y: auto;
