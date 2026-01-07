@@ -196,12 +196,12 @@ const PageBuilder = {
                                 {
                                     type: 'product_list',
                                     uuid: 'default-product-list-' + Date.now(),
-                                    title: '精選商品',
+                                    title: '',
                                     sourceType: 'auto',
                                     category: '全部',
                                     limit: 999,
-                                    marginTop: 20,
-                                    marginBottom: 20
+                                    marginTop: 0,
+                                    marginBottom: 30
                                 }
                             ]
                         };
