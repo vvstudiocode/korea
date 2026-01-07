@@ -481,14 +481,15 @@ function renderMyProducts(products) {
         return;
     }
 
-    tbody.innerHTML = products.map(p => {
+    tbody.innerHTML = products.map((p, index) => {
         const profit = (p.customPrice || 0) - (p.wholesalePrice || 0);
         const imageUrl = (p.image || '').split(',')[0].trim() || 'https://via.placeholder.com/50';
         const typeTag = p.type === 'own' ? '<span class="tag tag-own">自建</span>' : '';
         const statusBadge = p.status === 'active' ? '<span class="status-badge status-done">上架中</span>' : '<span class="status-badge status-pending">下架</span>';
 
         return `
-        <tr>
+        <tr class="product-row" draggable="true" data-id="${p.id}" data-index="${index}">
+            <td style="cursor:move; text-align:center; color:#999; font-size:1.2rem;" class="drag-handle" onclick="event.stopPropagation()">⠿</td>
             <td><img src="${imageUrl}" class="table-thumb"></td>
             <td>${p.name} ${typeTag}</td>
             <td style="color:#888;">${formatCurrency(p.wholesalePrice)}</td>
@@ -503,7 +504,120 @@ function renderMyProducts(products) {
         </tr>
         `;
     }).join('');
+
+    enableKolProductDragAndDrop();
+    updateSortButtonVisibility();
 }
+
+// KOL Product Drag & Drop Logic
+let kolDragSrcEl = null;
+
+function enableKolProductDragAndDrop() {
+    const rows = document.querySelectorAll('#myProductsBody tr.product-row');
+    rows.forEach(row => {
+        row.addEventListener('dragstart', handleKolDragStart);
+        row.addEventListener('dragover', handleKolDragOver);
+        row.addEventListener('drop', handleKolDrop);
+    });
+}
+
+function handleKolDragStart(e) {
+    kolDragSrcEl = this;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', this.innerHTML);
+    this.classList.add('dragging');
+    this.style.opacity = '0.4';
+    this.style.border = '2px dashed #6366f1';
+}
+
+function handleKolDragOver(e) {
+    if (e.preventDefault) {
+        e.preventDefault();
+    }
+    e.dataTransfer.dropEffect = 'move';
+    const targetRow = this;
+    if (kolDragSrcEl && targetRow !== kolDragSrcEl && targetRow.parentNode === kolDragSrcEl.parentNode) {
+        const rect = targetRow.getBoundingClientRect();
+        const next = (e.clientY - rect.top) / (rect.bottom - rect.top) > 0.5;
+        targetRow.parentNode.insertBefore(kolDragSrcEl, next ? targetRow.nextSibling : targetRow);
+    }
+    return false;
+}
+
+function handleKolDrop(e) {
+    if (e.stopPropagation) {
+        e.stopPropagation();
+    }
+    if (kolDragSrcEl) {
+        kolDragSrcEl.classList.remove('dragging');
+        kolDragSrcEl.style.opacity = '1';
+        kolDragSrcEl.style.border = '';
+        updateKolProductsOrder(); // Update local array to match DOM
+        updateSortButtonVisibility(true); // Show save button
+    }
+    return false;
+}
+
+function updateKolProductsOrder() {
+    const rows = document.querySelectorAll('#myProductsBody tr.product-row');
+    const newOrder = [];
+    rows.forEach(row => {
+        const id = row.getAttribute('data-id');
+        const product = kolProducts.find(p => String(p.id) === String(id));
+        if (product) {
+            newOrder.push(product);
+        }
+    });
+    kolProducts = newOrder;
+}
+
+function updateSortButtonVisibility(show = false) {
+    let btn = document.getElementById('saveKolSortBtn');
+    if (show) {
+        if (!btn) {
+            // Fix: Try toolbar first, then header
+            const container = document.querySelector('#productsView .toolbar') || document.querySelector('#productsView .page-header');
+            if (!container) return;
+
+            btn = document.createElement('button');
+            btn.id = 'saveKolSortBtn';
+            btn.className = 'btn-secondary'; // Use consistent class
+            btn.style.marginLeft = '10px';
+            btn.style.backgroundColor = '#17a2b8';
+            btn.style.color = 'white';
+            btn.innerHTML = '💾 儲存排序';
+            btn.onclick = saveKolProductSort;
+            container.appendChild(btn);
+        }
+    } else {
+        if (btn) btn.remove();
+    }
+}
+
+async function saveKolProductSort() {
+    const btn = document.getElementById('saveKolSortBtn');
+    if (!btn) return;
+    btn.textContent = '儲存中...';
+    btn.disabled = true;
+
+    try {
+        const sortedIds = kolProducts.map(p => p.id);
+        const result = await callKolApi('kolReorderProducts', { orderedIds: sortedIds });
+        if (result.success) {
+            showToast('排序已儲存', 'success');
+            btn.remove();
+        } else {
+            showToast('儲存失敗: ' + result.error, 'error');
+            btn.textContent = '💾 儲存排序';
+            btn.disabled = false;
+        }
+    } catch (e) {
+        showToast('連線錯誤', 'error');
+        btn.textContent = '💾 儲存排序';
+        btn.disabled = false;
+    }
+}
+
 
 // 從商品庫選品
 async function openProductPicker() {
