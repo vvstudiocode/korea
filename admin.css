@@ -356,10 +356,43 @@ body {
 
 .modal-content {
     background: white;
-    padding: 2rem;
+    padding: 0;
+    /* Remove padding here, move to body/header/actions */
     border-radius: 8px;
     width: 400px;
     max-width: 90%;
+    /* Ensure modal stays within viewport and scrolls */
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Ensure sections inside have correct padding/flex behavior */
+.modal-header {
+    flex-shrink: 0;
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+}
+
+.modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem;
+}
+
+.modal-actions {
+    flex-shrink: 0;
+    padding: 1.5rem;
+    padding-top: 1rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    border-top: 1px solid var(--border);
 }
 
 .modal-content h3 {
@@ -375,11 +408,7 @@ body {
     border: 1px solid var(--border);
 }
 
-.modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 1rem;
-}
+
 
 .modal-actions button {
     padding: 8px 16px;
@@ -1876,22 +1905,32 @@ tr.dragging {
         }
     }
 
-    /* 手機版 Modal 優化 */
     @media (max-width: 768px) {
+        .modal {
+            z-index: 9999 !important;
+            /* Ensure modal is on top */
+            align-items: flex-end;
+            /* Bottom sheet style or center */
+            padding-bottom: 0;
+        }
+
         .modal-content {
             width: 100% !important;
             margin: 0 !important;
-            border-radius: 0;
-            max-height: 100vh;
-            height: 100vh;
+            border-radius: 12px 12px 0 0 !important;
+            /* Bottom sheet style */
+            max-height: 85vh !important;
+            height: auto !important;
             display: flex;
             flex-direction: column;
+            bottom: 0;
         }
 
         .modal-body {
             flex: 1;
             overflow-y: auto;
             padding: 15px !important;
+            -webkit-overflow-scrolling: touch;
         }
 
         /* 縮小手機版 Modal 字體 */
@@ -1901,7 +1940,8 @@ tr.dragging {
         .modal-content label,
         .modal-content th,
         .modal-content td {
-            font-size: 14px !important;
+            font-size: 16px !important;
+            /* Better for touch targets and prevent zoom */
         }
 
         .form-row {
@@ -1915,9 +1955,104 @@ tr.dragging {
         }
 
         .modal-actions {
-            padding: 10px;
+            padding: 15px;
             background: white;
             border-top: 1px solid #eee;
             flex-shrink: 0;
+            padding-bottom: max(15px, env(safe-area-inset-bottom));
+            /* Safe area */
+        }
+
+        /* Fix Table Scrolling */
+        .table-container {
+            width: 100%;
+            max-width: 100vw;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-bottom: 1rem;
+        }
+
+        /* Ensure content doesn't overflow horizontally causing body scroll */
+        .view-section {
+            padding: 1rem;
+            width: 100%;
+            overflow-x: hidden;
+        }
+    }
+
+    /* 
+       Corrected Mobile Modal Styles (Override) 
+       Fixes "out of screen" and scrolling issues 
+    */
+    @media (max-width: 768px) {
+        .modal {
+            z-index: 9999 !important;
+            align-items: flex-end;
+            /* Bottom sheet style */
+            padding-bottom: 0;
+            padding: 0;
+        }
+
+        .modal-content {
+            width: 100% !important;
+            margin: 0 !important;
+            border-radius: 12px 12px 0 0 !important;
+            max-height: 80vh !important;
+            /* Slightly reduced to avoid browser bars */
+            height: auto !important;
+            display: flex;
+            flex-direction: column;
+            bottom: 0;
+            position: relative;
+        }
+
+        .modal-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px !important;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Prevent auto-zoom */
+        .modal-content input,
+        .modal-content select,
+        .modal-content textarea,
+        .modal-content label,
+        .modal-content th,
+        .modal-content td {
+            font-size: 16px !important;
+        }
+
+        .form-row {
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .form-group {
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .modal-actions {
+            padding: 15px;
+            background: white;
+            border-top: 1px solid #eee;
+            flex-shrink: 0;
+            padding-bottom: max(20px, env(safe-area-inset-bottom));
+        }
+
+        /* Fix Table Scrolling */
+        .table-container {
+            width: 100%;
+            max-width: 100vw;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-bottom: 1rem;
+        }
+
+        .view-section {
+            padding: 1rem;
+            width: 100%;
+            overflow-x: hidden;
         }
     }

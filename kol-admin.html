@@ -53,7 +53,11 @@
                 <li id="tab-settings" onclick="kolSwitchTab('settings')" data-tooltip="店舖設定">
                     <span class="icon">◎</span><span class="text">店舖設定</span>
                 </li>
-                <li id="tab-layout" onclick="kolSwitchTab('layout')" data-tooltip="排版管理">
+                <!-- 移除了排版管理，改為頁尾設定 -->
+                <li id="tab-footer" onclick="kolSwitchTab('footer')" data-tooltip="頁尾設定">
+                    <span class="icon">T</span><span class="text">頁尾設定</span>
+                </li>
+                <li id="tab-layout" onclick="kolSwitchTab('layout')" data-tooltip="排版管理" style="display: none;">
                     <span class="icon">◫</span><span class="text">排版管理</span>
                 </li>
             </ul>
@@ -343,6 +347,48 @@
                 </div>
             </div>
 
+            <!-- 頁尾設定視圖 -->
+            <div id="footerView" class="view-section" style="display: none;">
+                <div class="view-header">
+                    <h2>頁尾設定</h2>
+                    <button class="accent-btn" onclick="saveKolFooter()">儲存設定</button>
+                </div>
+                <div class="card footer-settings-card">
+                    <p class="helper-text">設定您商店頁尾顯示的資訊與社群連結。</p>
+
+                    <div class="settings-group">
+                        <div class="form-group">
+                            <label>版權文字 (Copyright)</label>
+                            <input type="text" id="footerCopyright"
+                                placeholder="例如: © 2024 My Shop. All rights reserved.">
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <h4 class="group-title">社群連結</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Facebook 連結</label>
+                                <input type="text" id="footerFb" placeholder="https://facebook.com/...">
+                            </div>
+                            <div class="form-group">
+                                <label>Instagram 連結</label>
+                                <input type="text" id="footerIg" placeholder="https://instagram.com/...">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Line 連結</label>
+                                <input type="text" id="footerLine" placeholder="https://line.me/...">
+                            </div>
+                            <div class="form-group">
+                                <label>客服連結 (選填)</label>
+                                <input type="text" id="footerSupport" placeholder="外部客服表單連結...">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
 
@@ -393,6 +439,8 @@
             </div>
         </div>
     </div>
+
+
 
     <!-- Page Builder Add Component Modal -->
     <div class="modal" id="addCompModal">

@@ -187,15 +187,25 @@ const PageBuilder = {
                 } else {
                     console.warn('⚠️ Layout fetch failed:', response.status);
 
-                    // Fallback: 如果是 KOL 商店且找不到專屬排版，則讀取預設排版
+                    // Fallback: 如果是 KOL 商店且找不到專屬排版，則初始化為簡易版 (僅商品列表)
                     if (this.storeId && response.status === 404) {
-                        console.log('🔄 Trying to load default global layout...');
-                        const defaultUrl = 'https://raw.githubusercontent.com/vvstudiocode/korea/main/layout.json?_=' + Date.now();
-                        const defRes = await fetch(defaultUrl);
-                        if (defRes.ok) {
-                            layoutData = await defRes.json();
-                            console.log('✅ Default Global Layout loaded');
-                        }
+                        console.log('✨ Initializing simple default layout for KOL...');
+                        layoutData = {
+                            footer: { enabled: true, text: `© ${new Date().getFullYear()} ${this.storeId} Store` },
+                            layout: [
+                                {
+                                    type: 'product_list',
+                                    uuid: 'default-product-list-' + Date.now(),
+                                    title: '精選商品',
+                                    sourceType: 'auto',
+                                    category: '全部',
+                                    limit: 12,
+                                    marginTop: 20,
+                                    marginBottom: 20
+                                }
+                            ]
+                        };
+                        console.log('✅ Default Simple Layout created');
                     }
                 }
             } catch (err) {

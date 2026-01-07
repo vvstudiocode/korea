@@ -288,6 +288,10 @@ async function kolSwitchTab(tabId) {
         document.getElementById('pageTitle').textContent = '店舖設定';
         document.getElementById('pageTitle').textContent = '店舖設定';
         loadProfileSettings();
+    } else if (tabId === 'footer') {
+        document.getElementById('footerView').style.display = 'block';
+        document.getElementById('pageTitle').textContent = '頁尾設定';
+        if (typeof loadKolFooter === 'function') loadKolFooter();
     } else if (tabId === 'layout') {
         document.getElementById('builderSection').style.display = 'block';
         document.getElementById('pageTitle').textContent = '排版管理';
@@ -1432,4 +1436,78 @@ function uploadToGitHub(file) {
         reader.onerror = () => reject(new Error('File reading failed'));
         reader.readAsDataURL(file);
     });
+}
+
+// ===================================
+// 頁尾設定相關功能
+// ===================================
+
+async function loadKolFooter() {
+    showLoadingOverlay('載入頁尾設定...');
+    try {
+        // 使用 PageBuilder 的機制載入排版 (包含 footer)
+        if (typeof PageBuilder === 'undefined') {
+            throw new Error('PageBuilder not found');
+        }
+
+        // 確保 PageBuilder 初始化
+        if (!PageBuilder.layout || PageBuilder.layout.length === 0) {
+            await PageBuilder.init(kolStoreId);
+        } else if (!PageBuilder.storeId) {
+            await PageBuilder.init(kolStoreId);
+        } else {
+            // 重新讀取確保最新
+            await PageBuilder.loadLayout();
+        }
+
+        const footer = PageBuilder.footer || {};
+
+        document.getElementById('footerCopyright').value = footer.text || '';
+        document.getElementById('footerFb').value = footer.social?.facebook || '';
+        document.getElementById('footerIg').value = footer.social?.instagram || '';
+        document.getElementById('footerLine').value = footer.social?.line || '';
+        document.getElementById('footerSupport').value = footer.links?.support || '';
+
+    } catch (error) {
+        console.error('Error loading footer:', error);
+        showToast('載入設定失敗', 'error');
+    } finally {
+        hideLoadingOverlay();
+    }
+}
+
+async function saveKolFooter() {
+    showLoadingOverlay('儲存中...');
+    try {
+        const text = document.getElementById('footerCopyright').value.trim();
+        const facebook = document.getElementById('footerFb').value.trim();
+        const instagram = document.getElementById('footerIg').value.trim();
+        const line = document.getElementById('footerLine').value.trim();
+        const support = document.getElementById('footerSupport').value.trim();
+
+        const newFooter = {
+            enabled: true,
+            text: text,
+            social: {
+                facebook, instagram, line
+            },
+            links: {
+                support
+            }
+        };
+
+        // 更新 PageBuilder 的 footer 狀態
+        PageBuilder.footer = newFooter;
+
+        // 呼叫 PageBuilder 的儲存功能
+        await PageBuilder.saveLayout();
+
+        showToast('頁尾設定已儲存', 'success');
+
+    } catch (error) {
+        console.error('Error saving footer:', error);
+        showToast('儲存失敗', 'error');
+    } finally {
+        hideLoadingOverlay();
+    }
 }
