@@ -6,6 +6,7 @@ const GAS_API_URL = 'https://script.google.com/macros/s/AKfycby7V5VwHfn_Tb-wpg_S
 let currentPassword = '';
 let currentOrders = [];
 let currentProducts = [];
+let currentStores = []; // Cache for stores
 
 // 批次更新暫存
 let pendingUpdates = {}; // Order Updates
@@ -190,6 +191,15 @@ function switchTab(tabId) {
         if (currentProducts.length === 0) {
             fetchProducts();
         }
+        // 確保賣場列表已載入 (顯示 KOL 名稱用)
+        if (currentStores.length === 0) {
+            callApi('getStores').then(data => {
+                if (data.success) {
+                    currentStores = data.data.stores || [];
+                    renderOrders(currentOrders); // 重繪以顯示名稱
+                }
+            });
+        }
     } else if (tabId === 'products') {
         document.getElementById('productsView').style.display = 'block';
         document.getElementById('pageTitle').textContent = '商品管理';
@@ -298,6 +308,13 @@ function filterDashboardByDate(range) {
 // ----------------------
 // 訂單管理
 // ----------------------
+
+function getStoreName(storeId) {
+    if (!storeId) return '';
+    const store = currentStores.find(s => s.storeId === storeId);
+    return store ? `${store.storeName} (${store.ownerName})` : storeId;
+}
+
 function renderOrders(orders) {
     const tbody = document.getElementById('ordersTableBody');
     if (orders.length === 0) {
@@ -351,6 +368,7 @@ function renderOrders(orders) {
                     </div>
                     ${order.storeName ? `<div style="margin-top: 5px;"><strong>門市:</strong> ${order.storeName} (${order.storeCode})</div>` : ''}
                     ${order.storeAddress ? `<div style="margin-top: 5px;"><strong>地址:</strong> ${order.storeAddress}</div>` : ''}
+                    ${order.storeId ? `<div style="margin-top: 5px; color: #e91e63;"><strong>KOL:</strong> ${getStoreName(order.storeId)}</div>` : ''}
                 </div>
             </td>
         </tr>
@@ -2114,7 +2132,7 @@ function renderPurchasingStats(stats) {
                 <td><strong>${item.name}</strong></td>
                 <td>${item.spec || '無規格'}</td>
                 <td style="color: #e91e63; font-weight: bold; font-size: 1.1em">${item.totalQty}</td>
-                <td>${item.orderCount} 筆 <span style="font-size: 0.8em; color: #999;">(點擊展開)</span></td>
+                <td>${item.orderCount} 筆 </td>
             </tr>
             <tr id="purchasing-detail-${index}" style="display: none; background: #fffafb;">
                 <td colspan="4">
@@ -2513,7 +2531,7 @@ window.addEventListener('beforeunload', function (e) {
 // 賣場管理系統 (Store Management)
 // ============================================================
 
-let currentStores = [];
+// 賣場列表 (currentStores 已在上方宣告)
 
 // 載入賣場列表
 function loadStores() {
@@ -2839,6 +2857,28 @@ function initKolStatsMonthSelect() {
     }
 
     loadKolStats();
+    populateKolStatsStoreFilter();
+}
+
+function populateKolStatsStoreFilter() {
+    const select = document.getElementById('kolStatsStoreFilter');
+    // 保留第一個選項 (全部賣場)
+    select.innerHTML = '<option value="">全部賣場</option>';
+
+    // 如果 currentStores 為空，嘗試載入
+    if (currentStores.length === 0) {
+        callApi('getStores').then(data => {
+            if (data.success) {
+                currentStores = data.data.stores || [];
+                populateKolStatsStoreFilter(); // 遞迴呼叫重新填充
+            }
+        });
+        return;
+    }
+
+    currentStores.forEach(s => {
+        select.innerHTML += `<option value="${s.storeId}">${s.storeName} (${s.ownerName})</option>`;
+    });
 }
 
 async function loadKolStats() {
@@ -2859,7 +2899,24 @@ async function loadKolStats() {
         });
 
         if (result.success && result.data) {
-            renderKolStats(result.data);
+            // 過濾邏輯
+            const storeFilter = document.getElementById('kolStatsStoreFilter').value;
+            let filteredStores = result.data.stores || [];
+
+            if (storeFilter) {
+                filteredStores = filteredStores.filter(s => s.storeId === storeFilter);
+
+                // 重新計算總計
+                const newTotals = {
+                    totalRevenue: filteredStores.reduce((sum, s) => sum + s.totalRevenue, 0),
+                    totalCost: filteredStores.reduce((sum, s) => sum + s.totalCost, 0),
+                    totalProfit: filteredStores.reduce((sum, s) => sum + s.grossProfit, 0),
+                    totalOrders: filteredStores.reduce((sum, s) => sum + s.orderCount, 0)
+                };
+                renderKolStats({ stores: filteredStores, totals: newTotals });
+            } else {
+                renderKolStats(result.data);
+            }
         } else {
             tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:red;">載入失敗</td></tr>';
         }
