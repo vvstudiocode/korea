@@ -2857,29 +2857,32 @@ function initKolStatsMonthSelect() {
     }
 
     loadKolStats();
-    populateKolStatsStoreFilter();
+    populateKolStatsStoreDatalist();
 }
 
-function populateKolStatsStoreFilter() {
-    const select = document.getElementById('kolStatsStoreFilter');
-    // 保留第一個選項 (全部賣場)
-    select.innerHTML = '<option value="">全部賣場</option>';
+function populateKolStatsStoreDatalist() {
+    const datalist = document.getElementById('kolStatsStoreList');
+    if (!datalist) return;
+    datalist.innerHTML = '';
 
     // 如果 currentStores 為空，嘗試載入
     if (currentStores.length === 0) {
         callApi('getStores').then(data => {
             if (data.success) {
                 currentStores = data.data.stores || [];
-                populateKolStatsStoreFilter(); // 遞迴呼叫重新填充
+                populateKolStatsStoreDatalist();
             }
         });
         return;
     }
 
     currentStores.forEach(s => {
-        select.innerHTML += `<option value="${s.storeId}">${s.storeName} (${s.ownerName})</option>`;
+        datalist.innerHTML += `<option value="${s.storeId} - ${s.storeName} (${s.ownerName})">`;
     });
 }
+
+
+
 
 async function loadKolStats() {
     const monthValue = document.getElementById('kolStatsMonth').value;
@@ -2900,11 +2903,15 @@ async function loadKolStats() {
 
         if (result.success && result.data) {
             // 過濾邏輯
-            const storeFilter = document.getElementById('kolStatsStoreFilter').value;
+            const filterInput = document.getElementById('kolStatsStoreInput') ? document.getElementById('kolStatsStoreInput').value.trim().toLowerCase() : '';
             let filteredStores = result.data.stores || [];
 
-            if (storeFilter) {
-                filteredStores = filteredStores.filter(s => s.storeId === storeFilter);
+            if (filterInput) {
+                // 支援 ID 或 名稱 關鍵字搜尋
+                filteredStores = filteredStores.filter(s => {
+                    const searchStr = `${s.storeId} - ${s.storeName} (${s.ownerName})`.toLowerCase();
+                    return searchStr.includes(filterInput);
+                });
 
                 // 重新計算總計
                 const newTotals = {

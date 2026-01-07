@@ -332,9 +332,11 @@
                     </div>
                     <div class="filter-group" style="margin-left: 15px;">
                         <label>篩選賣場：</label>
-                        <select id="kolStatsStoreFilter" onchange="loadKolStats()">
-                            <option value="">全部賣場</option>
-                        </select>
+                        <input list="kolStatsStoreList" id="kolStatsStoreInput" placeholder="輸入或選擇賣場"
+                            onchange="loadKolStats()" style="padding: 5px; border-radius: 4px; border: 1px solid #ddd;">
+                        <datalist id="kolStatsStoreList">
+                            <!-- 動態生成 -->
+                        </datalist>
                     </div>
                 </div>
 
