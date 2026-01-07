@@ -1,6 +1,4 @@
 {
-  "version": "1.0",
-  "lastUpdated": "2026-01-06T14:06:30.967Z",
   "sections": [
     {
       "type": "hero",
@@ -14,46 +12,13 @@
       "marginBottom": 20
     },
     {
-      "type": "text_combination",
-      "marginTop": 0,
-      "marginBottom": 20,
-      "title": "Paragraph Title",
-      "subtitle": "Subtitle",
-      "content": "Input your text contents to promote your product, or tell the story about your shop.",
-      "buttonText": "Enter",
-      "textAlign": "center"
-    },
-    {
-      "type": "product_list",
-      "marginTop": 0,
-      "marginBottom": 20,
-      "title": "商品列表",
+      "type": "products",
+      "title": "精選商品",
+      "sourceType": "category",
       "category": "全部",
       "limit": 8,
-      "itemsDesktop": 4,
-      "itemsMobile": 2
-    },
-    {
-      "type": "image_carousel",
       "marginTop": 0,
-      "marginBottom": 20,
-      "title": "新圖片輪播",
-      "images": [
-        {
-          "src": "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800",
-          "srcMobile": "",
-          "link": ""
-        },
-        {
-          "src": "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=800",
-          "srcMobile": "",
-          "link": ""
-        }
-      ],
-      "fullWidth": true,
-      "ratioDesktop": "21:9",
-      "ratioMobile": "16:9",
-      "speed": 3
+      "marginBottom": 20
     }
   ],
   "footer": {
@@ -67,7 +32,7 @@
     "copyright": "© 2026 123. All Rights Reserved."
   },
   "global": {
-    "backgroundColor": "#e3cbec",
+    "backgroundColor": "#ffffff",
     "fontFamily": "Noto Sans TC",
     "fontSize": "16px"
   }
