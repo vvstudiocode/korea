@@ -205,14 +205,24 @@ const PageRenderer = {
                 console.log('✅ Layout loaded from GitHub');
                 return data;
             } else if (this.currentStoreId && response.status === 404) {
-                // KOL 專屬 layout 不存在，嘗試載入預設 layout
-                console.log('⚠️ KOL layout not found, trying default layout...');
-                const defaultRes = await fetch(this.LAYOUT_URL + '?_=' + Date.now());
-                if (defaultRes.ok) {
-                    const data = await defaultRes.json();
-                    console.log('✅ Default layout loaded');
-                    return data;
-                }
+                // KOL 專屬 layout 不存在，使用簡易版預設 Layout (User Request: 只顯示商品列表, limit 999)
+                console.log('✨ KOL layout not found, initializing simple default layout...');
+                return {
+                    sections: [
+                        {
+                            type: 'product_list',
+                            uuid: 'default-product-list-' + Date.now(),
+                            title: '精選商品',
+                            sourceType: 'auto', // auto defaults to category '全部'
+                            category: '全部',
+                            limit: 999, // User requested 999
+                            marginTop: 20,
+                            marginBottom: 20,
+                            textAlign: 'left' // Ensure good default alignment
+                        }
+                    ],
+                    footer: { enabled: true, text: `© ${new Date().getFullYear()} ${this.currentStoreId} Store` }
+                };
             }
         } catch (err) {
             console.warn('⚠️ GitHub fetch failed, trying GAS API...');

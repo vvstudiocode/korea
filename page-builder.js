@@ -199,7 +199,7 @@ const PageBuilder = {
                                     title: '精選商品',
                                     sourceType: 'auto',
                                     category: '全部',
-                                    limit: 12,
+                                    limit: 999,
                                     marginTop: 20,
                                     marginBottom: 20
                                 }
