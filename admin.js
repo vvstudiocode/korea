@@ -650,6 +650,14 @@ function fetchProducts(force = false) {
         });
 }
 
+// 新增：計算總庫存 (包含 variants)
+function calculateTotalStock(product) {
+    if (product.variants && product.variants.length > 0) {
+        return product.variants.reduce((sum, v) => sum + (parseInt(v.stock) || 0), 0);
+    }
+    return product.stock || 0;
+}
+
 function renderProducts(products) {
     const tbody = document.getElementById('productsTableBody');
 
@@ -688,9 +696,15 @@ function renderProducts(products) {
         // 如果有多張圖片，只顯示第一張
         const imageUrl = (p.image || "").split(',')[0].trim();
 
-        return `
-        <tr class="${p._isModified ? 'row-modified' : ''}" data-id="${p.id}">
-            <td style="cursor:move; text-align:center; color:#999; font-size:1.2rem;" class="drag-handle">⠿</td>
+        const hasVariants = p.variants && p.variants.length > 0;
+        const totalStock = calculateTotalStock(p);
+        const rowStyle = hasVariants ? 'cursor:pointer;' : '';
+        const clickEvent = hasVariants ? `onclick="toggleProductDetail('${p.id}')"` : '';
+
+        // 主行 (Main Row)
+        const mainRow = `
+        <tr class="${p._isModified ? 'row-modified' : ''} product-main-row" data-id="${p.id}" ${clickEvent} style="${rowStyle}">
+            <td style="cursor:move; text-align:center; color:#999; font-size:1.2rem;" class="drag-handle" onclick="event.stopPropagation()">⠿</td>
             <td><img src="${imageUrl}" class="table-thumb" style="width:40px;height:40px;object-fit:cover;vertical-align:middle;"></td>
             <td>${p.name} ${p._isNew ? '(新)' : ''}</td>
             <td>${p.price}</td>
@@ -699,19 +713,42 @@ function renderProducts(products) {
             <td style="color: #6366f1;">${p.wholesalePrice || 0}</td>
             <td style="color: #f59e0b; font-weight: 500;">${hqProfit}</td>
             <td style="color: #aaa; font-size:0.9em;">₩${p.priceKrw || 0}</td>
-            <td>${p.stock}</td>
+            <td style="font-weight:bold;">${totalStock}</td>
             <td>${p.status}</td>
             <td>
-                <div style="display:flex; gap:5px;">
+                <div style="display:flex; gap:5px;" onclick="event.stopPropagation()">
                     <button class="action-btn" onclick="openProductModal('${p.id || ''}')">編輯</button>
                     <button class="action-btn btn-danger" onclick="confirmDeleteProduct('${p.id || ''}')">刪除</button>
                 </div>
             </td>
-        </tr>
-    `}).join('');
+        </tr>`;
+
+        // 詳情行 (Detail Row) - 僅在有規格時生成
+        let detailRow = '';
+        if (hasVariants) {
+            const detailContent = `
+                <div style="padding: 10px 20px; background-color: #f8f9fa; border-left: 3px solid #6366f1;">
+                    <strong>規格庫存明細：</strong>
+                    <div style="display:flex; gap: 15px; flex-wrap: wrap; margin-top: 5px;">
+                        ${p.variants.map(v => `<span style="background:white; padding:2px 8px; border-radius:4px; border:1px solid #ddd;">${v.spec || v.name}: <b>${v.stock}</b></span>`).join('')}
+                    </div>
+                </div>
+            `;
+
+            detailRow = `
+            <tr id="detail-${p.id}" class="product-detail-row" style="display:none;">
+                <td colspan="12" style="padding:0; border:none;">
+                    ${detailContent}
+                </td>
+            </tr>
+            `;
+        }
+
+        return mainRow + detailRow;
+    }).join('');
 
     // 重要：將資料綁定到 DOM 元素，以便拖勒排序後能找回正確資料
-    const rows = tbody.querySelectorAll('tr');
+    const rows = tbody.querySelectorAll('tr.product-main-row');
     rows.forEach((row, index) => {
         if (displayProducts[index]) {
             row._productData = displayProducts[index];
@@ -719,6 +756,14 @@ function renderProducts(products) {
     });
 
     enableProductDragAndDrop();
+}
+
+// 切換商品詳情顯示
+function toggleProductDetail(productId) {
+    const detailRow = document.getElementById(`detail-${productId}`);
+    if (detailRow) {
+        detailRow.style.display = detailRow.style.display === 'none' ? 'table-row' : 'none';
+    }
 }
 
 // 載入現有品牌列表 (用於自動完成)
@@ -746,7 +791,7 @@ function loadBrandList() {
 let dragSrcEl = null;
 
 function enableProductDragAndDrop() {
-    const rows = document.querySelectorAll('#productsTableBody tr');
+    const rows = document.querySelectorAll('#productsTableBody tr.product-main-row');
     rows.forEach(row => {
         row.setAttribute('draggable', true);
         row.addEventListener('dragstart', handleDragStart);
@@ -795,7 +840,7 @@ function handleDrop(e) {
 
         // 根據新的 DOM 順序重建 currentProducts
         const tbody = document.getElementById('productsTableBody');
-        const rows = Array.from(tbody.querySelectorAll('tr'));
+        const rows = Array.from(tbody.querySelectorAll('tr.product-main-row'));
 
         // 建立新的產品陣列
         const newOrderProducts = [];
@@ -828,6 +873,8 @@ function handleDrop(e) {
         if (newProducts.length === currentProducts.length) {
             currentProducts = newProducts;
             showUnsavedSortWarning();
+            // 重繪以修正 Detail Row 的位置 (因為 DOM 移動只移了 Main Row)
+            renderProducts(currentProducts);
         }
     }
 
