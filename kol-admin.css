@@ -130,14 +130,19 @@ body {
 }
 
 .sidebar-header {
-    padding: 1.5rem;
+    padding: 1rem 1rem 0.5rem;
     text-align: center;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .sidebar-header h3 {
-    font-size: 1.1rem;
-    margin-top: 0.5rem;
+    font-size: 1rem;
+    margin-top: 0.3rem;
+}
+
+/* 預設隱藏手機版專屬按鈕 */
+.mobile-close-sidebar {
+    display: none;
 }
 
 .nav-links {
@@ -998,14 +1003,19 @@ body.sidebar-open {
     }
 
     .dashboard-container.sidebar-collapsed .sidebar-header {
-        padding: 1.2rem 0.5rem;
+        padding: 0.5rem;
         text-align: center;
+        border-bottom: none;
+        min-height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
-    .dashboard-container.sidebar-collapsed .sidebar-header::after {
-        content: '☰';
-        font-size: 1.5rem;
-        color: #fff;
+    .dashboard-container.sidebar-collapsed .sidebar-header #storeLogoContainer,
+    .dashboard-container.sidebar-collapsed .sidebar-header h3,
+    .dashboard-container.sidebar-collapsed .sidebar-header .mobile-close-sidebar {
+        display: none !important;
     }
 
     .dashboard-container.sidebar-collapsed .nav-links li .text {

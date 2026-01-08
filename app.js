@@ -703,17 +703,33 @@ function addToCart(product, quantity, selectedOptions) {
     const cartItemId = getCartItemId(product.id, selectedOptions);
     const existingItem = cart.find(item => item.cartItemId === cartItemId);
 
+    // 確定價格：如果有規格，尋找對應規格的價格
+    let finalPrice = product.price;
+    if (selectedOptions && Object.keys(selectedOptions).length > 0 && product.variants && product.variants.length > 0) {
+        // 將選擇的規格值（如 "M", "Red"）組合為字串 "M/Red"
+        const specString = Object.values(selectedOptions).join('/');
+        const variant = product.variants.find(v => v.spec === specString);
+        if (variant && variant.price) {
+            finalPrice = variant.price;
+        }
+    }
+
     if (existingItem) {
         existingItem.quantity += quantity;
+        existingItem.price = finalPrice; // 更新為最新價格（以防變動）
     } else {
         const images = String(product.image || '').split(',').map(url => url.trim());
         const mainImage = images.length > 0 && images[0] !== '' ? images[0] : 'https://via.placeholder.com/300';
+
+        // 整理規格顯示文字
+        const specText = Object.values(selectedOptions).join(' / ');
 
         cart.push({
             cartItemId: cartItemId,
             id: product.id,
             name: product.name,
-            price: product.price,
+            spec: specText, // 存入規格文字供結帳顯示
+            price: finalPrice,
             image: mainImage,
             quantity: quantity,
             selectedOptions: selectedOptions
