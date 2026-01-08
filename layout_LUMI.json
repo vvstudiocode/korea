@@ -1,0 +1,28 @@
+{
+  "sections": [
+    {
+      "type": "product_list",
+      "title": "",
+      "sourceType": "auto",
+      "category": "全部",
+      "limit": 999,
+      "marginTop": 0,
+      "marginBottom": 30
+    }
+  ],
+  "footer": {
+    "notices": [
+      {
+        "title": "購買須知",
+        "content": "本店為代購性質，商品皆為正品。下單後約 7-14 個工作天到貨。"
+      }
+    ],
+    "socialLinks": {},
+    "copyright": "© 2026 🌸 LUMI 趙的仙選. All Rights Reserved."
+  },
+  "global": {
+    "backgroundColor": "#ffffff",
+    "fontFamily": "Noto Sans TC",
+    "fontSize": "16px"
+  }
+}
