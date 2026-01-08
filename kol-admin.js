@@ -1410,7 +1410,6 @@ async function loadProfileSettings() {
             document.getElementById('settingsEmail').value = profile.email || '';
             document.getElementById('settingsThemeColor').value = profile.themeColor || '#6366f1';
             document.getElementById('settingsThemeColorPicker').value = profile.themeColor || '#6366f1';
-            document.getElementById('settingsBankAccount').value = profile.bankAccount || '';
 
             // Logo
             if (profile.logoUrl) {
@@ -1451,7 +1450,6 @@ async function handleProfileUpdate(event) {
         phone: document.getElementById('settingsPhone').value.trim(),
         email: document.getElementById('settingsEmail').value.trim(),
         themeColor: document.getElementById('settingsThemeColor').value.trim(),
-        bankAccount: document.getElementById('settingsBankAccount').value.trim(),
         logoUrl: document.getElementById('settingsLogoUrl').value
     };
 
