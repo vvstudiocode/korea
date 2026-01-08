@@ -494,7 +494,7 @@ function renderMyProducts(products) {
 
         return `
         <tr class="product-row" draggable="true" data-id="${p.id}" data-index="${index}">
-            <td style="cursor:move; text-align:center; color:#999; font-size:1.2rem;" class="drag-handle" onclick="event.stopPropagation()">⠿</td>
+            <td class="drag-handle" onclick="event.stopPropagation()">⠿</td>
             <td><img src="${imageUrl}" class="table-thumb"></td>
             <td>${p.name} ${typeTag}</td>
             <td style="color:#888;">${formatCurrency(p.wholesalePrice)}</td>

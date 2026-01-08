@@ -400,6 +400,16 @@ body {
     margin-right: 0.3rem;
 }
 
+.drag-handle {
+    width: 30px;
+    padding: 0.8rem 5px !important;
+    cursor: move;
+    text-align: center;
+    color: #ccc;
+    font-size: 1.1rem;
+    user-select: none;
+}
+
 .action-btn:hover {
     background: var(--border-color);
 }
