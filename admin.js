@@ -799,7 +799,72 @@ function enableProductDragAndDrop() {
         row.addEventListener('drop', handleDrop);
         // row.addEventListener('dragenter', handleDragEnter);
         // row.addEventListener('dragleave', handleDragLeave);
+
+        // Mobile Touch Support
+        const handle = row.querySelector('.drag-handle');
+        if (handle) {
+            handle.addEventListener('touchstart', handleTouchStart, { passive: false });
+            handle.addEventListener('touchmove', handleTouchMove, { passive: false });
+            handle.addEventListener('touchend', handleTouchEnd, { passive: false });
+        }
     });
+}
+
+// Mobile Touch Variables
+let touchDragRow = null;
+
+function handleTouchStart(e) {
+    if (e.cancelable) e.preventDefault();
+    touchDragRow = this.closest('tr');
+    if (touchDragRow) {
+        touchDragRow.classList.add('dragging');
+        touchDragRow.style.opacity = '0.5';
+        dragSrcEl = touchDragRow; // Reuse global variable if possible or just use local
+    }
+}
+
+function handleTouchMove(e) {
+    if (!touchDragRow) return;
+    if (e.cancelable) e.preventDefault();
+
+    const touch = e.touches[0];
+    const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
+
+    if (targetElement) {
+        const targetRow = targetElement.closest('tr.product-main-row');
+        if (targetRow && targetRow !== touchDragRow) {
+            const rect = targetRow.getBoundingClientRect();
+            // Determine insertion point
+            const offset = touch.clientY - rect.top;
+            if (offset > rect.height / 2) {
+                targetRow.parentNode.insertBefore(touchDragRow, targetRow.nextSibling);
+            } else {
+                targetRow.parentNode.insertBefore(touchDragRow, targetRow);
+            }
+        }
+    }
+}
+
+function handleTouchEnd(e) {
+    if (touchDragRow) {
+        touchDragRow.classList.remove('dragging');
+        touchDragRow.style.opacity = '1';
+
+        // Trigger save logic (reusing handleDrop logic)
+        // Manual trigger since we skipped drop event
+        const tbody = document.getElementById('productsTableBody');
+        const rows = Array.from(tbody.querySelectorAll('tr.product-main-row'));
+        const newProducts = rows.map(row => row._productData).filter(p => p);
+
+        if (newProducts.length === currentProducts.length) {
+            currentProducts = newProducts;
+            showUnsavedSortWarning();
+            renderProducts(currentProducts);
+        }
+
+        touchDragRow = null;
+        dragSrcEl = null;
+    }
 }
 
 function handleDragStart(e) {

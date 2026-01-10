@@ -2076,3 +2076,55 @@ tr.dragging {
             flex-direction: column;
         }
     }
+
+    /* Update: Maximize width for tables on mobile */
+    @media (max-width: 768px) {
+        .view-section {
+            padding: 0.5rem;
+            /* Reduce padding */
+        }
+
+        /* Target specific views for full width */
+        #purchasingView .table-container,
+        #productsView .table-container,
+        #ordersView .table-container,
+        #storesView .table-container {
+            margin: 0 -0.5rem;
+            /* Negative margin to counteract parent padding */
+            width: calc(100% + 1rem);
+            /* Force full width */
+            border-radius: 0;
+            /* Remove radius for edge-to-edge look */
+        }
+
+        /* Ensure content is centered if it was constrained */
+        #purchasingView,
+        #productsView,
+        #ordersView {
+            text-align: center;
+        }
+
+        #purchasingView .admin-table,
+        #productsView .data-table,
+        #ordersView .data-table {
+            margin: 0 auto;
+            /* Center table itself */
+        }
+
+        /* Purchase Stats Specifics */
+        .filter-bar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .filter-group {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .filter-group button,
+        .filter-group input {
+            width: 100%;
+            margin: 5px 0;
+        }
+    }
