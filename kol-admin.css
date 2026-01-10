@@ -383,8 +383,19 @@ body {
     text-transform: uppercase;
 }
 
+.data-table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
 .data-table tbody tr:hover {
     background: var(--bg-color);
+}
+
+/* 讓商品列表的每一行都有手指圖示，提示可點擊 */
+#myProductsTableBody tr:hover {
+    cursor: pointer;
+    background-color: #f0f2ff;
+    /* 輕微藍色背景強化選中感 */
 }
 
 .table-thumb {
