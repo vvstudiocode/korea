@@ -2080,8 +2080,8 @@ tr.dragging {
     /* Update: Maximize width for tables on mobile */
     @media (max-width: 768px) {
         .view-section {
-            padding: 0.5rem;
-            /* Reduce padding */
+            padding: 0.5rem 0.5rem 120px 0.5rem;
+            /* Restore bottom padding */
         }
 
         /* Target specific views for full width */

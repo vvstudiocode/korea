@@ -970,12 +970,12 @@ async function handleOrderSubmit(e) {
 
         // **核心修改**：確保 selectedOptions 被傳送到後端
         const simplifiedItems = cart.map(item => {
-            // 將選項物件轉換為字串 (e.g., "顏色: 紅, 尺寸: M")
+            // 將選項物件轉換為內部規格字串 (e.g., "紅/M") 以匹配後端庫存 Spec key
             let specString = '';
             if (item.selectedOptions && Object.keys(item.selectedOptions).length > 0) {
-                specString = Object.entries(item.selectedOptions)
-                    .map(([key, value]) => `${key}: ${value}`)
-                    .join(', ');
+                // 使用 Object.values 確保生成的字串格式為 "Value1/Value2" (例如 "紅/M")
+                // 這必須與 admin.js 生成 variants 的邏輯一致
+                specString = Object.values(item.selectedOptions).join('/');
             }
 
             return {
