@@ -637,6 +637,22 @@
         </div>
     </div>
 
+    <!-- 商品詳細資料 Modal -->
+    <div id="productDetailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>商品詳細資料</h3>
+                <button class="close-btn" onclick="closeModal('productDetailModal')">✕</button>
+            </div>
+            <div class="modal-body" id="productDetailModalBody">
+                <!-- 由 JS 動態注入 -->
+            </div>
+            <div class="modal-actions">
+                <button onclick="closeModal('productDetailModal')">關閉</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast 容器 -->
     <div id="toastContainer"></div>
 

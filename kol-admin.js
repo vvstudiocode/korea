@@ -493,18 +493,18 @@ function renderMyProducts(products) {
         const statusBadge = p.status === 'active' ? '<span class="status-badge status-done">上架中</span>' : '<span class="status-badge status-pending">下架</span>';
 
         return `
-        <tr class="product-row" draggable="true" data-id="${p.id}" data-index="${index}">
+        <tr class="product-row" draggable="true" data-id="${p.id}" data-index="${index}" onclick="showKolProductDetail('${p.id}')">
             <td class="drag-handle" onclick="event.stopPropagation()">⠿</td>
             <td><img src="${imageUrl}" class="table-thumb"></td>
             <td>${p.name} ${typeTag}</td>
             <td style="color:#888;">${formatCurrency(p.wholesalePrice)}</td>
             <td style="font-weight:600;">${formatCurrency(p.customPrice)}</td>
             <td style="color:#28a745; font-weight:500;">${formatCurrency(profit)}</td>
-            <td>${p.availableStock}</td>
+            <td>${p.availableStock || p.stock || 0}</td>
             <td>${p.soldQty || 0}</td>
             <td>${statusBadge}</td>
             <td>
-                <button class="action-btn" onclick="openEditMyProduct('${p.id}')">編輯</button>
+                <button class="action-btn" onclick="event.stopPropagation(); openEditMyProduct('${p.id}')">編輯</button>
             </td>
         </tr>
         `;
@@ -997,6 +997,74 @@ async function saveMyProduct() {
     } finally {
         hideLoadingOverlay();
     }
+}
+
+// 顯示商品詳細資料 (唯讀)
+function showKolProductDetail(productId) {
+    const product = kolProducts.find(p => String(p.id) === String(productId));
+    if (!product) return;
+
+    const body = document.getElementById('productDetailModalBody');
+    const imageUrl = (product.image || '').split(',')[0] || 'https://via.placeholder.com/100';
+
+    let variantsHtml = '';
+    if (product.variants && product.variants.length > 0) {
+        variantsHtml = `
+            <div style="margin-top: 15px;">
+                <h4 style="margin-bottom: 8px; font-size: 0.95rem; color: #4b5563;">規格明細</h4>
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                    <thead>
+                        <tr style="background: #f3f4f6; text-align: left;">
+                            <th style="padding: 8px; border: 1px solid #e5e7eb;">規格</th>
+                            <th style="padding: 8px; border: 1px solid #e5e7eb; width: 80px;">庫存</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${product.variants.map(v => `
+                            <tr>
+                                <td style="padding: 8px; border: 1px solid #e5e7eb;">${v.spec || v.name}</td>
+                                <td style="padding: 8px; border: 1px solid #e5e7eb;">${v.stock}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    }
+
+    body.innerHTML = `
+        <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+            <img src="${imageUrl}" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px; border: 1px solid #eee;">
+            <div>
+                <h4 style="margin: 0 0 5px 0; font-size: 1.1rem;">${product.name}</h4>
+                <div style="color: #666; font-size: 0.9rem; margin-bottom: 4px;">商品 ID: ${product.id}</div>
+                <div style="color: #666; font-size: 0.9rem;">分類: ${product.category || '未分類'}</div>
+                <div style="margin-top: 8px; font-weight: 700; color: var(--primary-color);">
+                    售價: ${formatCurrency(product.customPrice)}
+                </div>
+            </div>
+        </div>
+        
+        <div style="background: #f9fafb; padding: 12px; border-radius: 8px; margin-bottom: 15px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                <span>總庫存:</span>
+                <span style="font-weight: 600;">${product.availableStock || product.stock || 0}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <span>已售出:</span>
+                <span style="font-weight: 600;">${product.soldQty || 0}</span>
+            </div>
+        </div>
+
+        ${variantsHtml}
+
+        <div style="margin-top: 15px;">
+            <h4 style="margin-bottom: 5px; font-size: 0.95rem; color: #4b5563;">商品描述</h4>
+            <div style="font-size: 0.9rem; color: #4b5563; line-height: 1.5; white-space: pre-wrap;">${product.description || '無描述'}</div>
+        </div>
+    `;
+
+    openModal('productDetailModal');
 }
 
 // ----------------------------------------------------
