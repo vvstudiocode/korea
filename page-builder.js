@@ -124,12 +124,15 @@ const PageBuilder = {
     editingIndex: null,
     editingFooter: false,
     previewMode: 'desktop',
-    footer: null,
-    editingIndex: null,
-    editingFooter: false,
-    previewMode: 'desktop',
     debounceTimer: null,
     storeId: null, // 新增：支援 KOL 賣場 ID
+
+    // Touch Drag State
+    touchDragItem: null,
+    touchDragIndex: null,
+    touchStartY: 0,
+    touchCurrentY: 0,
+    touchPlaceholder: null,
 
     // GitHub 設定 (與後端保持一致)
     LAYOUT_URL: 'https://raw.githubusercontent.com/vvstudiocode/korea/main/layout.json',
@@ -288,6 +291,66 @@ const PageBuilder = {
         };
     },
 
+    handleTouchStart: function (e, item, index) {
+        if (e.cancelable && e.target.closest('.comp-drag-handle')) {
+            e.preventDefault();
+        }
+
+        this.touchDragItem = item;
+        this.touchDragIndex = index;
+        this.touchStartY = e.touches[0].clientY;
+
+        item.classList.add('dragging');
+        item.style.position = 'relative';
+        item.style.zIndex = '1000';
+        item.style.transition = 'none';
+    },
+
+    handleTouchMove: function (e) {
+        if (!this.touchDragItem) return;
+        if (e.cancelable) e.preventDefault();
+
+        const touch = e.touches[0];
+        const deltaY = touch.clientY - this.touchStartY;
+
+        this.touchDragItem.style.transform = `translateY(${deltaY}px)`;
+    },
+
+    handleTouchEnd: function (e) {
+        if (!this.touchDragItem) return;
+
+        const touch = e.changedTouches[0];
+        const clientX = touch.clientX;
+        const clientY = touch.clientY;
+
+        // Hide dragged item momentarily to find element below
+        const prevDisplay = this.touchDragItem.style.display;
+        this.touchDragItem.style.display = 'none';
+        const elemBelow = document.elementFromPoint(clientX, clientY);
+        this.touchDragItem.style.display = prevDisplay;
+
+        // Reset styles
+        this.touchDragItem.style.transform = '';
+        this.touchDragItem.style.position = '';
+        this.touchDragItem.style.zIndex = '';
+        this.touchDragItem.classList.remove('dragging');
+        this.touchDragItem.style.transition = '';
+
+        if (elemBelow) {
+            const targetItem = elemBelow.closest('.comp-item');
+            if (targetItem && targetItem.dataset.index !== undefined) {
+                const toIndex = parseInt(targetItem.dataset.index);
+                // Ensure valid index and strictly different
+                if (!isNaN(toIndex) && toIndex !== this.touchDragIndex) {
+                    this.reorderComponents(this.touchDragIndex, toIndex);
+                }
+            }
+        }
+
+        this.touchDragItem = null;
+        this.touchDragIndex = null;
+    },
+
     renderComponentsList: function () {
         const list = document.getElementById('builderComponentsList');
         if (!list) return;
@@ -328,7 +391,7 @@ const PageBuilder = {
 
             div.innerHTML = `
                 <div class="comp-item-header">
-                    <div class="comp-drag-handle" title="拖拽排序">☰</div>
+                    <div class="comp-drag-handle" title="拖拽排序" style="touch-action: none;">☰</div>
                     <div class="comp-info" onclick="PageBuilder.toggleEdit(${index})" style="cursor:pointer; flex: 1;">
                         <span class="comp-name">${comp.title || info.name}</span>
                         <span class="comp-type-tag">${info.name}</span>
@@ -363,6 +426,11 @@ const PageBuilder = {
                 const toIndex = index;
                 this.reorderComponents(fromIndex, toIndex);
             });
+
+            // Mobile Touch Support
+            handle.addEventListener('touchstart', (e) => this.handleTouchStart(e, div, index), { passive: false });
+            handle.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: false });
+            handle.addEventListener('touchend', (e) => this.handleTouchEnd(e));
 
             list.appendChild(div);
         });

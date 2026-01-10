@@ -413,6 +413,7 @@ body {
     color: #ccc;
     font-size: 1.1rem;
     user-select: none;
+    touch-action: none;
 }
 
 .action-btn:hover {

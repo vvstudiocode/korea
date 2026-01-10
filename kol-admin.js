@@ -520,9 +520,18 @@ let kolDragSrcEl = null;
 function enableKolProductDragAndDrop() {
     const rows = document.querySelectorAll('#myProductsBody tr.product-row');
     rows.forEach(row => {
+        // Desktop Drag events
         row.addEventListener('dragstart', handleKolDragStart);
         row.addEventListener('dragover', handleKolDragOver);
         row.addEventListener('drop', handleKolDrop);
+
+        // Mobile Touch events (attached to handle)
+        const handle = row.querySelector('.drag-handle');
+        if (handle) {
+            handle.addEventListener('touchstart', handleKolTouchStart, { passive: false });
+            handle.addEventListener('touchmove', handleKolTouchMove, { passive: false });
+            handle.addEventListener('touchend', handleKolTouchEnd, { passive: false });
+        }
     });
 }
 
@@ -561,6 +570,51 @@ function handleKolDrop(e) {
         updateSortButtonVisibility(true); // Show save button
     }
     return false;
+}
+
+// Mobile Touch Sorting Logic
+let kolTouchDragRow = null;
+
+function handleKolTouchStart(e) {
+    if (e.cancelable) e.preventDefault();
+    kolTouchDragRow = this.closest('tr');
+    if (kolTouchDragRow) {
+        kolTouchDragRow.classList.add('dragging');
+        kolTouchDragRow.style.opacity = '0.5';
+    }
+}
+
+function handleKolTouchMove(e) {
+    if (!kolTouchDragRow) return;
+    if (e.cancelable) e.preventDefault();
+
+    const touch = e.touches[0];
+    const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
+
+    if (targetElement) {
+        const targetRow = targetElement.closest('tr.product-row');
+        if (targetRow && targetRow !== kolTouchDragRow) {
+            const rect = targetRow.getBoundingClientRect();
+            // Determine insertion point (above or below)
+            // If touch is in lower half of target row, insert after
+            const offset = touch.clientY - rect.top;
+            if (offset > rect.height / 2) {
+                targetRow.parentNode.insertBefore(kolTouchDragRow, targetRow.nextSibling);
+            } else {
+                targetRow.parentNode.insertBefore(kolTouchDragRow, targetRow);
+            }
+        }
+    }
+}
+
+function handleKolTouchEnd(e) {
+    if (kolTouchDragRow) {
+        kolTouchDragRow.classList.remove('dragging');
+        kolTouchDragRow.style.opacity = '1';
+        kolTouchDragRow = null;
+        updateKolProductsOrder();
+        updateSortButtonVisibility(true);
+    }
 }
 
 function updateKolProductsOrder() {
