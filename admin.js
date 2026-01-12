@@ -1979,8 +1979,9 @@ function addProductToOrderItems() {
     // 清空輸入
     select.value = '';
     document.getElementById('productQty').value = 1;
-    if (document.getElementById('specSelectGroup')) {
-        document.getElementById('specSelectGroup').style.display = 'none';
+    const specGroup = document.getElementById('specSelectGroup');
+    if (specGroup) {
+        specGroup.style.display = 'none';
     }
 }
 

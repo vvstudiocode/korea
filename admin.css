@@ -2128,3 +2128,112 @@ tr.dragging {
             margin: 5px 0;
         }
     }
+/* ============================================
+   品牌按鈕樣式 - 統一所有彈窗和動作按鈕
+   ============================================ */
+
+/* 主要動作按鈕 - 粉紅色漸層 */
+.btn-brand-primary,
+.add-item-btn,
+button.accent-btn {
+    background: linear-gradient(135deg, #FF6B9D 0%, #FF8FA3 100%) !important;
+    color: white !important;
+    border: none !important;
+    padding: 0.6rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(255, 107, 157, 0.3);
+    font-size: 0.95rem;
+}
+
+.btn-brand-primary:hover,
+.add-item-btn:hover,
+button.accent-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 107, 157, 0.4);
+    opacity: 0.95;
+}
+
+/* 次要動作按鈕 - 深色 */
+.btn-brand-secondary {
+    background: #2C3E50 !important;
+    color: white !important;
+    border: none !important;
+    padding: 0.6rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 6px rgba(44, 62, 80, 0.2);
+}
+
+.btn-brand-secondary:hover {
+    background: #34495e !important;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(44, 62, 80, 0.3);
+}
+
+/* 取消/重置按鈕 - 白色外框 */
+.btn-brand-outline {
+    background: white !important;
+    color: #666 !important;
+    border: 1px solid #ddd !important;
+    padding: 0.6rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-brand-outline:hover {
+    background: #f8f9fa !important;
+    border-color: #bbb !important;
+    color: #333 !important;
+}
+
+/* 新增商品/賣場按鈕 */
+.add-btn {
+    background: linear-gradient(135deg, #FF6B9D 0%, #FF8FA3 100%) !important;
+    color: white !important;
+    padding: 10px 20px;
+    border: none !important;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(255, 107, 157, 0.3);
+    transition: all 0.3s ease;
+}
+
+.add-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 107, 157, 0.4);
+    opacity: 0.95 !important;
+}
+
+/* 規格選擇器容器 */
+#specSelectors {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+#specSelectors .spec-dimension {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+#specSelectors .spec-dimension label {
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+#specSelectors .spec-dimension select {
+    padding: 0.55rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.95rem;
+}
