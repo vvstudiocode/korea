@@ -129,10 +129,19 @@
 
             <!-- 2. 我的商品 -->
             <div id="productsView" class="view-section" style="display: none;">
-                <div class="toolbar">
-                    <button class="btn-primary" onclick="openProductPicker()">+ 從商品庫選品</button>
-                    <button class="btn-secondary" onclick="openCreateOwnProduct()" style="display: none;">+
-                        建立專屬商品</button>
+                <div class="toolbar" style="flex-direction: column; gap:0.8rem;">
+                    <button class="btn-primary" onclick="openProductPicker()" style="width:100%">+ 從商品庫選品</button>
+                    <!-- 隱藏的建立專屬商品按鈕，保留供未來擴充
+                    <button class="btn-secondary" onclick="openCreateOwnProduct()" style="display: none;">+ 建立專屬商品</button> 
+                    -->
+
+                    <div class="kol-search-row" style="display:flex; gap:0.5rem; width:100%;">
+                        <input type="text" id="myProductSearch" placeholder="搜尋商品名稱..."
+                            onkeydown="if(event.key === 'Enter') searchMyProducts()">
+                        <button type="button" class="btn-search" onclick="searchMyProducts()">搜尋</button>
+                    </div>
+
+                    <button class="btn-save-all" onclick="saveAllProductPrices()" style="width:100%">💾 儲存所有變更</button>
                 </div>
 
                 <div class="table-container">
@@ -161,9 +170,17 @@
 
             <!-- 3. 訂單管理 -->
             <div id="ordersView" class="view-section" style="display: none;">
-                <div class="toolbar">
-                    <input type="text" id="kolOrderSearch" placeholder="🔍 搜尋訂單編號、客戶姓名..." oninput="filterKolOrders()">
-                    <select id="kolOrderStatus" onchange="filterKolOrders()">
+                <div class="toolbar" style="justify-content: space-between; align-items: center;">
+                    <div class="kol-search-row" style="flex: 1; display:flex; gap:0.5rem; flex-wrap:wrap;">
+                        <button class="btn-add-order" onclick="openKolNewOrder()">+ 新增訂單</button>
+                        <div style="display:flex; flex:1; gap:0.5rem;">
+                            <input type="text" id="kolOrderSearch" placeholder="🔍 搜尋訂單編號、客戶姓名..."
+                                onkeydown="if(event.key === 'Enter') filterKolOrders()">
+                            <button type="button" class="btn-search" onclick="filterKolOrders()">搜尋</button>
+                        </div>
+                    </div>
+
+                    <select id="kolOrderStatus" onchange="filterKolOrders()" style="min-width: 120px;">
                         <option value="">全部狀態</option>
                         <option value="待處理">待處理</option>
                         <option value="已確認">已確認</option>
@@ -649,6 +666,208 @@
             </div>
             <div class="modal-actions">
                 <button onclick="closeModal('productDetailModal')">關閉</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- KOL 新增/編輯訂單 Modal (複製自 Admin) -->
+    <div id="kolOrderModal" class="modal kol-order-modal">
+        <div class="modal-content large-modal">
+            <div class="modal-header">
+                <h3><span id="kolModalTitle">新增訂單</span> <span id="kolDetailOrderId" class="badge"></span></h3>
+                <button class="close-btn" onclick="closeModal('kolOrderModal')">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="detail-section">
+                    <div class="form-row" style="display:flex; justify-content:space-between; margin-bottom:1rem;">
+                        <h4 style="margin:0;">訂單資訊</h4>
+                        <div class="status-select">
+                            <label>訂單狀態:</label>
+                            <select id="kolDetailStatus">
+                                <option value="待處理">待處理</option>
+                                <option value="已確認">已確認</option>
+                                <option value="已出貨">已出貨</option>
+                                <option value="已完成">已完成</option>
+                                <option value="已取消">已取消</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label>訂單日期</label>
+                            <input type="text" id="kolDetailDate" readonly class="readonly-input">
+                        </div>
+                        <div class="form-group half">
+                            <label>訂購人姓名</label>
+                            <input type="text" id="kolDetailName">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label>電話</label>
+                            <input type="tel" id="kolDetailPhone">
+                        </div>
+                        <div class="form-group half">
+                            <label>Email (選填)</label>
+                            <input type="email" id="kolDetailEmail">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>運送方式</label>
+                            <select id="kolDetailShipping" onchange="updateKolShippingFee()">
+                                <option value="7-11店到店">7-11店到店 (+60)</option>
+                                <option value="限台中市面交">限台中市面交 (免運)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <!-- 7-11 門市資訊 -->
+                    <div id="kolDetailStoreInfo" class="store-info-group">
+                        <div class="form-row">
+                            <div class="form-group half">
+                                <label>門市名稱</label>
+                                <input type="text" id="kolDetailStoreName">
+                            </div>
+                            <div class="form-group half">
+                                <label>門市店號</label>
+                                <input type="text" id="kolDetailStoreCode">
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 通用地址欄位 -->
+                    <div class="form-group">
+                        <label>地址 (門市或宅配)</label>
+                        <input type="text" id="kolDetailStoreAddress">
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h4>商品明細 <button type="button" class="btn-primary" onclick="openKolAddProduct()"
+                            style="float:right; padding:0.4rem 0.8rem; font-size:0.85rem;">+ 新增商品</button></h4>
+
+                    <!-- 新增商品區域（隱藏） -->
+                    <div id="kolAddProductArea"
+                        style="display:none; margin-bottom:1rem; padding:1rem; background:#f8f9fa; border-radius:4px;">
+                        <!-- 第一行：商品搜尋與數量 -->
+                        <div class="form-row" style="display:flex; gap:1rem;">
+                            <div class="form-group" style="flex:3;">
+                                <label>選擇商品（可輸入搜尋）</label>
+                                <input type="text" id="kolProductSearch" list="kolProductSuggestions"
+                                    placeholder="輸入或選擇商品..." style="width:100%; padding:0.5rem;"
+                                    oninput="onKolProductInput()">
+                                <datalist id="kolProductSuggestions">
+                                    <!-- 動態載入 -->
+                                </datalist>
+                            </div>
+                            <div class="form-group quarter" style="flex:1;">
+                                <label>數量</label>
+                                <input type="number" id="kolProductQty" value="1" min="1">
+                            </div>
+                        </div>
+
+                        <!-- 第二行：規格選擇 (獨立一行，避免被擠壓) -->
+                        <div id="kolSpecSelectGroup"
+                            style="display:none; margin-top: 0.5rem; padding: 0.5rem; background: #fff; border: 1px solid #eee; border-radius: 4px;">
+                            <label style="display:block; margin-bottom:0.5rem; font-weight:bold;">規格選擇</label>
+                            <div id="kolSpecSelectors" style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                                <!-- 動態生成多個規格選擇器 -->
+                            </div>
+                        </div>
+
+                        <!-- 第三行：按鈕 -->
+                        <div class="form-row" style="margin-top: 1rem; justify-content: flex-end; display:flex;">
+                            <div class="form-group" style="flex:0 0 auto;">
+                                <button type="button" onclick="addKolProductToOrderItems()"
+                                    class="btn-primary">確認新增</button>
+                                <button type="button" onclick="cancelKolAddProduct()" class="btn-outline"
+                                    style="margin-left:0.5rem;">取消</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="overflow-x:auto;">
+                        <table class="data-table" style="min-width: 500px;">
+                            <thead>
+                                <tr>
+                                    <th>商品</th>
+                                    <th>規格</th>
+                                    <th>數量</th>
+                                    <th>單價</th>
+                                    <th>小計</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="kolDetailItemsBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h4>訂單調整</h4>
+
+                    <!-- 商品小計 -->
+                    <div class="price-row" style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+                        <span>商品小計</span>
+                        <span id="kolItemsSubtotal">NT$ 0</span>
+                    </div>
+
+                    <!-- 折扣率選項 -->
+                    <div class="discount-options"
+                        style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem;">
+                        <label style="display: flex; align-items: center;  gap: 0.5rem;">
+                            <input type="checkbox" id="kolEnableDiscountPercent" onchange="updateKolOrderTotal()">
+                            <span>啟用折扣率</span>
+                        </label>
+                        <input type="number" id="kolDiscountPercent" placeholder="90" min="0" max="100" step="1"
+                            oninput="updateKolOrderTotal()" style="width: 60px; padding: 0.4rem;">
+                        <span>%</span>
+                        <span id="kolDiscountPercentAmount" style="color: #dc3545; margin-left: 1rem;">- NT$ 0</span>
+                    </div>
+
+                    <!-- 固定折扣選項 -->
+                    <div class="discount-options"
+                        style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" id="kolEnableDiscountAmount" onchange="updateKolOrderTotal()">
+                            <span>固定折扣金額</span>
+                        </label>
+                        <input type="number" id="kolDiscountAmount" placeholder="100" min="0"
+                            oninput="updateKolOrderTotal()" style="width: 80px; padding: 0.4rem;">
+                        <span>元</span>
+                    </div>
+
+                    <!-- 運費 -->
+                    <div class="price-row" style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+                        <span>運費</span>
+                        <div>
+                            <input type="number" id="kolDetailShippingFee" value="0" min="0"
+                                oninput="updateKolOrderTotal()"
+                                style="width: 80px; padding: 0.4rem; text-align: right;">
+                            <span> 元</span>
+                        </div>
+                    </div>
+
+                    <!-- 總計 -->
+                    <div class="price-row total-row"
+                        style="display:flex; justify-content:space-between; margin-top:1rem; font-size:1.2rem; border-top:1px solid #eee; padding-top:1rem;">
+                        <span><strong>訂單總計</strong></span>
+                        <span id="kolDetailTotal" style="color: var(--primary-color);"><strong>NT$ 0</strong></span>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h4>備註</h4>
+                    <textarea id="kolDetailNote" class="note-box" rows="3"
+                        style="width:100%; border:1px solid #ddd; padding:0.5rem; border-radius:4px;"></textarea>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button onclick="closeModal('kolOrderModal')">取消</button>
+                <button onclick="submitKolNewOrder()" class="accent-btn">確認建立訂單</button>
             </div>
         </div>
     </div>

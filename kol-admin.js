@@ -1750,3 +1750,445 @@ async function saveKolFooter() {
         hideLoadingOverlay();
     }
 }
+
+// ============================================================
+// 搜尋與儲存功能增強
+// ============================================================
+
+function searchMyProducts() {
+    const term = document.getElementById('myProductSearch').value.trim().toLowerCase();
+    if (!term) {
+        renderMyProducts(kolProducts);
+        return;
+    }
+
+    const filtered = kolProducts.filter(p =>
+        p.name.toLowerCase().includes(term) ||
+        (p.id && String(p.id).includes(term))
+    );
+    renderMyProducts(filtered);
+}
+
+// 供外部調用 (保留相容性)
+function saveAllProductPrices() {
+    // 實際上這是儲存所有變更，包括價格和排序（如果有的話）
+    if (confirm('確定要儲存所有商品的變更嗎？')) {
+        saveKolProductSort();
+    }
+}
+
+
+// ============================================================
+// KOL 手動新增訂單功能
+// ============================================================
+
+let tempOrderItems = [];
+let isEditingOrder = false;
+
+function openKolNewOrder() {
+    isEditingOrder = false;
+    tempOrderItems = [];
+
+    document.getElementById('kolModalTitle').textContent = '新增訂單';
+    document.getElementById('kolDetailOrderId').textContent = '';
+    document.getElementById('kolDetailOrderId').className = 'badge'; // Reset class
+
+    // 清空表單
+    document.getElementById('kolDetailStatus').value = '待處理';
+    document.getElementById('kolDetailDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('kolDetailName').value = '';
+    document.getElementById('kolDetailPhone').value = '';
+    document.getElementById('kolDetailEmail').value = '';
+
+    document.getElementById('kolDetailShipping').value = '7-11店到店';
+    updateKolShippingFee();
+
+    document.getElementById('kolDetailStoreName').value = '';
+    document.getElementById('kolDetailStoreCode').value = '';
+    document.getElementById('kolDetailStoreAddress').value = '';
+    document.getElementById('kolDetailNote').value = '';
+
+    // 重置折扣相關
+    document.getElementById('kolEnableDiscountPercent').checked = false;
+    document.getElementById('kolDiscountPercent').value = '';
+    document.getElementById('kolEnableDiscountAmount').checked = false;
+    document.getElementById('kolDiscountAmount').value = '';
+
+    renderKolDetailItems();
+    openModal('kolOrderModal');
+
+    // 預載入商品建議列表 (使用 KOL 自己的商品)
+    loadKolProductSuggestions();
+}
+
+function loadKolProductSuggestions() {
+    const datalist = document.getElementById('kolProductSuggestions');
+    if (!datalist) return;
+
+    datalist.innerHTML = kolProducts.map(p =>
+        `<option value="${p.name}">${p.name} (庫存: ${p.availableStock || p.stock || 0})</option>`
+    ).join('');
+}
+
+function openKolAddProduct() {
+    const area = document.getElementById('kolAddProductArea');
+    if (!area) return;
+
+    area.style.display = 'block';
+
+    // 重置輸入
+    const input = document.getElementById('kolProductSearch');
+    input.value = '';
+    document.getElementById('kolProductQty').value = 1;
+    document.getElementById('kolSpecSelectGroup').style.display = 'none';
+}
+
+function cancelKolAddProduct() {
+    const area = document.getElementById('kolAddProductArea');
+    if (area) area.style.display = 'none';
+}
+
+// 當選擇商品時處理規格
+function onKolProductInput() {
+    const input = document.getElementById('kolProductSearch');
+    const productName = input.value.trim();
+    const specGroup = document.getElementById('kolSpecSelectGroup');
+    const specSelectors = document.getElementById('kolSpecSelectors');
+
+    if (!productName || !specGroup) {
+        if (specGroup) specGroup.style.display = 'none';
+        return;
+    }
+
+    // 在 KOL 商品中找
+    const product = kolProducts.find(p => p.name === productName);
+
+    if (!product) {
+        specGroup.style.display = 'none';
+        return;
+    }
+
+    // 檢查 variants
+    if (product.variants && product.variants.length > 0) {
+        const dimensions = parseVariantDimensions(product);
+
+        if (Object.keys(dimensions).length > 0) {
+            // 建構選擇器
+            specSelectors.innerHTML = '';
+
+            Object.keys(dimensions).forEach(dimName => {
+                const wrapper = document.createElement('div');
+                wrapper.innerHTML = `<label style="font-size:0.85rem; color:#666;">${dimName}</label>`;
+
+                const select = document.createElement('select');
+                select.className = 'spec-select';
+                select.style.padding = '0.4rem';
+                select.style.border = '1px solid #ddd';
+                select.style.borderRadius = '4px';
+
+                const options = dimensions[dimName];
+                options.forEach(opt => {
+                    const option = document.createElement('option');
+                    option.value = opt;
+                    option.textContent = opt;
+                    select.appendChild(option);
+                });
+
+                wrapper.appendChild(select);
+                specSelectors.appendChild(wrapper);
+            });
+
+            specGroup.style.display = 'block';
+        } else {
+            // 單一規格下拉 (Fallback)
+            specSelectors.innerHTML = '';
+            const wrapper = document.createElement('div');
+            const select = document.createElement('select');
+            select.className = 'spec-select';
+
+            product.variants.forEach(v => {
+                const option = document.createElement('option');
+                option.value = v.spec;
+                option.textContent = v.spec;
+                select.appendChild(option);
+            });
+            wrapper.appendChild(select);
+            specSelectors.appendChild(wrapper);
+            specGroup.style.display = 'block';
+        }
+    } else {
+        specGroup.style.display = 'none';
+    }
+}
+
+function addKolProductToOrderItems() {
+    const input = document.getElementById('kolProductSearch');
+    const productName = input.value.trim();
+    const qty = parseInt(document.getElementById('kolProductQty').value) || 1;
+
+    if (!productName) {
+        alert('請選擇商品');
+        return;
+    }
+
+    const product = kolProducts.find(p => p.name === productName);
+    if (!product) {
+        alert('找不到此商品');
+        return;
+    }
+
+    // 收集規格
+    let spec = '';
+    const specGroup = document.getElementById('kolSpecSelectGroup');
+
+    if (specGroup && specGroup.style.display !== 'none') {
+        const selects = document.querySelectorAll('#kolSpecSelectors select');
+        const values = [];
+        selects.forEach(s => values.push(s.value));
+        spec = values.join('/');
+    }
+
+    // 找價格 (KOL 售價)
+    let price = product.customPrice || product.price || 0;
+
+    // 如果有變體，嘗試找變體價格
+    if (spec && product.variants) {
+        const variant = product.variants.find(v => v.spec === spec);
+        if (variant) {
+            // 注意：KOL 可能沒有為每個變體設定不同的 customPrice
+            // 簡化邏輯：優先使用商品層級的 customPrice，除非我們想讓 KOL 設定每個變體的售價 (目前 UI 尚未支援)
+            // 這裡暫時使用商品層級的 customPrice (統一售價)
+            // *如果需要支援變體價差，需要更複雜的邏輯*
+        }
+    }
+
+    // 在暫存列表中新增
+    const existing = tempOrderItems.find(item => item.name === productName && item.spec === spec);
+    if (existing) {
+        existing.qty += qty;
+        existing.subtotal = existing.price * existing.qty;
+    } else {
+        tempOrderItems.push({
+            id: product.id,
+            name: product.name,
+            spec: spec,
+            qty: qty,
+            price: price,
+            subtotal: price * qty
+        });
+    }
+
+    renderKolDetailItems();
+    cancelKolAddProduct();
+}
+
+function renderKolDetailItems() {
+    const tbody = document.getElementById('kolDetailItemsBody');
+    if (!tbody) return;
+
+    if (tempOrderItems.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999;">暫無商品</td></tr>';
+        updateKolOrderTotal();
+        return;
+    }
+
+    tbody.innerHTML = tempOrderItems.map((item, index) => `
+        <tr>
+            <td>${item.name}</td>
+            <td>${item.spec || '-'}</td>
+            <td>
+                <input type="number" value="${item.qty}" min="1" style="width:60px" 
+                    onchange="updateKolItemQty(${index}, this.value)">
+            </td>
+            <td>${formatCurrency(item.price)}</td>
+            <td>${formatCurrency(item.subtotal)}</td>
+            <td>
+                <button class="action-btn btn-danger" onclick="removeKolOrderItem(${index})">移除</button>
+            </td>
+        </tr>
+    `).join('');
+
+    updateKolOrderTotal();
+}
+
+function updateKolItemQty(index, newQty) {
+    const qty = parseInt(newQty) || 1;
+    if (tempOrderItems[index]) {
+        tempOrderItems[index].qty = qty;
+        tempOrderItems[index].subtotal = tempOrderItems[index].price * qty;
+        renderKolDetailItems();
+    }
+}
+
+function removeKolOrderItem(index) {
+    tempOrderItems.splice(index, 1);
+    renderKolDetailItems();
+}
+
+function updateKolShippingFee() {
+    const method = document.getElementById('kolDetailShipping').value;
+    const feeInput = document.getElementById('kolDetailShippingFee');
+    const storeInfo = document.getElementById('kolDetailStoreInfo');
+
+    if (method === '7-11店到店') {
+        feeInput.value = 60;
+        storeInfo.style.display = 'block';
+    } else {
+        feeInput.value = 0;
+        storeInfo.style.display = 'none';
+    }
+    updateKolOrderTotal();
+}
+
+function updateKolOrderTotal() {
+    // 1. 小計
+    let subtotal = tempOrderItems.reduce((sum, item) => sum + (item.subtotal || 0), 0);
+    document.getElementById('kolItemsSubtotal').textContent = formatCurrency(subtotal);
+
+    // 2. 折扣
+    let discount = 0;
+    const enablePercent = document.getElementById('kolEnableDiscountPercent').checked;
+    const discountPercent = parseFloat(document.getElementById('kolDiscountPercent').value) || 0;
+
+    if (enablePercent && discountPercent > 0 && discountPercent <= 100) {
+        discount += subtotal * (100 - discountPercent) / 100;
+    }
+
+    const enableAmount = document.getElementById('kolEnableDiscountAmount').checked;
+    const discountAmount = parseFloat(document.getElementById('kolDiscountAmount').value) || 0;
+
+    if (enableAmount) {
+        discount += discountAmount;
+    }
+
+    document.getElementById('kolDiscountPercentAmount').textContent = '- ' + formatCurrency(discount);
+
+    // 3. 運費
+    const shipping = parseFloat(document.getElementById('kolDetailShippingFee').value) || 0;
+
+    // 4. 總計
+    const total = Math.max(0, subtotal - discount + shipping);
+    document.getElementById('kolDetailTotal').innerHTML = `<strong>${formatCurrency(total)}</strong>`;
+}
+
+async function submitKolNewOrder() {
+    if (tempOrderItems.length === 0) {
+        alert('請至少加入一項商品');
+        return;
+    }
+
+    const name = document.getElementById('kolDetailName').value.trim();
+    if (!name) {
+        alert('請輸入訂購人姓名');
+        return;
+    }
+
+    const shippingMethod = document.getElementById('kolDetailShipping').value;
+    const storeName = document.getElementById('kolDetailStoreName').value.trim();
+
+    if (shippingMethod === '7-11店到店' && !storeName) {
+        alert('請輸入 7-11 門市名稱');
+        return;
+    }
+
+    // 準備資料
+    const orderData = {
+        date: document.getElementById('kolDetailDate').value,
+        status: document.getElementById('kolDetailStatus').value,
+        customerName: name,
+        phone: document.getElementById('kolDetailPhone').value.trim(),
+        email: document.getElementById('kolDetailEmail').value.trim(),
+        shippingMethod: shippingMethod,
+        storeName: storeName,
+        storeCode: document.getElementById('kolDetailStoreCode').value.trim(),
+        address: document.getElementById('kolDetailStoreAddress').value.trim(),
+        note: document.getElementById('kolDetailNote').value,
+        items: tempOrderItems,
+        shippingFee: document.getElementById('kolDetailShippingFee').value,
+        discount: 0, // 簡化：後端可能需要詳細的折扣資訊，這裡傳送最終計算結果或需要調整後端
+        total: parseFloat(document.getElementById('kolDetailTotal').textContent.replace(/[^\d.-]/g, ''))
+    };
+
+    showLoadingOverlay('建立訂單中...');
+
+    try {
+        const result = await callKolApi('kolCreateOrder', { order: orderData });
+        if (result.success) {
+            showToast('訂單建立成功', 'success');
+            closeModal('kolOrderModal');
+            loadKolOrders(); // 重新載入訂單列表
+        } else {
+            alert('訂單建立失敗: ' + result.error);
+        }
+    } catch (err) {
+        console.error(err);
+        alert('發生錯誤，請稍後再試');
+    } finally {
+        hideLoadingOverlay();
+    }
+}
+
+// 輔助函數：解析多維度規格 (複製自 admin.js)
+function parseVariantDimensions(product) {
+    if (!product) return {};
+
+    // 1. 優先從 product.options 讀取 (標準 Shopify 結構)
+    if (product.options && Array.isArray(product.options) && product.options.length > 0) {
+        console.log('使用 product.options 解析規格:', product.options);
+        const dimensions = {};
+
+        // 檢查 options 是否為字串 (JSON string) 還是物件
+        let optionsData = product.options;
+        if (typeof optionsData === 'string') {
+            try {
+                optionsData = JSON.parse(optionsData);
+            } catch (e) {
+                console.warn('options JSON 解析失敗', e);
+            }
+        }
+
+        // 處理 {"顏色":["紅","藍"], "尺寸":["S","M"]} 這種物件格式
+        if (!Array.isArray(optionsData) && typeof optionsData === 'object') {
+            return optionsData;
+        }
+
+        // 處理 [{"name":"顏色", "values":["紅","藍"]}] 這種陣列格式
+        if (Array.isArray(optionsData)) {
+            optionsData.forEach(opt => {
+                if (opt.name && opt.values) {
+                    dimensions[opt.name] = opt.values;
+                }
+            });
+            return dimensions;
+        }
+    }
+
+    // 2. 如果沒有 options，嘗試從 variants.spec (例如 "紅/小孩") 推斷
+    if (product.variants && product.variants.length > 0) {
+        const specs = product.variants.map(v => v.spec).filter(s => s);
+        if (specs.length === 0) return {};
+
+        // 檢查是否有斜線分隔
+        const hasSlash = specs.some(s => s.includes('/'));
+        if (hasSlash) {
+            // 推測維度
+            const dimValues1 = new Set();
+            const dimValues2 = new Set();
+
+            specs.forEach(s => {
+                const parts = s.split('/');
+                if (parts[0]) dimValues1.add(parts[0].trim());
+                if (parts[1]) dimValues2.add(parts[1].trim());
+            });
+
+            if (dimValues2.size > 0) {
+                return {
+                    "規格 1": Array.from(dimValues1),
+                    "規格 2": Array.from(dimValues2)
+                };
+            }
+        }
+    }
+
+    return {};
+}

@@ -1692,3 +1692,124 @@ body.sidebar-open {
         padding: 2rem;
     }
 }
+
+/* ============================================================
+   Mobile KOL Admin UI Optimizations
+   ============================================================ */
+
+/* 手機版 header 調整 */
+@media (max-width: 768px) {
+    .top-bar {
+        padding: 0.8rem 1rem;
+        flex-wrap: wrap;
+    }
+
+    .top-bar h2 {
+        flex: 1;
+        font-size: 1.1rem;
+    }
+
+    /* 前往官網按鈕 - 移至右上角 */
+    .header-actions {
+        order: 0;
+        margin-left: auto;
+    }
+
+    .header-actions .btn-outline {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.8rem;
+    }
+
+    /* 搜尋列調整 - 輸入框大、按鈕小 */
+    .kol-search-row {
+        display: flex;
+        gap: 0.5rem;
+        width: 100%;
+    }
+
+    .kol-search-row input {
+        flex: 3;
+        padding: 0.8rem 1rem;
+        font-size: 1rem;
+    }
+
+    .kol-search-row .btn-search {
+        flex: 0 0 auto;
+        padding: 0.6rem 1rem;
+        font-size: 0.85rem;
+        white-space: nowrap;
+    }
+
+    /* 產品管理按鈕統一尺寸 */
+    .kol-product-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+        width: 100%;
+    }
+
+    .kol-product-buttons .btn-primary,
+    .kol-product-buttons .btn-save-all {
+        width: 100%;
+        padding: 1rem;
+        font-size: 1rem;
+        text-align: center;
+    }
+}
+
+/* 搜尋按鈕樣式 */
+.btn-search {
+    background: linear-gradient(135deg, #d4a373, #c89666);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: opacity 0.2s;
+}
+
+.btn-search:hover {
+    opacity: 0.9;
+}
+
+/* 儲存所有變更按鈕 */
+.btn-save-all {
+    background: linear-gradient(135deg, #d4a373, #c89666);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+/* KOL 訂單詳情 Modal 樣式 */
+.kol-order-modal .modal-content {
+    max-width: 700px;
+    max-height: 90vh;
+}
+
+.kol-order-modal .detail-section {
+    margin-bottom: 1.5rem;
+}
+
+.kol-order-modal .detail-section h4 {
+    font-size: 1rem;
+    margin-bottom: 0.8rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* 新增訂單按鈕 */
+.btn-add-order {
+    background: linear-gradient(135deg, #28a745, #218838);
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.btn-add-order:hover {
+    opacity: 0.9;
+}
