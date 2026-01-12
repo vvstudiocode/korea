@@ -145,10 +145,12 @@
                 <div class="toolbar" style="margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
                     <button class="add-btn" onclick="openCreateOrderModal()">+ 新增訂單</button>
                     <!-- 訂單搜尋 -->
-                    <div style="flex: 1; min-width: 200px;">
+                    <div style="display: flex; gap: 0.5rem; flex: 1; min-width: 200px;">
                         <input type="text" id="orderSearchInput" placeholder="🔍 搜尋訂單編號、客戶姓名、電話..."
-                            oninput="filterOrders()"
-                            style="width: 100%; padding: 0.6rem; border-radius: 6px; border: 1px solid #ddd;">
+                            onkeypress="if(event.key==='Enter') filterOrders()"
+                            style="flex: 1; padding: 0.6rem; border-radius: 6px; border: 1px solid #ddd;">
+                        <button onclick="filterOrders()" class="btn-brand-primary"
+                            style="white-space: nowrap; padding: 0.6rem 1.2rem;">搜尋</button>
                     </div>
                     <!-- 狀態篩選 -->
                     <select id="orderStatusFilter" onchange="filterOrders()"
@@ -189,10 +191,12 @@
                 <div class="toolbar">
                     <button class="add-btn" onclick="openProductModal()">+ 新增商品</button>
                     <!-- 商品搜尋 -->
-                    <div style="flex: 1; margin: 0 1rem;">
+                    <div style="display: flex; gap: 0.5rem; flex: 1; margin: 0 1rem;">
                         <input type="text" id="productSearchInput" placeholder="🔍 搜尋商品名稱、分類、品牌..."
-                            oninput="filterProductsList()"
-                            style="width: 100%; padding: 0.6rem; border-radius: 6px; border: 1px solid #ddd;">
+                            onkeypress="if(event.key==='Enter') filterProductsList()"
+                            style="flex: 1; padding: 0.6rem; border-radius: 6px; border: 1px solid #ddd;">
+                        <button onclick="filterProductsList()" class="btn-brand-primary"
+                            style="white-space: nowrap; padding: 0.6rem 1.2rem;">搜尋</button>
                     </div>
                     <!-- 商品批次儲存區 -->
                     <div id="productBatchActions" style="display:inline-flex; align-items:center; margin-left: 1rem;">
@@ -490,8 +494,9 @@
                     <!-- 新增商品區域（隱藏） -->
                     <div id="addProductArea"
                         style="display:none; margin-bottom:1rem; padding:1rem; background:#f8f9fa; border-radius:4px;">
+                        <!-- 第一行：商品搜尋與數量 -->
                         <div class="form-row">
-                            <div class="form-group" style="flex:2;">
+                            <div class="form-group" style="flex:3;">
                                 <label>選擇商品（可輸入搜尋）</label>
                                 <input type="text" id="productSearch" list="productSuggestions" placeholder="輸入或選擇商品..."
                                     style="width:100%; padding:0.5rem;">
@@ -499,22 +504,27 @@
                                     <!-- 動態載入 -->
                                 </datalist>
                             </div>
-                            <!-- 新增規格選擇 -->
-                            <div class="form-group" id="specSelectGroup"
-                                style="display:none; width: 150px; margin-left: 10px;">
-                                <label>規格</label>
-                                <select id="productSpec"
-                                    style="width:100%; padding:0.55rem; border:1px solid #ddd; border-radius:4px;">
-                                </select>
-                            </div>
                             <div class="form-group quarter">
                                 <label>數量</label>
                                 <input type="number" id="productQty" value="1" min="1">
                             </div>
-                            <div class="form-group" style="flex:0 0 auto; align-self:flex-end;">
+                        </div>
+
+                        <!-- 第二行：規格選擇 (獨立一行，避免被擠壓) -->
+                        <div id="specSelectGroup"
+                            style="display:none; margin-top: 0.5rem; padding: 0.5rem; background: #fff; border: 1px solid #eee; border-radius: 4px;">
+                            <label style="display:block; margin-bottom:0.5rem; font-weight:bold;">規格選擇</label>
+                            <div id="specSelectors" style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                                <!-- 動態生成多個規格選擇器 -->
+                            </div>
+                        </div>
+
+                        <!-- 第三行：按鈕 -->
+                        <div class="form-row" style="margin-top: 1rem; justify-content: flex-end;">
+                            <div class="form-group" style="flex:0 0 auto;">
                                 <button type="button" onclick="addProductToOrderItems()"
-                                    class="accent-btn">確認新增</button>
-                                <button type="button" onclick="cancelAddProduct()"
+                                    class="btn-brand-primary">確認新增</button>
+                                <button type="button" onclick="cancelAddProduct()" class="btn-brand-outline"
                                     style="margin-left:0.5rem;">取消</button>
                             </div>
                         </div>
@@ -526,6 +536,8 @@
                                 <th>商品</th>
                                 <th>規格</th>
                                 <th>數量</th>
+                                <th>原價</th>
+                                <th>單價</th>
                                 <th>小計</th>
                                 <th>操作</th>
                             </tr>
@@ -534,19 +546,54 @@
                     </table>
                 </div>
 
+
                 <div class="detail-section">
-                    <h4>訂單總計</h4>
-                    <table class="detail-table">
-                        <tr>
-                            <td>運費</td>
-                            <td><input type="number" id="detailShippingFee" value="0" min="0"
-                                    style="width:80px; padding:0.3rem;" oninput="updateTotal()"> 元</td>
-                        </tr>
-                        <tr>
-                            <td><strong>總金額</strong></td>
-                            <td><strong id="detailTotal">0</strong> 元</td>
-                        </tr>
-                    </table>
+                    <h4>訂單調整</h4>
+
+                    <!-- 商品小計 -->
+                    <div class="price-row">
+                        <span>商品小計</span>
+                        <span id="itemsSubtotal">NT$ 0</span>
+                    </div>
+
+                    <!-- 折扣率選項 -->
+                    <div class="discount-options">
+                        <label style="display: flex; align-items: center;  gap: 0.5rem;">
+                            <input type="checkbox" id="enableDiscountPercent" onchange="updateOrderTotal()">
+                            <span>啟用折扣率</span>
+                        </label>
+                        <input type="number" id="discountPercent" placeholder="90" min="0" max="100" step="1"
+                            oninput="updateOrderTotal()" style="width: 80px; padding: 0.4rem;">
+                        <span>%</span>
+                        <span id="discountPercentAmount" style="color: #e74c3c; margin-left: 1rem;">- NT$ 0</span>
+                    </div>
+
+                    <!-- 固定折扣選項 -->
+                    <div class="discount-options">
+                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" id="enableDiscountAmount" onchange="updateOrderTotal()">
+                            <span>固定折扣金額</span>
+                        </label>
+                        <input type="number" id="discountAmount" placeholder="100" min="0" oninput="updateOrderTotal()"
+                            style="width: 100px; padding: 0.4rem;">
+                        <span>元</span>
+                    </div>
+
+                    <!-- 運費 -->
+                    <div class="price-row">
+                        <span>運費</span>
+                        <div>
+                            <input type="number" id="detailShippingFee" value="0" min="0" oninput="updateOrderTotal()"
+                                style="width: 80px; padding: 0.4rem; text-align: right;">
+                            <span> 元</span>
+                        </div>
+                    </div>
+
+                    <!-- 總計 -->
+                    <div class="price-row total-row">
+                        <span><strong>訂單總計</strong></span>
+                        <span id="detailTotal" style="font-size: 1.3rem; color: #2C3E50;"><strong>NT$ 0</strong></span>
+                    </div>
                 </div>
 
                 <div class="detail-section">

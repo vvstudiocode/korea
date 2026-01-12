@@ -444,7 +444,7 @@ function filterOrders() {
         const matchSearch = !searchTerm ||
             order.orderId.toLowerCase().includes(searchTerm) ||
             (order.customerName || '').toLowerCase().includes(searchTerm) ||
-            (order.customerPhone || '').includes(searchTerm);
+            String(order.customerPhone || '').toLowerCase().includes(searchTerm);
 
         // 狀態篩選
         const matchStatus = !statusFilter || order.status === statusFilter;
@@ -1827,12 +1827,59 @@ function updateShippingFee() {
     updateTotal();
 }
 
-function updateTotal() {
-    const itemsTotal = tempOrderItems.reduce((sum, item) => sum + item.subtotal, 0);
-    const shippingFee = parseInt(document.getElementById('detailShippingFee').value) || 0;
-    const total = itemsTotal + shippingFee;
+// 更新訂單總計（支援折扣率和固定折扣）
+function updateOrderTotal() {
+    // 1. 計算商品小計
+    let itemsSubtotal = 0;
+    tempOrderItems.forEach(item => {
+        itemsSubtotal += item.subtotal || 0;
+    });
 
-    document.getElementById('detailTotal').textContent = total;
+    // 2. 套用折扣率
+    let discountFromPercent = 0;
+    const enablePercent = document.getElementById('enableDiscountPercent');
+    const percentInput = document.getElementById('discountPercent');
+
+    if (enablePercent && enablePercent.checked && percentInput) {
+        const percent = parseFloat(percentInput.value) || 100;
+        if (percent < 100 && percent >= 0) {
+            discountFromPercent = itemsSubtotal * (100 - percent) / 100;
+        }
+    }
+
+    // 3. 套用固定折扣
+    let discountFromAmount = 0;
+    const enableAmount = document.getElementById('enableDiscountAmount');
+    const amountInput = document.getElementById('discountAmount');
+
+    if (enableAmount && enableAmount.checked && amountInput) {
+        discountFromAmount = parseFloat(amountInput.value) || 0;
+    }
+
+    // 4. 計算總折扣
+    const totalDiscount = discountFromPercent + discountFromAmount;
+
+    // 5. 加上運費
+    const shippingFee = parseFloat(document.getElementById('detailShippingFee').value) || 0;
+
+    // 6. 計算最終總計
+    const total = Math.max(0, itemsSubtotal - totalDiscount + shippingFee);
+
+    // 更新顯示
+    document.getElementById('itemsSubtotal').textContent = `NT$ ${Math.round(itemsSubtotal)}`;
+
+    if (document.getElementById('discountPercentAmount')) {
+        document.getElementById('discountPercentAmount').textContent = `- NT$ ${Math.round(totalDiscount)}`;
+    }
+
+    document.getElementById('detailTotal').innerHTML = `<strong>NT$ ${Math.round(total)}</strong>`;
+
+    console.log('訂單總計更新:', { itemsSubtotal, discountFromPercent, discountFromAmount, totalDiscount, shippingFee, total });
+}
+
+// 保留舊函數名稱以維持相容性
+function updateTotal() {
+    updateOrderTotal();
 }
 
 function openAddProductToOrder() {
@@ -1849,9 +1896,13 @@ function openAddProductToOrder() {
     const select = document.getElementById('productSearch');
     if (select) {
         select.value = '';
-        // 綁定產品選擇事件
+        // 綁定產品選擇事件 (多種事件確保觸發)
         select.removeEventListener('input', onProductSelected);
         select.addEventListener('input', onProductSelected);
+        select.removeEventListener('change', onProductSelected);
+        select.addEventListener('change', onProductSelected);
+        select.removeEventListener('blur', onProductSelected);
+        select.addEventListener('blur', onProductSelected);
     }
 
     const qtyInput = document.getElementById('productQty');
@@ -1869,11 +1920,15 @@ function openAddProductToOrder() {
 
 // 當選擇商品時，檢查並顯示規格選項
 function onProductSelected() {
-    const productName = document.getElementById('productSearch').value.trim();
+    console.log('onProductSelected 被觸發');
+    const searchInput = document.getElementById('productSearch');
+    const productName = searchInput ? searchInput.value.trim() : '';
     const specGroup = document.getElementById('specSelectGroup');
-    const specSelect = document.getElementById('productSpec');
+    const specSelectors = document.getElementById('specSelectors');
 
-    if (!productName || !specGroup || !specSelect) {
+    console.log('選擇的商品:', productName);
+
+    if (!productName || !specGroup || !specSelectors) {
         if (specGroup) specGroup.style.display = 'none';
         return;
     }
@@ -1882,41 +1937,172 @@ function onProductSelected() {
     const product = currentProducts.find(p => p.name === productName);
 
     if (!product) {
+        console.log('找不到對應商品資料:', productName);
         specGroup.style.display = 'none';
         return;
     }
 
+    console.log('找到商品:', product.name, '變體數量:', product.variants ? product.variants.length : 0);
+
     // 檢查是否有 variants
     if (product.variants && product.variants.length > 0) {
-        // 清空並填充規格選項
-        specSelect.innerHTML = '';
+        // 解析規格維度 - 傳入整個產品物件
+        const dimensions = parseVariantDimensions(product);
 
-        // 添加預設選項
-        const defaultOption = document.createElement('option');
-        defaultOption.value = '';
-        defaultOption.textContent = '-- 請選擇規格 --';
-        specSelect.appendChild(defaultOption);
+        if (Object.keys(dimensions).length > 0) {
+            // 清空並重建規格選擇器
+            specSelectors.innerHTML = '';
 
-        // 添加所有規格選項
-        product.variants.forEach(variant => {
-            const option = document.createElement('option');
-            option.value = variant.spec || '';
-            option.textContent = variant.spec || '無';
-            // 顯示庫存資訊
-            if (variant.stock !== undefined) {
-                option.textContent += ` (庫存: ${variant.stock})`;
+            // 為每個維度創建選擇器
+            Object.keys(dimensions).forEach(dimName => {
+                const dimDiv = document.createElement('div');
+                dimDiv.className = 'spec-dimension';
+
+                const label = document.createElement('label');
+                label.textContent = dimName;
+
+                const select = document.createElement('select');
+                select.className = 'spec-select';
+                select.dataset.dimension = dimName;
+
+                // 添加預設選項
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = `-- 請選擇${dimName} --`;
+                select.appendChild(defaultOption);
+
+                // 添加該維度的所有值
+                dimensions[dimName].forEach(value => {
+                    const option = document.createElement('option');
+                    option.value = value;
+                    option.textContent = value;
+                    select.appendChild(option);
+                });
+
+                dimDiv.appendChild(label);
+                dimDiv.appendChild(select);
+                specSelectors.appendChild(dimDiv);
+            });
+
+            // 顯示規格選擇器 - 強制設置所有可見性屬性
+            specGroup.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; min-height: 80px; margin-top: 0.5rem; padding: 1rem; background: #fff3cd; border: 2px solid #ffc107; border-radius: 6px;';
+            console.log('規格選擇器已顯示，specGroup:', specGroup);
+            console.log('specSelectors 內容:', specSelectors.innerHTML);
+
+            // 檢查是否真的有內容
+            if (specSelectors.children.length === 0) {
+                console.error('警告：specSelectors 沒有子元素！');
             }
-            specSelect.appendChild(option);
-        });
+        } else {
+            // 多維度解析失敗，回退到單一規格模式
+            console.log('多維度解析失敗，使用單一規格模式，變體數:', product.variants.length);
 
-        // 顯示規格選擇器
-        specGroup.style.display = 'block';
-        console.log('顯示規格選擇器，共', product.variants.length, '個規格');
+            specSelectors.innerHTML = '';
+
+            const dimDiv = document.createElement('div');
+            dimDiv.className = 'spec-dimension';
+            dimDiv.style.cssText = 'display: flex; flex-direction: column; gap: 4px;';
+
+            const label = document.createElement('label');
+            label.textContent = '規格';
+            label.style.fontWeight = 'bold';
+
+            const select = document.createElement('select');
+            select.className = 'spec-select';
+            select.dataset.dimension = '規格';
+            select.style.cssText = 'padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; min-width: 150px;';
+
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = '-- 請選擇規格 --';
+            select.appendChild(defaultOption);
+
+            product.variants.forEach(variant => {
+                const option = document.createElement('option');
+                option.value = variant.spec || '';
+                option.textContent = variant.spec || '無';
+                if (variant.stock !== undefined) {
+                    option.textContent += ` (庫存: ${variant.stock})`;
+                }
+                select.appendChild(option);
+            });
+
+            dimDiv.appendChild(label);
+            dimDiv.appendChild(select);
+            specSelectors.appendChild(dimDiv);
+
+            // 顯示規格選擇器
+            specGroup.style.display = 'block';
+            specGroup.style.marginTop = '0.5rem';
+            specGroup.style.padding = '0.5rem';
+            specGroup.style.background = '#f8f9fa';
+            specGroup.style.border = '1px solid #ddd';
+            specGroup.style.borderRadius = '4px';
+            console.log('單一規格選擇器已顯示');
+        }
     } else {
         // 沒有規格，隱藏選擇器
         specGroup.style.display = 'none';
         console.log('商品無規格');
     }
+}
+
+// 解析規格維度 - 使用產品的 options 欄位
+function parseVariantDimensions(product) {
+    // 如果產品有 options 欄位，直接使用
+    if (product.options && typeof product.options === 'object') {
+        // options 可能是 {"顏色":["紅","米白"],"尺寸":["小孩","大人"]} 格式
+        let optionsData = product.options;
+
+        // 如果是字串，嘗試解析
+        if (typeof optionsData === 'string') {
+            try {
+                optionsData = JSON.parse(optionsData);
+            } catch (e) {
+                console.log('無法解析 options:', e);
+                return {};
+            }
+        }
+
+        // 確保有維度資料
+        if (Object.keys(optionsData).length > 0) {
+            console.log('使用 options 欄位:', optionsData);
+            return optionsData;
+        }
+    }
+
+    // 回退：從 variants 的 spec 解析（用斜線分隔）
+    if (product.variants && product.variants.length > 0) {
+        const firstSpec = product.variants[0].spec || '';
+        const parts = firstSpec.split('/');
+
+        if (parts.length > 1) {
+            // 多維度，嘗試推斷維度名稱
+            const dimensions = {};
+            const dimNames = ['規格1', '規格2', '規格3'];
+
+            parts.forEach((_, index) => {
+                if (index < dimNames.length) {
+                    dimensions[dimNames[index]] = [];
+                }
+            });
+
+            product.variants.forEach(v => {
+                const specParts = (v.spec || '').split('/');
+                specParts.forEach((part, index) => {
+                    const dimName = dimNames[index];
+                    if (dimName && dimensions[dimName] && !dimensions[dimName].includes(part)) {
+                        dimensions[dimName].push(part);
+                    }
+                });
+            });
+
+            console.log('從 variants 解析維度:', dimensions);
+            return dimensions;
+        }
+    }
+
+    return {};
 }
 
 function cancelAddProduct() {
@@ -1930,9 +2116,34 @@ function addProductToOrderItems() {
     const select = document.getElementById('productSearch');
     const productName = select.value.trim();
     const qty = parseInt(document.getElementById('productQty').value) || 1;
-    // 取得選取的規格
-    const specSelect = document.getElementById('productSpec');
-    const spec = (specSelect && specSelect.style.display !== 'none') ? specSelect.value : '';
+
+    // 從多維度選擇器收集規格
+    const specGroup = document.getElementById('specSelectGroup');
+    const specSelectors = document.getElementById('specSelectors');
+    let spec = '';
+
+    if (specGroup && specGroup.style.display !== 'none' && specSelectors) {
+        const selects = specSelectors.querySelectorAll('select.spec-select');
+        const specValues = [];
+        let allSelected = true;
+
+        selects.forEach(sel => {
+            if (sel.value) {
+                specValues.push(sel.value);
+            } else {
+                allSelected = false;
+            }
+        });
+
+        // 如果有多個選擇器但沒有全部選擇，提示用戶
+        if (selects.length > 0 && !allSelected) {
+            alert('請選擇所有規格');
+            return;
+        }
+
+        // 用斜線組合規格值
+        spec = specValues.join('/');
+    }
 
     console.log('嘗試新增商品:', productName, '規格:', spec, '數量:', qty);
 
@@ -1947,11 +2158,20 @@ function addProductToOrderItems() {
         return;
     }
 
-    // 檢查規格是否必選
-    if (specSelect && specSelect.style.display !== 'none' && !spec && specSelect.options.length > 1) {
-        // 如果有規格選項但沒選 (排除只有"無"的情況)
-        // 這裡我們先允許空規格，如果使用者不選的話。或者強制選?
-        // 通常最好強制選，或者預設選第一個。
+    // 如果有規格選擇器顯示但沒選擇規格，且商品有多個變體
+    if (specGroup && specGroup.style.display !== 'none' && !spec && product.variants && product.variants.length > 1) {
+        alert('請選擇規格');
+        return;
+    }
+
+    // 查找對應的變體以獲取正確價格
+    let price = product.price;
+    if (spec && product.variants) {
+        const matchedVariant = product.variants.find(v => v.spec === spec);
+        if (matchedVariant && matchedVariant.price) {
+            price = matchedVariant.price;
+            console.log('找到對應變體，價格:', price);
+        }
     }
 
     // 檢查是否已存在 (同名稱且同規格)
@@ -1965,8 +2185,9 @@ function addProductToOrderItems() {
             name: product.name,
             spec: spec,
             qty: qty,
-            price: product.price,
-            subtotal: product.price * qty
+            originalPrice: price,
+            price: price,
+            subtotal: price * qty
         });
         console.log('新增商品到列表');
     }
@@ -1979,9 +2200,11 @@ function addProductToOrderItems() {
     // 清空輸入
     select.value = '';
     document.getElementById('productQty').value = 1;
-    const specGroup = document.getElementById('specSelectGroup');
     if (specGroup) {
         specGroup.style.display = 'none';
+    }
+    if (specSelectors) {
+        specSelectors.innerHTML = '';
     }
 }
 
@@ -2106,13 +2329,19 @@ function renderOrderItems() {
             <td>${item.name}</td>
             <td>${item.spec || '-'}</td>
             <td>${item.qty}</td>
+            <td>${formatCurrency(item.originalPrice || item.price)}</td>
+            <td>
+                <input type="number" value="${item.price}" 
+                       onchange="updateItemPrice(${index}, this.value)"
+                       style="width: 80px; padding: 0.3rem; border: 1px solid #ddd; border-radius: 4px;">
+            </td>
             <td>${formatCurrency(item.subtotal)}</td>
             <td><button class="action-btn" onclick="removeOrderItem(${index})" style="background:#dc3545;color:white;">刪除</button></td>
         </tr>
     `).join('');
 
     // 更新總計
-    updateTotal();
+    updateOrderTotal();
 
     console.log('商品明細已更新');
     // 全局重新整理
@@ -3200,4 +3429,22 @@ function viewKolDetail(storeId) {
 function exportKolStats() {
     showToast('匯出功能開發中...', 'info');
     // TODO: 匯出 CSV 或 Excel
+}
+
+// 更新商品單價
+function updateItemPrice(index, newPrice) {
+    if (index >= 0 && index < tempOrderItems.length) {
+        const item = tempOrderItems[index];
+        const price = parseFloat(newPrice);
+
+        if (!isNaN(price) && price >= 0) {
+            item.price = price;
+            item.subtotal = item.qty * price;
+            renderOrderItems();
+            console.log('更新商品單價:', item.name, price);
+        } else {
+            alert('請輸入有效的價格');
+            renderOrderItems(); // 重置回原值
+        }
+    }
 }
