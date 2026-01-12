@@ -266,8 +266,12 @@ function closeMobileSidebar() {
     document.body.classList.remove('sidebar-open');
 }
 
-function refreshData() {
-    callApi('getDashboardData')
+function refreshData(startDate = null, endDate = null) {
+    const payload = {};
+    if (startDate) payload.startDate = startDate;
+    if (endDate) payload.endDate = endDate;
+
+    callApi('getDashboardData', payload)
         .then(data => {
             if (data.success) {
                 currentOrders = data.data.orders;
@@ -296,12 +300,46 @@ function updateDashboardStats(stats) {
     document.getElementById('statProfitMargin').textContent = `毛利率: ${profitMargin}%`;
 }
 
-// 日期篩選（未來可擴展）
+// 日期篩選
 function filterDashboardByDate(range) {
-    // 目前顯示全部資料
-    // 未來可以根據 range 值篩選訂單
-    console.log('篩選範圍:', range);
-    // refreshData(); // 可以加上篩選邏輯
+    let startDate = null;
+    let endDate = null;
+    const now = new Date();
+
+    switch (range) {
+        case 'today':
+            startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+            break;
+        case 'week':
+            startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            startDate.setHours(0, 0, 0, 0);
+            endDate = now;
+            break;
+        case 'month':
+            startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+            endDate = now;
+            break;
+        case 'year':
+            startDate = new Date(now.getFullYear(), 0, 1);
+            endDate = now;
+            break;
+        case 'all':
+        default:
+            startDate = null;
+            endDate = null;
+            break;
+    }
+
+    // 格式化日期為 YYYY-MM-DD
+    const formatDate = (date) => {
+        if (!date) return null;
+        return date.getFullYear() + '-' +
+            String(date.getMonth() + 1).padStart(2, '0') + '-' +
+            String(date.getDate()).padStart(2, '0');
+    };
+
+    refreshData(formatDate(startDate), formatDate(endDate));
 }
 
 
@@ -327,13 +365,27 @@ function renderOrders(orders) {
         const displayStatus = (pending && pending.status) ? pending.status : order.status;
         const isModified = !!pending;
 
+        // 訂單來源標記
+        let sourceIcon = '';
+        let sourceTitle = '';
+        if (order.orderSource === 'customer') {
+            sourceIcon = '🛒';
+            sourceTitle = '客戶訂單';
+        } else if (order.orderSource === 'manual') {
+            sourceIcon = '✍️';
+            sourceTitle = '手動建單';
+        } else if (order.orderSource === 'kol') {
+            sourceIcon = '👥';
+            sourceTitle = '團購訂單';
+        }
+
         const statusOptions = ['待處理', '已確認', '已出貨', '已完成', '已取消', '取消']
             .map(s => `<option value="${s}" ${s === displayStatus ? 'selected' : ''}>${s}</option>`)
             .join('');
 
         return `
         <tr class="${isModified ? 'row-modified' : ''}" onclick="toggleRowDetails('${order.orderId}')" style="cursor:pointer;">
-            <td>${order.orderId}</td>
+            <td><span title="${sourceTitle}">${sourceIcon}</span> ${order.orderId}</td>
             <td onclick="event.stopPropagation()">
                 <select onchange="markOrderUpdated('${order.orderId}', 'status', this.value)" 
                         style="padding: 5px; border-radius: 4px; border: 1px solid #ddd; background: ${getStatusColor(displayStatus)}">
