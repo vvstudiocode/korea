@@ -1847,15 +1847,76 @@ function openAddProductToOrder() {
 
     // 重置表單
     const select = document.getElementById('productSearch');
-    if (select) select.value = '';
+    if (select) {
+        select.value = '';
+        // 綁定產品選擇事件
+        select.removeEventListener('input', onProductSelected);
+        select.addEventListener('input', onProductSelected);
+    }
 
     const qtyInput = document.getElementById('productQty');
     if (qtyInput) qtyInput.value = 1;
+
+    // 隱藏規格選擇器
+    const specGroup = document.getElementById('specSelectGroup');
+    if (specGroup) specGroup.style.display = 'none';
 
     // 顯示區域
     area.style.display = 'block';
 
     console.log('開啟新增商品區域，商品數量:', currentProducts.length);
+}
+
+// 當選擇商品時，檢查並顯示規格選項
+function onProductSelected() {
+    const productName = document.getElementById('productSearch').value.trim();
+    const specGroup = document.getElementById('specSelectGroup');
+    const specSelect = document.getElementById('productSpec');
+
+    if (!productName || !specGroup || !specSelect) {
+        if (specGroup) specGroup.style.display = 'none';
+        return;
+    }
+
+    // 查找商品
+    const product = currentProducts.find(p => p.name === productName);
+
+    if (!product) {
+        specGroup.style.display = 'none';
+        return;
+    }
+
+    // 檢查是否有 variants
+    if (product.variants && product.variants.length > 0) {
+        // 清空並填充規格選項
+        specSelect.innerHTML = '';
+
+        // 添加預設選項
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = '-- 請選擇規格 --';
+        specSelect.appendChild(defaultOption);
+
+        // 添加所有規格選項
+        product.variants.forEach(variant => {
+            const option = document.createElement('option');
+            option.value = variant.spec || '';
+            option.textContent = variant.spec || '無';
+            // 顯示庫存資訊
+            if (variant.stock !== undefined) {
+                option.textContent += ` (庫存: ${variant.stock})`;
+            }
+            specSelect.appendChild(option);
+        });
+
+        // 顯示規格選擇器
+        specGroup.style.display = 'block';
+        console.log('顯示規格選擇器，共', product.variants.length, '個規格');
+    } else {
+        // 沒有規格，隱藏選擇器
+        specGroup.style.display = 'none';
+        console.log('商品無規格');
+    }
 }
 
 function cancelAddProduct() {
