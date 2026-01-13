@@ -75,8 +75,8 @@
                 <button class="hamburger-btn" onclick="toggleMobileSidebar()">☰</button>
                 <h2 id="pageTitle">總覽報表</h2>
                 <div class="header-actions">
-                    <a href="https://vvstudiocode.github.io/korea/" target="_blank" class="btn-outline"
-                        style="text-decoration:none; margin-right:10px; display:flex; align-items:center;">
+                    <a href="https://vvstudiocode.github.io/korea/" target="_blank" class="header-link-small"
+                        title="前往官網">
                         前往官網 ↗
                     </a>
                     <div id="batchActions" style="display:none; margin-right: 1rem;">
@@ -84,7 +84,6 @@
                             style="color: #d9534f; font-size: 0.9rem; margin-right: 10px;"></span>
                         <button id="saveBatchBtn" onclick="saveBatchUpdates()" class="accent-btn">💾 儲存所有變更</button>
                     </div>
-                    <!-- refresh btn removed -->
                 </div>
             </header>
 
@@ -99,9 +98,16 @@
                             <option value="week">近7天</option>
                             <option value="month" selected>本月</option>
                             <option value="year">今年</option>
+                            <option value="custom">自訂範圍</option>
                         </select>
+                        <div id="dashboardCustomDates"
+                            style="display:none; align-items:center; gap:5px; margin-left:10px;">
+                            <input type="date" id="dashStartDate" class="date-input-small">
+                            <span>至</span>
+                            <input type="date" id="dashEndDate" class="date-input-small">
+                            <button onclick="applyDashboardCustomDate()" class="btn-small action-btn">查詢</button>
+                        </div>
                     </div>
-                    <!-- refresh btn removed -->
                 </div>
 
                 <div class="stats-grid">
@@ -145,12 +151,10 @@
                 <div class="toolbar" style="margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
                     <button class="add-btn" onclick="openCreateOrderModal()">+ 新增訂單</button>
                     <!-- 訂單搜尋 -->
-                    <div style="display: flex; gap: 0.5rem; flex: 1; min-width: 200px;">
+                    <div style="display: flex; gap: 0.5rem; flex: 2; min-width: 250px;">
                         <input type="text" id="orderSearchInput" placeholder="🔍 搜尋訂單編號、客戶姓名、電話..."
-                            onkeypress="if(event.key==='Enter') filterOrders()"
-                            style="flex: 1; padding: 0.6rem; border-radius: 6px; border: 1px solid #ddd;">
-                        <button onclick="filterOrders()" class="btn-brand-primary"
-                            style="white-space: nowrap; padding: 0.6rem 1.2rem;">搜尋</button>
+                            onkeypress="if(event.key==='Enter') filterOrders()" class="search-input-large">
+                        <button onclick="filterOrders()" class="btn-brand-primary btn-sm">搜尋</button>
                     </div>
                     <!-- 狀態篩選 -->
                     <select id="orderStatusFilter" onchange="filterOrders()"
@@ -191,12 +195,10 @@
                 <div class="toolbar">
                     <button class="add-btn" onclick="openProductModal()">+ 新增商品</button>
                     <!-- 商品搜尋 -->
-                    <div style="display: flex; gap: 0.5rem; flex: 1; margin: 0 1rem;">
+                    <div style="display: flex; gap: 0.5rem; flex: 2; margin: 0 1rem;">
                         <input type="text" id="productSearchInput" placeholder="🔍 搜尋商品名稱、分類、品牌..."
-                            onkeypress="if(event.key==='Enter') filterProductsList()"
-                            style="flex: 1; padding: 0.6rem; border-radius: 6px; border: 1px solid #ddd;">
-                        <button onclick="filterProductsList()" class="btn-brand-primary"
-                            style="white-space: nowrap; padding: 0.6rem 1.2rem;">搜尋</button>
+                            onkeypress="if(event.key==='Enter') filterProductsList()" class="search-input-large">
+                        <button onclick="filterProductsList()" class="btn-brand-primary btn-sm">搜尋</button>
                     </div>
                     <!-- 商品批次儲存區 -->
                     <div id="productBatchActions" style="display:inline-flex; align-items:center; margin-left: 1rem;">
@@ -205,6 +207,7 @@
                         <button onclick="saveProductBatchChanges()" class="accent-btn" disabled>💾 儲存商品變更</button>
                     </div>
                 </div>
+                <!-- table container omitted -->
                 <div class="table-container">
                     <table class="data-table">
                         <thead>
@@ -237,8 +240,8 @@
                 <div class="view-header">
                     <h2>採買統計</h2>
                     <div class="view-actions">
-                        <button class="btn-primary" onclick="loadPurchasingStats()">重新計算</button>
-                        <button class="btn-secondary" onclick="exportPurchasingStats()">匯出報表</button>
+                        <button class="accent-btn" onclick="loadPurchasingStats()">重新計算</button>
+                        <button class="btn-outline" onclick="exportPurchasingStats()">匯出報表</button>
                     </div>
                 </div>
 
@@ -248,6 +251,7 @@
                         <input type="date" id="statsStartDate">
                         <span>至</span>
                         <input type="date" id="statsEndDate">
+
                         <button class="btn-small" onclick="loadPurchasingStats()">篩選</button>
                         <button class="btn-link" onclick="setStatsShortcut('today')">今日</button>
                         <button class="btn-link" onclick="setStatsShortcut('yesterday')">昨日</button>

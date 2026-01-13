@@ -301,7 +301,51 @@ function updateDashboardStats(stats) {
 }
 
 // 日期篩選
+// Custom Date Filter Handler
+function applyDashboardCustomDate() {
+    const startVal = document.getElementById('dashStartDate').value;
+    const endVal = document.getElementById('dashEndDate').value;
+
+    if (!startVal || !endVal) {
+        alert('請選擇開始與結束日期');
+        return;
+    }
+
+    // Parse as local dates
+    const startDate = new Date(startVal);
+    startDate.setHours(0, 0, 0, 0);
+
+    // Set end date to end of day
+    const endDate = new Date(endVal);
+    endDate.setHours(23, 59, 59, 999);
+
+    if (startDate > endDate) {
+        alert('結束日期不能早於開始日期');
+        return;
+    }
+
+    updateDashboardStats(startDate, endDate);
+}
+
+// 日期篩選
 function filterDashboardByDate(range) {
+    const customDates = document.getElementById('dashboardCustomDates');
+
+    if (range === 'custom') {
+        customDates.style.display = 'flex';
+        // Initialize inputs with current month if empty
+        if (!document.getElementById('dashStartDate').value) {
+            const now = new Date();
+            const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+            const today = new Date();
+            document.getElementById('dashStartDate').value = firstDay.toISOString().split('T')[0];
+            document.getElementById('dashEndDate').value = today.toISOString().split('T')[0];
+        }
+        return; // Wait for user to click search
+    } else {
+        customDates.style.display = 'none';
+    }
+
     let startDate = null;
     let endDate = null;
     const now = new Date();
