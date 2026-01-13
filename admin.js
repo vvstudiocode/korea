@@ -670,7 +670,7 @@ function saveOrderDetailToBatch(orderId) {
         storeAddress: document.getElementById('detailStoreAddress').value,
         note: document.getElementById('detailNote').value,
         items: tempOrderItems,
-        total: parseInt(document.getElementById('detailTotal').textContent)
+        total: parseInt(document.getElementById('detailTotal').textContent.replace(/[^\d]/g, '')) || 0
     };
 
     console.log('saveOrderDetailToBatch - updates:', updates);
@@ -2399,7 +2399,7 @@ function submitManualOrder() {
             fee: parseInt(document.getElementById('detailShippingFee').value) || 0
         },
         items: tempOrderItems,
-        total: parseInt(document.getElementById('detailTotal').textContent),
+        total: parseInt(document.getElementById('detailTotal').textContent.replace(/[^\d]/g, '')) || 0,
         note: document.getElementById('detailNote').value.trim()
     };
 
