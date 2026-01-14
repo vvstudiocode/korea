@@ -607,7 +607,8 @@
             </div>
             <div class="modal-actions">
                 <button onclick="closeModal('orderDetailModal')">取消</button>
-                <button onclick="saveOrderDetailToBatch()" class="accent-btn">確認修改 (暫存)</button>
+                <button onclick="saveOrderDetailToBatch(document.getElementById('detailOrderId').textContent)"
+                    class="accent-btn">確認修改 (暫存)</button>
             </div>
         </div>
     </div>
