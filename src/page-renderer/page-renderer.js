@@ -942,7 +942,7 @@ const PageRenderer = {
             if (e.target.closest('button')) return;
 
             console.log('🖱️ Card Clicked - Navigating to:', p.id);
-            window.location.href = '/p/' + p.id + '/';
+            window.location.href = '/korea/p/' + p.id + '/';
         };
 
         card.addEventListener('click', clickHandler);

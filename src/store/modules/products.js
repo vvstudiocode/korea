@@ -145,7 +145,7 @@ const Products = {
         }
 
         return `
-        <div class="product-card" onclick="window.location.href='/p/${product.id}/'">
+        <div class="product-card" onclick="window.location.href='/korea/p/${product.id}/'">
             ${imageHtml}
             <div class="product-info">
                 <h3 class="product-name">${product.name}</h3>
