@@ -941,8 +941,8 @@ const PageRenderer = {
             // 如果點擊的是按鈕，不觸發導航（讓按鈕自己處理）
             if (e.target.closest('button')) return;
 
-            console.log('🖱️ Card Clicked - Navigating to:', p.id);
-            window.location.href = '/korea/p/' + p.id + '/';
+            console.log('🖱️ Card Clicked - Opening in new tab:', p.id);
+            window.open('/korea/p/' + p.id + '/', '_blank');
         };
 
         card.addEventListener('click', clickHandler);
