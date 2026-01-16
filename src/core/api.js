@@ -54,7 +54,9 @@ const API = {
     async getProducts(storeId = null) {
         const payload = storeId ? { storeId } : {};
         const data = await this.call('getProducts', payload);
-        return data.products || [];
+        // GAS 返回格式: { success: true, data: [...products] }
+        // data 直接就是商品陣列
+        return Array.isArray(data.data) ? data.data : (data.products || data.data || []);
     },
 
     /**
