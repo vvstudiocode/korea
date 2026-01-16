@@ -732,7 +732,7 @@ function saveOrderDetailToBatch(orderId) {
 // ----------------------
 function fetchProducts(force = false) {
     const tbody = document.getElementById('productsTableBody');
-    if (!force) tbody.innerHTML = '<tr><td colspan="11" class="loading-cell">載入中...</td></tr>';
+    if (!force) tbody.innerHTML = '<tr><td colspan="13" class="loading-cell">載入中...</td></tr>';
 
     return callApi('getProductsAdmin', { _t: Date.now() })
         .then(data => {
@@ -801,6 +801,7 @@ function renderProducts(products) {
         const mainRow = `
         <tr class="${p._isModified ? 'row-modified' : ''} product-main-row" data-id="${p.id}" ${clickEvent} style="${rowStyle}">
             <td style="cursor:move; text-align:center; color:#999; font-size:1.2rem;" class="drag-handle" onclick="event.stopPropagation()">⠿</td>
+            <td style="font-size:0.75rem; color:#6366f1; font-family:monospace;" onclick="event.stopPropagation()">${p.id || '-'}</td>
             <td><img src="${imageUrl}" class="table-thumb" style="width:40px;height:40px;object-fit:cover;vertical-align:middle;"></td>
             <td><a href="https://vvstudiocode.github.io/korea/products/${p.id}/" target="_blank" style="color:#6366f1; text-decoration:none;" onclick="event.stopPropagation()">${p.name}</a> ${p._isNew ? '(新)' : ''}</td>
             <td>${p.price}</td>
@@ -833,7 +834,7 @@ function renderProducts(products) {
 
             detailRow = `
             <tr id="detail-${p.id}" class="product-detail-row" style="display:none;">
-                <td colspan="12" style="padding:0; border:none;">
+                <td colspan="13" style="padding:0; border:none;">
                     ${detailContent}
                 </td>
             </tr>
