@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>23235r | OMO Select 韓國代購</title>
+    <title>232 | OMO Select 韓國代購</title>
     <meta name="description" content="">
     
     <!-- Open Graph -->
     <meta property="og:type" content="product">
     <meta property="og:url" content="https://vvstudiocode.github.io/korea/p/P608197/">
-    <meta property="og:title" content="23235r | OMO Select">
+    <meta property="og:title" content="232 | OMO Select">
     <meta property="og:description" content="">
     <meta property="og:image" content="https://raw.githubusercontent.com/vvstudiocode/korea/main/images/products/222/未命名設計 (33).png">
     <meta property="product:price:amount" content="22">
@@ -17,7 +17,7 @@
     
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="23235r">
+    <meta name="twitter:title" content="232">
     <meta name="twitter:image" content="https://raw.githubusercontent.com/vvstudiocode/korea/main/images/products/222/未命名設計 (33).png">
 
     <link rel="stylesheet" href="/korea/src/store/styles/styles.css">
@@ -33,12 +33,13 @@
         /* Navbar Styles - matching homepage */
         .navbar { 
             background: #fff; 
-            padding: 1.5rem 0; 
+            padding: 1rem 20px; 
             box-shadow: none;
             border-bottom: 1px solid rgba(0,0,0,0.03);
             position: sticky; 
             top: 0; 
             z-index: 100; 
+            margin-top: 10px;
         }
         .nav-container { 
             max-width: 1200px; 
@@ -205,7 +206,7 @@
         
         /* Mobile Responsive */
         @media (max-width: 768px) {
-            .navbar { padding: 12px 15px; }
+            .navbar { padding: 18px 15px; }
             .logo-img { height: 32px; }
             .logo-text { font-size: 0.85rem; }
             .cart-btn { padding: 8px 15px; font-size: 0.85rem; }
@@ -229,14 +230,15 @@
 </head>
 <body data-product-id="P608197">
     <nav class="navbar">
-        <div class="nav-container" style="justify-content: center; position: relative;">
-            <div class="logo" style="position: absolute; left: 50%; transform: translateX(-50%);">
+        <div class="nav-container" style="justify-content: space-between; position: relative; padding: 0 20px;">
+            <a href="/korea/" class="back-btn" style="margin: 0;">← 返回首頁</a>
+            <div class="logo">
                 <a href="/korea/">
                     <img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/logo.png" alt="OMO Select" class="logo-img">
                     <span class="logo-text">韓國代購</span>
                 </a>
             </div>
-            <div class="nav-actions" style="position: absolute; right: 20px;">
+            <div class="nav-actions">
                 <button class="cart-btn" onclick="toggleCart()">
                     購物車 <span class="cart-badge" id="cartCount">0</span>
                 </button>
@@ -264,25 +266,24 @@
     </div>
 
     <div class="product-page">
-        <a href="/korea/" class="back-btn">← 返回首頁</a>
         
         <div class="product-grid">
             <div class="product-gallery">
                 <div class="gallery-main">
                     <button class="gallery-nav prev" onclick="slideImage(-1)">❮</button>
                     <div class="gallery-slider" id="gallerySlider">
-                        <img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/images/products/222/未命名設計 (33).png" alt="23235r"><img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/images/products/222/未命名設計 (34).png" alt="23235r">
+                        <img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/images/products/222/未命名設計 (33).png" alt="232"><img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/images/products/222/未命名設計 (34).png" alt="232">
                     </div>
                     <button class="gallery-nav next" onclick="slideImage(1)">❯</button>
                 </div>
                 <div class="product-thumbnails">
-                    <img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/images/products/222/未命名設計 (33).png" alt="23235r - 1" class="active" onclick="changeMainImage(this)">
-                    <img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/images/products/222/未命名設計 (34).png" alt="23235r - 2" class="" onclick="changeMainImage(this)">
+                    <img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/images/products/222/未命名設計 (33).png" alt="232 - 1" class="active" onclick="changeMainImage(this)">
+                    <img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/images/products/222/未命名設計 (34).png" alt="232 - 2" class="" onclick="changeMainImage(this)">
                 </div>
             </div>
 
             <div class="product-info">
-                <h1>23235r</h1>
+                <h1>232</h1>
                 <div class="product-price-display" id="priceDisplay">NT$ 22</div>
                 
                 
@@ -312,7 +313,7 @@
     </div>
 
     <script>
-        const PRODUCT = {"id":"P608197","name":"23235r","price":22,"image":"https://raw.githubusercontent.com/vvstudiocode/korea/main/images/products/222/未命名設計 (33).png","stock":97,"variants":[]};
+        const PRODUCT = {"id":"P608197","name":"232","price":22,"image":"https://raw.githubusercontent.com/vvstudiocode/korea/main/images/products/222/未命名設計 (33).png","stock":97,"variants":[]};
         
         let selectedSpec = null;
         let currentPrice = PRODUCT.price;
