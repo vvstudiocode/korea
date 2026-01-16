@@ -119,4 +119,26 @@ if (typeof window !== 'undefined') {
     window.App = App;
     // 相容舊版函數
     window.showNotification = (msg) => App.showNotification(msg);
+
+    // 訂單查詢模態框
+    window.openSearchModal = function () {
+        Modal.show('searchModal');
+    };
+
+    // 關閉搜尋視窗
+    window.closeSearchModal = function () {
+        Modal.close('searchModal');
+    };
+
+    // 直接加入購物車（無規格商品）
+    window.addToCartById = function (productId) {
+        Cart.addById(productId);
+    };
+
+    // 處理訂單查詢 Enter 鍵
+    window.handleSearchKeyPress = function (event) {
+        if (event.key === 'Enter') {
+            window.handleOrderSearch();
+        }
+    };
 }
