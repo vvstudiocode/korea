@@ -12,7 +12,7 @@
     <meta property="og:title" content="231221 | OMO Select">
     <meta property="og:description" content="">
     <meta property="og:image" content="https://raw.githubusercontent.com/vvstudiocode/korea/main/images/products/222/未命名設計 (33).png">
-    <meta property="product:price:amount" content="2222">
+    <meta property="product:price:amount" content="22">
     <meta property="product:price:currency" content="TWD">
     
     <!-- Twitter -->
@@ -27,51 +27,147 @@
     
     <style>
         :root { --primary-color: #D68C94; }
-        body { background: #fcfbfb; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #fcfbfb; font-family: 'Noto Sans TC', sans-serif; }
+        
+        /* Navbar Styles */
+        .navbar { 
+            background: #fff; 
+            padding: 15px 20px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
+            position: sticky; 
+            top: 0; 
+            z-index: 100; 
+        }
+        .nav-container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+        .logo { display: flex; align-items: center; gap: 10px; }
+        .logo a { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .logo-img { height: 40px; width: auto; }
+        .logo-text { 
+            font-size: 1rem; 
+            color: #333; 
+            font-weight: 500; 
+        }
+        .nav-actions { display: flex; gap: 10px; }
+        .cart-btn { 
+            background: transparent; 
+            color: #333; 
+            border: none; 
+            padding: 8px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 1.4rem; 
+            transition: opacity 0.2s;
+            position: relative;
+        }
+        .cart-btn:hover { opacity: 0.7; }
+        .cart-count {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background: var(--primary-color);
+            color: white;
+            font-size: 0.7rem;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Product Page Layout */
         .product-page { max-width: 1200px; margin: 0 auto; padding: 20px; }
         .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 20px; }
-        @media (max-width: 768px) { .product-grid { grid-template-columns: 1fr; } }
+        
+        /* Gallery with Swipe */
+        .product-gallery { position: relative; }
         .product-gallery img { width: 100%; border-radius: 12px; }
-        .product-thumbnails { display: flex; gap: 10px; margin-top: 15px; overflow-x: auto; }
-        .product-thumbnails img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; cursor: pointer; border: 2px solid transparent; }
+        .gallery-main { position: relative; overflow: hidden; border-radius: 12px; }
+        .gallery-slider { display: flex; transition: transform 0.3s ease; }
+        .gallery-slider img { min-width: 100%; max-width: 100%; height: auto; object-fit: cover; }
+        .gallery-nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.9); border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; z-index: 10; }
+        .gallery-nav:hover { background: white; }
+        .gallery-nav.prev { left: 10px; }
+        .gallery-nav.next { right: 10px; }
+        .product-thumbnails { display: flex; gap: 10px; margin-top: 15px; overflow-x: auto; padding-bottom: 5px; }
+        .product-thumbnails img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; cursor: pointer; border: 2px solid transparent; flex-shrink: 0; }
         .product-thumbnails img.active, .product-thumbnails img:hover { border-color: var(--primary-color); }
-        .product-info h1 { font-size: 1.8rem; margin-bottom: 10px; color: #333; }
+        
+        /* Product Info */
+        .product-info h1 { font-size: 1.8rem; margin-bottom: 10px; color: #333; line-height: 1.3; }
         .product-price-display { font-size: 1.5rem; color: var(--primary-color); font-weight: 600; margin: 15px 0; }
         .product-description { color: #666; line-height: 1.8; margin: 20px 0; white-space: pre-line; }
+        
+        /* Variants */
         .variant-group { margin: 20px 0; }
         .variant-label { font-weight: 500; display: block; margin-bottom: 10px; }
         .variant-options { display: flex; flex-wrap: wrap; gap: 10px; }
-        .variant-btn { padding: 10px 20px; border: 1px solid #ddd; border-radius: 8px; background: #fff; cursor: pointer; transition: all 0.2s; }
+        .variant-btn { padding: 10px 20px; border: 1px solid #ddd; border-radius: 8px; background: #fff; cursor: pointer; transition: all 0.2s; font-size: 0.9rem; }
         .variant-btn:hover, .variant-btn.selected { border-color: var(--primary-color); color: var(--primary-color); }
         .variant-btn.selected { background: rgba(214, 140, 148, 0.1); }
         .variant-btn.out-of-stock { opacity: 0.5; text-decoration: line-through; cursor: not-allowed; }
+        
+        /* Quantity */
         .qty-row { display: flex; align-items: center; gap: 15px; margin: 20px 0; }
         .qty-controls { display: flex; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; }
-        .qty-controls button { width: 40px; height: 40px; border: none; background: #f5f5f5; cursor: pointer; font-size: 1.2rem; }
-        .qty-controls input { width: 60px; height: 40px; border: none; text-align: center; font-size: 1rem; }
-        .add-to-cart-btn { width: 100%; padding: 15px; background: var(--primary-color); color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; }
+        .qty-controls button { width: 44px; height: 44px; border: none; background: #f5f5f5; cursor: pointer; font-size: 1.2rem; }
+        .qty-controls button:hover { background: #eee; }
+        .qty-controls input { width: 60px; height: 44px; border: none; text-align: center; font-size: 1rem; }
+        
+        /* Add to Cart */
+        .add-to-cart-btn { width: 100%; padding: 16px; background: var(--primary-color); color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
         .add-to-cart-btn:hover { opacity: 0.9; }
         .add-to-cart-btn:disabled { background: #ccc; cursor: not-allowed; }
+        
+        /* Others */
         .stock-info { color: #888; font-size: 0.9rem; margin-top: 10px; }
-        .breadcrumb { padding: 15px 0; color: #888; font-size: 0.9rem; }
-        .breadcrumb a { color: #666; text-decoration: none; }
-        .breadcrumb a:hover { color: var(--primary-color); }
-        .back-btn { display: inline-flex; align-items: center; gap: 5px; color: #666; text-decoration: none; margin-bottom: 20px; }
+        .back-btn { display: inline-flex; align-items: center; gap: 5px; color: #333; text-decoration: none; margin-bottom: 20px; font-size: 0.95rem; }
         .back-btn:hover { color: var(--primary-color); }
+        a { color: #333; }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .navbar { padding: 12px 15px; }
+            .logo-img { height: 32px; }
+            .logo-text { font-size: 0.85rem; }
+            .cart-btn { padding: 8px 15px; font-size: 0.85rem; }
+            
+            .product-page { padding: 15px; }
+            .product-grid { grid-template-columns: 1fr; gap: 25px; }
+            .product-info h1 { font-size: 1.4rem; }
+            .product-price-display { font-size: 1.3rem; }
+            .variant-btn { padding: 8px 16px; font-size: 0.85rem; }
+            .qty-controls button { width: 40px; height: 40px; }
+            .qty-controls input { width: 50px; height: 40px; }
+            .add-to-cart-btn { padding: 14px; font-size: 1rem; }
+            .product-thumbnails img { width: 60px; height: 60px; }
+        }
+        
+        @media (max-width: 480px) {
+            .logo-text { display: none; }
+            .cart-btn { padding: 8px 12px; }
+        }
     </style>
 </head>
 <body data-product-id="P608197">
     <nav class="navbar">
-        <div class="nav-container">
-            <div class="logo">
+        <div class="nav-container" style="justify-content: center; position: relative;">
+            <div class="logo" style="position: absolute; left: 50%; transform: translateX(-50%);">
                 <a href="/korea/">
                     <img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/logo.png" alt="OMO Select" class="logo-img">
                     <span class="logo-text">韓國代購</span>
                 </a>
             </div>
-            <div class="nav-actions">
-                <button class="cart-btn" onclick="window.location.href='/korea/'">
-                    🛒 前往購物
+            <div class="nav-actions" style="position: absolute; right: 20px;">
+                <button class="cart-btn" onclick="toggleCart()">
+                    🛒<span class="cart-count" id="cartCount">0</span>
                 </button>
             </div>
         </div>
@@ -82,7 +178,13 @@
         
         <div class="product-grid">
             <div class="product-gallery">
-                <img id="mainImage" src="https://raw.githubusercontent.com/vvstudiocode/korea/main/images/products/222/未命名設計 (33).png" alt="231221">
+                <div class="gallery-main">
+                    <button class="gallery-nav prev" onclick="slideImage(-1)">❮</button>
+                    <div class="gallery-slider" id="gallerySlider">
+                        <img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/images/products/222/未命名設計 (33).png" alt="231221"><img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/images/products/222/未命名設計 (34).png" alt="231221">
+                    </div>
+                    <button class="gallery-nav next" onclick="slideImage(1)">❯</button>
+                </div>
                 <div class="product-thumbnails">
                     <img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/images/products/222/未命名設計 (33).png" alt="231221 - 1" class="active" onclick="changeMainImage(this)">
                     <img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/images/products/222/未命名設計 (34).png" alt="231221 - 2" class="" onclick="changeMainImage(this)">
@@ -91,7 +193,7 @@
 
             <div class="product-info">
                 <h1>231221</h1>
-                <div class="product-price-display" id="priceDisplay">NT$ 2,222</div>
+                <div class="product-price-display" id="priceDisplay">NT$ 22</div>
                 
                 
 
@@ -120,22 +222,46 @@
     </div>
 
     <script>
-        const PRODUCT = {"id":"P608197","name":"231221","price":2222,"image":"https://raw.githubusercontent.com/vvstudiocode/korea/main/images/products/222/未命名設計 (33).png","stock":99,"variants":[]};
+        const PRODUCT = {"id":"P608197","name":"231221","price":22,"image":"https://raw.githubusercontent.com/vvstudiocode/korea/main/images/products/222/未命名設計 (33).png","stock":99,"variants":[]};
         
         let selectedSpec = null;
         let currentPrice = PRODUCT.price;
         let currentStock = PRODUCT.stock;
+        let currentSlide = 0;
+        const totalSlides = 2;
 
-        // 初始化：如果有規格，選中第一個有庫存的
+        // 初始化
         document.addEventListener('DOMContentLoaded', () => {
+            updateCartCount();
             if (PRODUCT.variants.length > 0) {
                 const firstAvailable = document.querySelector('.variant-btn:not(.out-of-stock)');
                 if (firstAvailable) firstAvailable.click();
             }
+            // Touch swipe support
+            const slider = document.getElementById('gallerySlider');
+            if (slider) {
+                let startX = 0;
+                slider.addEventListener('touchstart', e => { startX = e.touches[0].clientX; });
+                slider.addEventListener('touchend', e => {
+                    const diff = startX - e.changedTouches[0].clientX;
+                    if (Math.abs(diff) > 50) slideImage(diff > 0 ? 1 : -1);
+                });
+            }
         });
 
+        function slideImage(dir) {
+            currentSlide = Math.max(0, Math.min(totalSlides - 1, currentSlide + dir));
+            document.getElementById('gallerySlider').style.transform = 'translateX(-' + (currentSlide * 100) + '%)';
+            // Update thumbnails
+            document.querySelectorAll('.product-thumbnails img').forEach((img, i) => {
+                img.classList.toggle('active', i === currentSlide);
+            });
+        }
+
         function changeMainImage(img) {
-            document.getElementById('mainImage').src = img.src;
+            const index = Array.from(img.parentElement.children).indexOf(img);
+            currentSlide = index;
+            document.getElementById('gallerySlider').style.transform = 'translateX(-' + (currentSlide * 100) + '%)';
             document.querySelectorAll('.product-thumbnails img').forEach(i => i.classList.remove('active'));
             img.classList.add('active');
         }
@@ -172,7 +298,6 @@
                 spec: selectedSpec || ''
             };
             
-            // 儲存到 localStorage
             let cart = JSON.parse(localStorage.getItem('omo_cart') || '[]');
             const existingIdx = cart.findIndex(item => item.id === cartItem.id && item.spec === cartItem.spec);
             if (existingIdx >= 0) {
@@ -181,8 +306,18 @@
                 cart.push(cartItem);
             }
             localStorage.setItem('omo_cart', JSON.stringify(cart));
-            
-            alert('已加入購物車！\n前往首頁查看購物車');
+            updateCartCount();
+            alert('已加入購物車！');
+        }
+
+        function updateCartCount() {
+            const cart = JSON.parse(localStorage.getItem('omo_cart') || '[]');
+            const count = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+            document.getElementById('cartCount').textContent = count;
+        }
+
+        function toggleCart() {
+            window.location.href = '/korea/';
         }
     </script>
 </body>
