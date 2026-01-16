@@ -10,8 +10,18 @@
 // 訂單查詢功能
 // ----------------------------------------------------
 window.handleOrderSearch = async function () {
-    const input = document.getElementById('orderPhoneInput');
-    const resultDiv = document.getElementById('orderResult');
+    // Date formatter helper
+    const formatDate = (isoString) => {
+        if (!isoString) return 'N/A';
+        const d = new Date(isoString);
+        if (isNaN(d.getTime())) return 'N/A';
+        // Format: YYYY/MM/DD HH:mm
+        const pad = (n) => n.toString().padStart(2, '0');
+        return `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    };
+
+    const input = document.getElementById('searchPhone');
+    const resultDiv = document.getElementById('searchResults');
     const phone = input.value.trim();
 
     if (!phone) {
@@ -20,69 +30,65 @@ window.handleOrderSearch = async function () {
     }
 
     // 顯示 Loading
-    const btn = document.querySelector('.search-btn'); // 假設按鈕有此 class
+    const btn = document.querySelector('#searchOrderModal .submit-order-btn');
     const originalBtnText = btn ? btn.textContent : '查詢';
     if (btn) {
         btn.disabled = true;
         btn.textContent = '查詢中...';
     }
 
+    // Clear previous results
     resultDiv.innerHTML = '<div style="padding:20px; text-align:center; color:#666;"><div class="loading-spinner" style="margin:0 auto 10px;"></div>正在查詢訂單資料...</div>';
-    resultDiv.style.display = 'block';
 
     try {
         let orders = [];
-        // 優先使用全局的 callApi 函數，如果存在
-        if (typeof callApi === 'function') {
-            const response = await callApi('searchOrder', { phone: phone });
-            if (response && response.success && Array.isArray(response.data)) {
-                orders = response.data;
-            } else {
-                console.warn('callApi searchOrder returned unexpected data:', response);
-            }
-        } else if (typeof GAS_API_URL !== 'undefined') {
-            // 如果沒有 callApi，直接使用 fetch 呼叫 GAS API
-            const response = await fetch(`${GAS_API_URL}?action=searchOrder&phone=${encodeURIComponent(phone)}`);
-            if (response.ok) {
-                const result = await response.json();
-                if (result.success && Array.isArray(result.data)) {
+
+        // 使用核心 API 模組 (api.js)
+        if (typeof API !== 'undefined') {
+            const result = await API.call('searchOrder', { phoneNumber: phone });
+            if (result.success) {
+                // 嘗試解析回傳的訂單資料 (處理不同可能的結構)
+                if (result.data && Array.isArray(result.data.orders)) {
+                    orders = result.data.orders;
+                } else if (Array.isArray(result.orders)) {
+                    orders = result.orders;
+                } else if (result.data && Array.isArray(result.data)) {
                     orders = result.data;
-                } else {
-                    console.warn('Direct fetch searchOrder returned unexpected data:', result);
                 }
-            } else {
-                throw new Error(`API request failed with status ${response.status}`);
             }
         } else {
-            throw new Error('API endpoint or callApi function not found.');
+            // Fallback: Try global callApi or fetch if API module isn't loaded (though it should be)
+            if (typeof callApi === 'function') {
+                const response = await callApi('searchOrder', { phone: phone });
+                if (response && response.success && Array.isArray(response.data)) orders = response.data;
+            }
         }
 
         if (orders.length === 0) {
-            resultDiv.innerHTML = '<div style="padding:20px; text-align:center; color:#666;">查無訂單資料。</div>';
+            resultDiv.innerHTML = '<div style="padding:20px; text-align:center; color:#666;">查無此手機號碼的訂單資料。</div>';
         } else {
             let html = '<div class="order-results-container">';
             orders.forEach(order => {
-                const statusColor = {
-                    '待處理': 'orange',
-                    '已確認': 'blue',
-                    '已出貨': 'green',
-                    '已完成': 'green',
-                    '已取消': 'red'
-                }[order.status] || 'gray';
+                const statusColor = Utils && Utils.getStatusColor ? Utils.getStatusColor(order.status) : (
+                    {
+                        '待處理': '#ff9800',
+                        '已確認': '#2196F3',
+                        '已出貨': '#4CAF50',
+                        '已完成': '#8BC34A',
+                        '已取消': '#9E9E9E'
+                    }[order.status] || '#757575'
+                );
 
                 html += `
                     <div class="order-card" style="border:1px solid #eee; border-radius:8px; padding:15px; margin-bottom:15px; background:white; box-shadow:0 2px 4px rgba(0,0,0,0.05);">
                         <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:10px; border-bottom:1px solid #f5f5f5; padding-bottom:10px;">
-                            <h3 style="margin:0; font-size:1.1em; color:#333;">#${order.id}</h3>
+                            <h3 style="margin:0; font-size:1.1em; color:#333;">#${order.orderId || order.id}</h3>
                             <span style="background:${statusColor}; color:white; padding:2px 8px; border-radius:12px; font-size:0.8em;">${order.status}</span>
                         </div>
                         <div style="font-size:0.9em; color:#666; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                            <p><strong>商店:</strong> ${order.storeName || '總部'}</p>
-                            <p><strong>日期:</strong> ${order.date ? new Date(order.date).toLocaleString() : 'N/A'}</p>
-                            <p><strong>收件人:</strong> ${order.recipient || 'N/A'}</p>
-                            <p><strong>總額:</strong> <span style="color:var(--primary-color, #ff4d4f); font-weight:bold;">NT$ ${order.total ? order.total.toLocaleString() : '0'}</span></p>
+                            <p><strong>日期:</strong> ${formatDate(order.timestamp || order.date)}</p>
+                            <p><strong>總額:</strong> <span style="color:#D68C94; font-weight:bold;">NT$ ${Number(order.total).toLocaleString()}</span></p>
                         </div>
-                        <p style="font-size:0.9em; color:#666; margin-top:5px;"><strong>配送地址:</strong> ${order.address || 'N/A'}</p>
                         
                         <div class="order-items" style="margin-top:10px; padding-top:10px; border-top:1px dashed #eee;">
                             <h4 style="font-size:0.9em; margin:0 0 5px 0; color:#333;">商品明細:</h4>
@@ -90,7 +96,7 @@ window.handleOrderSearch = async function () {
                                 ${order.items && order.items.length > 0 ? order.items.map(item => `
                                     <li style="display:flex; justify-content:space-between; margin-bottom:3px; color:#555;">
                                         <span>${item.name} ${item.spec ? '(' + item.spec + ')' : ''}</span>
-                                        <span>x${item.qty}</span>
+                                        <span>x${item.qty || item.quantity}</span>
                                     </li>
                                 `).join('') : '<li style="color:#999;">無商品明細</li>'}
                             </ul>
@@ -101,9 +107,10 @@ window.handleOrderSearch = async function () {
             html += '</div>';
             resultDiv.innerHTML = html;
         }
+
     } catch (e) {
-        console.error('Order search error:', e);
-        resultDiv.innerHTML = `<div style="color:red; text-align:center; padding:20px;">查詢錯誤: ${e.message}</div>`;
+        console.error('Search Order Error:', e);
+        resultDiv.innerHTML = '<div style="padding:20px; text-align:center; color:red;">查詢發生錯誤，請稍後再試。</div>';
     } finally {
         if (btn) {
             btn.disabled = false;
@@ -111,6 +118,7 @@ window.handleOrderSearch = async function () {
         }
     }
 };
+
 
 const PageRenderer = {
     // GitHub Raw URL for layout config

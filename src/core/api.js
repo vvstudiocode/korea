@@ -62,10 +62,12 @@ const API = {
     /**
      * 提交訂單
      * @param {Object} orderData - 訂單資料
+     * @param {boolean} isKol - 是否為 KOL 訂單
      * @returns {Promise<Object>} 訂單結果
      */
-    async submitOrder(orderData) {
-        return await this.call('submitOrder', orderData);
+    async submitOrder(orderData, isKol = false) {
+        const action = isKol ? 'submitStoreOrder' : 'submitOrder';
+        return await this.call(action, { orderData });
     },
 
     /**

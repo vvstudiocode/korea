@@ -51,12 +51,14 @@ const Checkout = {
         const is711 = this.selectedMethod === '711';
         const storeFields = document.getElementById('storeFieldsSection');
         const storeNameInput = document.getElementById('storeName');
+        const storeCodeInput = document.getElementById('storeCode');
         const storeAddressInput = document.getElementById('storeAddress');
         const addressGroup = document.querySelector('.address-group');
 
-        if (storeFields && storeNameInput && storeAddressInput) {
+        if (storeFields && storeNameInput && storeCodeInput && storeAddressInput) {
             storeFields.style.display = is711 ? 'block' : 'none';
             storeNameInput.required = is711;
+            storeCodeInput.required = is711;
             storeAddressInput.required = is711;
         }
 
@@ -99,8 +101,8 @@ const Checkout = {
      * 更新結帳摘要
      */
     updateSummary() {
-        const checkoutItems = document.getElementById('checkoutItems');
-        const checkoutTotal = document.getElementById('checkoutTotal');
+        const checkoutItems = document.getElementById('orderSummary');
+        const checkoutTotal = document.getElementById('orderTotal');
 
         if (!checkoutItems || !checkoutTotal) return;
 
@@ -156,35 +158,56 @@ const Checkout = {
             let shippingAddress = '';
             if (this.selectedMethod === '711') {
                 const storeName = formData.get('storeName');
+                const storeCode = formData.get('storeCode');
                 const storeAddress = formData.get('storeAddress');
-                shippingAddress = `7-11 ${storeName} (${storeAddress})`;
+                shippingAddress = `7-11 ${storeName} (${storeCode}) ${storeAddress}`;
             } else {
                 shippingAddress = formData.get('address') || '台中面交';
             }
 
+            // 產生訂單編號
+            const orderId = 'KR' + new Date().toISOString().slice(0, 10).replace(/-/g, '') + Math.random().toString().slice(2, 6);
+
             // 準備訂單資料
             const orderData = {
-                customerName,
-                customerPhone,
+                orderId: orderId,
+                customerName: formData.get('name'),
+                customerPhone: formData.get('phone'),
+                customerLineId: formData.get('lineId'),
+                customerEmail: formData.get('email'),
+                customerNote: formData.get('note') || '',
                 shippingMethod: this.getShippingMethodName(),
                 shippingAddress,
                 shippingFee: this.getShippingFee(),
-                items: Cart.items.map(item => ({
-                    id: item.id,
-                    name: item.name,
-                    spec: item.spec || '',
-                    price: item.price,
-                    quantity: item.quantity,
-                    selectedOptions: item.selectedOptions || {}
-                })),
+                items: Cart.items.map(item => {
+                    // 將選項物件轉換為內部規格字串 (e.g., "紅/M") 以匹配後端庫存 Spec key
+                    let specString = '';
+                    if (item.selectedOptions && Object.keys(item.selectedOptions).length > 0) {
+                        specString = Object.values(item.selectedOptions).join('/');
+                    }
+                    return {
+                        id: item.id,
+                        name: item.name,
+                        qty: Number(item.quantity),
+                        quantity: Number(item.quantity),
+                        price: Number(typeof item.price === 'string' ? item.price.replace(/,/g, '') : item.price),
+                        spec: specString,
+                        selectedOptions: item.selectedOptions || {}
+                    };
+                }),
                 subtotal: Cart.getSubtotal(),
                 total: Cart.getSubtotal() + this.getShippingFee(),
-                note: formData.get('note') || '',
-                storeId: window.currentStoreId || null
+                storeId: window.currentStoreId || null,
+                orderType: window.currentStoreId ? 'kol' : 'direct',
+                // 為了相容 GAS 接收端，加入個別欄位
+                storeName: formData.get('storeName') || '',
+                storeCode: formData.get('storeCode') || '',
+                storeAddress: formData.get('storeAddress') || ''
             };
 
             // 提交訂單
-            const result = await API.submitOrder(orderData);
+            // 第二個參數為 isKol，如果是 KOL 商店則為 true
+            const result = await API.submitOrder(orderData, !!window.currentStoreId);
 
             if (result.success) {
                 // 清空購物車
@@ -194,8 +217,9 @@ const Checkout = {
                 Modal.close('checkoutModal');
 
                 // 顯示成功訊息
-                const orderId = result.orderId || '已收到';
-                document.getElementById('orderIdDisplay').textContent = orderId;
+                // 顯示成功訊息
+                // 使用我們送出的 orderId，因為後端可能只回傳 success
+                document.getElementById('orderNumber').textContent = orderId;
                 Modal.show('successModal');
 
                 Toast.success('訂單提交成功！');

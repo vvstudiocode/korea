@@ -65,6 +65,13 @@ const Cart = {
             return;
         }
 
+        // 確保價格是數字
+        let safePrice = product.price;
+        if (typeof safePrice === 'string') {
+            safePrice = Number(safePrice.replace(/,/g, ''));
+        }
+        product.price = safePrice;
+
         const cartItemId = this.getItemId(product.id, selectedOptions);
         const existingItem = this.items.find(item => item.cartItemId === cartItemId);
 
@@ -158,7 +165,7 @@ const Cart = {
      * @returns {number} 小計金額
      */
     getSubtotal() {
-        return this.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        return this.items.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity)), 0);
     },
 
     /**
