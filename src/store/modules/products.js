@@ -23,6 +23,7 @@ const Products = {
         if (cached) {
             console.log('📦 從快取載入商品');
             this.items = cached;
+            window.products = this.items; // 暴露給 page-renderer.js 使用
             this.displayProgressive();
         } else if (grid) {
             grid.innerHTML = '<div class="loading">載入商品中...</div>';
@@ -50,6 +51,8 @@ const Products = {
                     console.log('✅ 商品資料無變化');
                     Storage.cacheProducts(this.items);
                 }
+                // 暴露給 page-renderer.js 使用
+                window.products = this.items;
             }
 
             return this.items;
