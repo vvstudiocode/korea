@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>231221 | OMO Select 韓國代購</title>
+    <meta name="description" content="">
+    
+    <!-- Open Graph -->
+    <meta property="og:type" content="product">
+    <meta property="og:url" content="https://vvstudiocode.github.io/korea/p/P608197/">
+    <meta property="og:title" content="231221 | OMO Select">
+    <meta property="og:description" content="">
+    <meta property="og:image" content="https://raw.githubusercontent.com/vvstudiocode/korea/main/images/products/222/未命名設計 (33).png">
+    <meta property="product:price:amount" content="222">
+    <meta property="product:price:currency" content="TWD">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="231221">
+    <meta name="twitter:image" content="https://raw.githubusercontent.com/vvstudiocode/korea/main/images/products/222/未命名設計 (33).png">
+
+    <link rel="stylesheet" href="/src/store/styles/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { --primary-color: #D68C94; }
+        body { background: #fcfbfb; }
+        .product-page { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 20px; }
+        @media (max-width: 768px) { .product-grid { grid-template-columns: 1fr; } }
+        .product-gallery img { width: 100%; border-radius: 12px; }
+        .product-thumbnails { display: flex; gap: 10px; margin-top: 15px; overflow-x: auto; }
+        .product-thumbnails img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; cursor: pointer; border: 2px solid transparent; }
+        .product-thumbnails img.active, .product-thumbnails img:hover { border-color: var(--primary-color); }
+        .product-info h1 { font-size: 1.8rem; margin-bottom: 10px; color: #333; }
+        .product-price-display { font-size: 1.5rem; color: var(--primary-color); font-weight: 600; margin: 15px 0; }
+        .product-description { color: #666; line-height: 1.8; margin: 20px 0; white-space: pre-line; }
+        .variant-group { margin: 20px 0; }
+        .variant-label { font-weight: 500; display: block; margin-bottom: 10px; }
+        .variant-options { display: flex; flex-wrap: wrap; gap: 10px; }
+        .variant-btn { padding: 10px 20px; border: 1px solid #ddd; border-radius: 8px; background: #fff; cursor: pointer; transition: all 0.2s; }
+        .variant-btn:hover, .variant-btn.selected { border-color: var(--primary-color); color: var(--primary-color); }
+        .variant-btn.selected { background: rgba(214, 140, 148, 0.1); }
+        .variant-btn.out-of-stock { opacity: 0.5; text-decoration: line-through; cursor: not-allowed; }
+        .qty-row { display: flex; align-items: center; gap: 15px; margin: 20px 0; }
+        .qty-controls { display: flex; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; }
+        .qty-controls button { width: 40px; height: 40px; border: none; background: #f5f5f5; cursor: pointer; font-size: 1.2rem; }
+        .qty-controls input { width: 60px; height: 40px; border: none; text-align: center; font-size: 1rem; }
+        .add-to-cart-btn { width: 100%; padding: 15px; background: var(--primary-color); color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; }
+        .add-to-cart-btn:hover { opacity: 0.9; }
+        .add-to-cart-btn:disabled { background: #ccc; cursor: not-allowed; }
+        .stock-info { color: #888; font-size: 0.9rem; margin-top: 10px; }
+        .breadcrumb { padding: 15px 0; color: #888; font-size: 0.9rem; }
+        .breadcrumb a { color: #666; text-decoration: none; }
+        .breadcrumb a:hover { color: var(--primary-color); }
+        .back-btn { display: inline-flex; align-items: center; gap: 5px; color: #666; text-decoration: none; margin-bottom: 20px; }
+        .back-btn:hover { color: var(--primary-color); }
+    </style>
+</head>
+<body data-product-id="P608197">
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <a href="/">
+                    <img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/logo.png" alt="OMO Select" class="logo-img">
+                    <span class="logo-text">韓國代購</span>
+                </a>
+            </div>
+            <div class="nav-actions">
+                <button class="cart-btn" onclick="window.location.href='/'">
+                    🛒 前往購物
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="product-page">
+        <a href="/" class="back-btn">← 返回首頁</a>
+        
+        <div class="product-grid">
+            <div class="product-gallery">
+                <img id="mainImage" src="https://raw.githubusercontent.com/vvstudiocode/korea/main/images/products/222/未命名設計 (33).png" alt="231221">
+                <div class="product-thumbnails">
+                    <img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/images/products/222/未命名設計 (33).png" alt="231221 - 1" class="active" onclick="changeMainImage(this)">
+                </div>
+            </div>
+
+            <div class="product-info">
+                <h1>231221</h1>
+                <div class="product-price-display" id="priceDisplay">NT$ 222</div>
+                
+                
+
+                <div class="qty-row">
+                    <span>數量：</span>
+                    <div class="qty-controls">
+                        <button onclick="changeQty(-1)">-</button>
+                        <input type="number" id="quantity" value="1" min="1" readonly>
+                        <button onclick="changeQty(1)">+</button>
+                    </div>
+                </div>
+
+                <button class="add-to-cart-btn" id="addToCartBtn" onclick="addToCart()">
+                    加入購物車
+                </button>
+
+                <div class="stock-info">
+                    庫存：<span id="stockDisplay">99</span> 件
+                </div>
+
+                <div class="product-description">
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const PRODUCT = {"id":"P608197","name":"231221","price":222,"image":"https://raw.githubusercontent.com/vvstudiocode/korea/main/images/products/222/未命名設計 (33).png","stock":99,"variants":[]};
+        
+        let selectedSpec = null;
+        let currentPrice = PRODUCT.price;
+        let currentStock = PRODUCT.stock;
+
+        // 初始化：如果有規格，選中第一個有庫存的
+        document.addEventListener('DOMContentLoaded', () => {
+            if (PRODUCT.variants.length > 0) {
+                const firstAvailable = document.querySelector('.variant-btn:not(.out-of-stock)');
+                if (firstAvailable) firstAvailable.click();
+            }
+        });
+
+        function changeMainImage(img) {
+            document.getElementById('mainImage').src = img.src;
+            document.querySelectorAll('.product-thumbnails img').forEach(i => i.classList.remove('active'));
+            img.classList.add('active');
+        }
+
+        function selectVariant(btn) {
+            document.querySelectorAll('.variant-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            selectedSpec = btn.dataset.spec;
+            currentPrice = Number(btn.dataset.price);
+            currentStock = Number(btn.dataset.stock);
+            
+            document.getElementById('priceDisplay').textContent = 'NT$ ' + currentPrice.toLocaleString();
+            document.getElementById('stockDisplay').textContent = currentStock;
+            
+            const addBtn = document.getElementById('addToCartBtn');
+            addBtn.disabled = currentStock <= 0;
+            addBtn.textContent = currentStock > 0 ? '加入購物車' : '已售完';
+        }
+
+        function changeQty(delta) {
+            const input = document.getElementById('quantity');
+            const newVal = Math.max(1, parseInt(input.value) + delta);
+            input.value = newVal;
+        }
+
+        function addToCart() {
+            const qty = parseInt(document.getElementById('quantity').value);
+            const cartItem = {
+                id: PRODUCT.id,
+                name: PRODUCT.name,
+                price: currentPrice,
+                image: PRODUCT.image,
+                quantity: qty,
+                spec: selectedSpec || ''
+            };
+            
+            // 儲存到 localStorage
+            let cart = JSON.parse(localStorage.getItem('omo_cart') || '[]');
+            const existingIdx = cart.findIndex(item => item.id === cartItem.id && item.spec === cartItem.spec);
+            if (existingIdx >= 0) {
+                cart[existingIdx].quantity += qty;
+            } else {
+                cart.push(cartItem);
+            }
+            localStorage.setItem('omo_cart', JSON.stringify(cart));
+            
+            alert('已加入購物車！\n前往首頁查看購物車');
+        }
+    </script>
+</body>
+</html>
