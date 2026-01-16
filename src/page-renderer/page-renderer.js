@@ -942,7 +942,7 @@ const PageRenderer = {
             if (e.target.closest('button')) return;
 
             console.log('🖱️ Card Clicked - Opening in new tab:', p.id);
-            window.open('/korea/p/' + p.id + '/', '_blank');
+            window.open('/korea/products/' + p.id + '/', '_blank');
         };
 
         card.addEventListener('click', clickHandler);

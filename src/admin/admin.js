@@ -802,7 +802,7 @@ function renderProducts(products) {
         <tr class="${p._isModified ? 'row-modified' : ''} product-main-row" data-id="${p.id}" ${clickEvent} style="${rowStyle}">
             <td style="cursor:move; text-align:center; color:#999; font-size:1.2rem;" class="drag-handle" onclick="event.stopPropagation()">⠿</td>
             <td><img src="${imageUrl}" class="table-thumb" style="width:40px;height:40px;object-fit:cover;vertical-align:middle;"></td>
-            <td><a href="https://vvstudiocode.github.io/korea/p/${p.id}/" target="_blank" style="color:#6366f1; text-decoration:none;" onclick="event.stopPropagation()">${p.name}</a> ${p._isNew ? '(新)' : ''}</td>
+            <td><a href="https://vvstudiocode.github.io/korea/products/${p.id}/" target="_blank" style="color:#6366f1; text-decoration:none;" onclick="event.stopPropagation()">${p.name}</a> ${p._isNew ? '(新)' : ''}</td>
             <td>${p.price}</td>
             <td style="color: #888;">${p.cost || 0}</td>
             <td style="color: #28a745; font-weight: 500;">${retailProfit}</td>
