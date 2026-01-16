@@ -868,8 +868,9 @@ function loadBrandList() {
     const brands = new Set();
 
     currentProducts.forEach(p => {
-        if (p.brand && p.brand.trim()) {
-            brands.add(p.brand.trim());
+        const brandStr = String(p.brand || '').trim();
+        if (brandStr) {
+            brands.add(brandStr);
         }
     });
 
