@@ -122,12 +122,12 @@ if (typeof window !== 'undefined') {
 
     // 訂單查詢模態框
     window.openSearchModal = function () {
-        Modal.show('searchModal');
+        Modal.show('searchOrderModal');
     };
 
     // 關閉搜尋視窗
     window.closeSearchModal = function () {
-        Modal.close('searchModal');
+        Modal.close('searchOrderModal');
     };
 
     // 直接加入購物車（無規格商品）

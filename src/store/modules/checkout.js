@@ -49,7 +49,7 @@ const Checkout = {
      */
     toggleStoreFields() {
         const is711 = this.selectedMethod === '711';
-        const storeFields = document.getElementById('storeFields');
+        const storeFields = document.getElementById('storeFieldsSection');
         const storeNameInput = document.getElementById('storeName');
         const storeAddressInput = document.getElementById('storeAddress');
         const addressGroup = document.querySelector('.address-group');
