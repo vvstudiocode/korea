@@ -1,12 +1,12 @@
 {
   "version": "1.0",
-  "lastUpdated": "2026-01-16T12:38:41.803Z",
+  "lastUpdated": "2026-01-16T16:28:28.466Z",
   "sections": [
     {
       "type": "product_list",
-      "marginTop": 0,
+      "marginTop": 5,
       "marginBottom": 0,
-      "title": "商品列表",
+      "title": "",
       "category": "全部",
       "limit": 999,
       "itemsDesktop": 4,
