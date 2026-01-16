@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- SEO Meta Tags - 由後台生成時替換 -->
+    <title>{{STORE_NAME}} | 韓國代購</title>
+    <meta name="description" content="{{STORE_DESCRIPTION}}">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{STORE_URL}}">
+    <meta property="og:title" content="{{STORE_NAME}} | 韓國代購">
+    <meta property="og:description" content="{{STORE_DESCRIPTION}}">
+    <meta property="og:image" content="{{STORE_LOGO}}">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="{{STORE_NAME}}">
+    <meta property="twitter:description" content="{{STORE_DESCRIPTION}}">
+    <meta property="twitter:image" content="{{STORE_LOGO}}">
+
+    <!-- 品牌主題色 -->
+    <style>
+        :root {
+            --primary-color: {
+                    {
+                    THEME_COLOR
+                }
+            }
+
+            ;
+
+            --accent-color: {
+                    {
+                    THEME_COLOR
+                }
+            }
+
+            ;
+        }
+    </style>
+
+    <!-- 樣式表 -->
+    <link rel="stylesheet" href="/src/store/styles/styles.css">
+    <link rel="stylesheet" href="/src/page-renderer/page-renderer.css">
+
+    <style>
+        /* Critical Loading Styles */
+        #loadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #fcfbfb;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease;
+        }
+
+        #loadingOverlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-text {
+            color: var(--primary-color);
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            font-weight: 600;
+        }
+    </style>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Playfair+Display:wght@400;600;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body data-store-id="{{STORE_ID}}">
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay">
+        <video autoplay loop muted playsinline style="width: 150px; height: 150px; object-fit: contain;">
+            <source src="{{LOADING_VIDEO}}" type="video/mp4">
+        </video>
+        <div class="loading-text">{{STORE_NAME}}</div>
+    </div>
+
+    <!-- 導航列 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <img src="{{STORE_LOGO}}" alt="{{STORE_NAME}}" class="logo-img">
+                <span class="logo-text">{{STORE_NAME}}</span>
+            </div>
+            <div class="nav-actions">
+                <button class="search-btn" id="searchBtn" onclick="openSearchModal()">
+                    🔍 訂單查詢
+                </button>
+                <button class="cart-btn" id="cartBtn">
+                    🛒 購物車
+                    <span class="cart-badge" id="cartBadge">0</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要內容區 -->
+    <main class="main-container">
+        <div id="pageBuilderRoot"></div>
+    </main>
+
+    <!-- 頁尾 -->
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                {{FOOTER_CONTENT}}
+            </div>
+        </div>
+        <div class="footer-copyright">
+            <div class="social-icons">
+                {{SOCIAL_LINKS}}
+            </div>
+            {{COPYRIGHT}}
+        </div>
+    </footer>
+
+    <!-- 購物車側邊欄 -->
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h3>購物車</h3>
+            <button class="close-cart" id="closeCart">✕</button>
+        </div>
+        <div class="cart-items" id="cartItems">
+            <div class="empty-cart">
+                <p>購物車是空的</p>
+                <p class="empty-cart-hint">快去挑選喜歡的商品吧！</p>
+            </div>
+        </div>
+        <div class="cart-footer">
+            <div class="shipping-method-selector">
+                <label>運送方式：</label>
+                <div class="shipping-options">
+                    <label class="shipping-option">
+                        <input type="radio" name="shippingMethod" value="pickup"
+                            onchange="Checkout.setShippingMethod('pickup')">
+                        <span>限台中市面交 <strong>免運</strong></span>
+                    </label>
+                    <label class="shipping-option">
+                        <input type="radio" name="shippingMethod" value="711" checked
+                            onchange="Checkout.setShippingMethod('711')">
+                        <span>7-11 店到店 <strong>NT$ 60</strong></span>
+                    </label>
+                </div>
+            </div>
+            <div class="cart-total">
+                <span>總計：</span>
+                <span class="total-amount" id="totalAmount">NT$ 0</span>
+            </div>
+            <button class="checkout-btn" id="checkoutBtn">前往結帳</button>
+        </div>
+    </div>
+
+    <!-- 商品詳情模態框 -->
+    <div class="modal" id="productModal">
+        <div class="modal-content product-detail">
+            <button class="modal-close" onclick="ProductDetail.close()">✕</button>
+            <div class="product-detail-grid">
+                <div class="product-detail-image">
+                    <img id="modalProductImage" src="" alt="">
+                </div>
+                <div class="product-detail-info">
+                    <h2 id="modalProductName"></h2>
+                    <p class="product-detail-price" id="modalProductPrice"></p>
+                    <div id="modalProductOptions" class="product-options-container"></div>
+                    <div class="quantity-selector">
+                        <label>數量：</label>
+                        <div class="qty-group">
+                            <button class="qty-btn" onclick="ProductDetail.decreaseQuantity()">-</button>
+                            <input type="number" id="modalQuantity" value="1" min="1" readonly>
+                            <button class="qty-btn" onclick="ProductDetail.increaseQuantity()">+</button>
+                        </div>
+                    </div>
+                    <button class="add-to-cart-btn" onclick="ProductDetail.addToCart()">加入購物車</button>
+                    <p class="product-detail-description" id="modalProductDescription"></p>
+                    <div class="product-detail-stock">庫存：<span id="modalProductStock"></span> 件</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 結帳模態框 -->
+    <div class="modal" id="checkoutModal">
+        <div class="modal-content checkout-form">
+            <button class="modal-close" onclick="Modal.close('checkoutModal')">✕</button>
+            <h2>填寫收件資訊</h2>
+            <form id="orderForm">
+                <div class="form-group">
+                    <label for="customerName">姓名 *</label>
+                    <input type="text" id="customerName" name="name" required placeholder="請輸入您的姓名">
+                </div>
+                <div class="form-group">
+                    <label for="customerPhone">手機號碼 *</label>
+                    <input type="tel" id="customerPhone" name="phone" required placeholder="0912345678">
+                </div>
+                <div class="form-group">
+                    <label for="customerLineId">Line ID *</label>
+                    <input type="text" id="customerLineId" name="lineId" required placeholder="請輸入 Line ID">
+                </div>
+                <div class="form-group">
+                    <label for="customerEmail">電子信箱 *</label>
+                    <input type="email" id="customerEmail" name="email" required placeholder="example@email.com">
+                </div>
+                <div id="storeFieldsSection">
+                    <div class="shipping-notice">
+                        <p>📦 您選擇了 <strong>7-11 店到店</strong> 取貨</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="storeName">7-11 門市名稱 *</label>
+                        <input type="text" id="storeName" name="storeName" required placeholder="例如：信義門市">
+                    </div>
+                    <div class="form-group">
+                        <label for="storeCode">門市店號 *</label>
+                        <input type="text" id="storeCode" name="storeCode" required placeholder="例如：123456">
+                    </div>
+                    <div class="form-group">
+                        <label for="storeAddress">門市地址 *</label>
+                        <input type="text" id="storeAddress" name="storeAddress" required placeholder="台北市信義區XX路XX號">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="customerNote">備注（選填）</label>
+                    <textarea id="customerNote" name="note" rows="3"></textarea>
+                </div>
+                <div class="order-summary">
+                    <h3>訂單摘要</h3>
+                    <div id="orderSummary"></div>
+                    <div class="order-total">總金額：<span id="orderTotal">NT$ 0</span></div>
+                </div>
+                <button type="submit" class="submit-order-btn">確認送出訂單</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 成功提示 -->
+    <div class="modal" id="successModal">
+        <div class="modal-content success-message">
+            <div class="success-icon">✓</div>
+            <h2>訂單送出成功！</h2>
+            <p>您的訂單編號：<strong id="orderNumber"></strong></p>
+            <button class="continue-btn" onclick="Modal.close('successModal')">繼續購物</button>
+        </div>
+    </div>
+
+    <!-- 遮罩層 -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- 訂單查詢 -->
+    <div class="modal" id="searchOrderModal">
+        <div class="modal-content search-order-form">
+            <button class="modal-close" onclick="closeSearchModal()">✕</button>
+            <h2>訂單查詢</h2>
+            <div class="search-input-group">
+                <p>請輸入訂購時的手機號碼查詢訂單狀態</p>
+                <div class="form-group">
+                    <input type="tel" id="searchPhone" placeholder="例如：0912345678">
+                    <button class="submit-order-btn" onclick="handleOrderSearch()" style="margin-top: 10px;">查詢</button>
+                </div>
+            </div>
+            <div id="searchResults" class="search-results"></div>
+        </div>
+    </div>
+
+    <!-- JavaScript 模組載入 -->
+    <script src="/src/core/api.js"></script>
+    <script src="/src/core/storage.js"></script>
+    <script src="/src/core/toast.js"></script>
+    <script src="/src/core/utils.js"></script>
+    <script src="/src/store/modules/products.js"></script>
+    <script src="/src/store/modules/cart.js"></script>
+    <script src="/src/store/modules/modal.js"></script>
+    <script src="/src/store/modules/product-detail.js"></script>
+    <script src="/src/store/modules/checkout.js"></script>
+    <script src="/src/store/modules/kol-store.js"></script>
+    <script src="/src/page-renderer/page-renderer.js"></script>
+    <script src="/src/store/app.js"></script>
+
+    <script>
+        // KOL 商店初始化 - 使用預載入的資料
+        window.STORE_CONFIG = {
+            storeId: '{{STORE_ID}}',
+            storeName: '{{STORE_NAME}}',
+            themeColor: '{{THEME_COLOR}}',
+            logoUrl: '{{STORE_LOGO}}'
+        };
+    </script>
+</body>
+
+</html>

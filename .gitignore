@@ -1,12 +1,27 @@
 .DS_Store
 .vscode/
-gas-backend/
+
+# Layout 設定檔（動態生成）
 layout.json
 layout_*.json
 *.log
 node_modules/
 
-
 # 商品圖片（由後台上傳到 GitHub，不追蹤本地）
 images/
 images/products/
+
+# ===== 敏感資訊 =====
+# GAS 後端原始碼（包含 API 金鑰）
+gas-backend/
+
+# 舊版備份
+_legacy/
+
+# 環境變數
+.env
+.env.local
+*.secret
+
+# API 金鑰和設定
+config/*.secret.json

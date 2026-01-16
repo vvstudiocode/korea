@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Omo Select_韓國代購 | Korean Shopping</title>
+    <meta name="description" content="提供最新韓國熱門商品代購服務，美妝保養、零食食品、生活用品應有盡有">
+
+    <!-- 樣式表 -->
+    <link rel="stylesheet" href="styles/styles.css">
+    <link rel="stylesheet" href="../../src/page-renderer/page-renderer.css">
+
+    <style>
+        /* Critical Loading Styles */
+        #loadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #fcfbfb;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease;
+        }
+
+        #loadingOverlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-text {
+            color: #D68C94;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            font-weight: 600;
+        }
+    </style>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Playfair+Display:wght@400;600;700&family=Poppins:wght@300;400;600&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay">
+        <video autoplay loop muted playsinline style="width: 150px; height: 150px; object-fit: contain;">
+            <source
+                src="https://raw.githubusercontent.com/vvstudiocode/korea/main/ce3ffe25-03c7-4f87-bfac-be6495d83780.mp4"
+                type="video/mp4">
+        </video>
+        <div class="loading-text">OMO Select</div>
+    </div>
+
+    <!-- 導航列 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <img src="../../assets/images/logo.png" alt="OMO Select Logo" class="logo-img">
+                <span class="logo-text">韓國代購</span>
+            </div>
+            <div class="nav-actions">
+                <button class="search-btn" id="searchBtn" onclick="openSearchModal()">
+                    🔍 訂單查詢
+                </button>
+                <button class="cart-btn" id="cartBtn">
+                    🛒 購物車
+                    <span class="cart-badge" id="cartBadge">0</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要內容區 -->
+    <main class="main-container">
+        <div id="pageBuilderRoot"></div>
+    </main>
+
+    <!-- 頁尾 -->
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <ul>
+                    <li class="section-header"><strong>一、實體採買承諾</strong></li>
+                    <li>本店所有商品皆為代購人員於韓國當地實體門市/專櫃/官方通路親自採買，保證正品。</li>
+
+                    <li class="section-header"><strong>二、價格結構透明化</strong></li>
+                    <li>商品頁面或報價所顯示的價格，皆已包含商品原價、韓國境內運費（若有）、國際運費、關稅（若產生）及本服務之代購費用。</li>
+                    <li>無需再支付其他費用（除非後續產生特殊要求或二次補運費之情況，將另行告知）。</li>
+
+                    <li class="section-header"><strong>三、付款方式與期限</strong></li>
+                    <li>選定商品並確認訂單內容後，請於 <strong>24小時</strong> 內完成全額匯款。</li>
+                    <li>請務必將匯款證明截圖並私訊 Line:@567gestz 給小幫手，並告知您的訂單編號/姓名，待確認款項後，訂單即正式成立。</li>
+                    <li>未於期限內完成匯款者，視同放棄訂單，將不另行通知。</li>
+
+                    <li class="section-header"><strong>四、訂單成立後不接受取消/更改</strong></li>
+                    <li>代購服務屬於客製化給付，一旦訂單成立並付款後，即不接受任何理由（如跑單、改變心意、顏色尺寸不合等）要求取消、退款或更改訂單內容。請務必在下單前再次確認。</li>
+
+                    <li class="section-header"><strong>五、採買與寄送時程</strong></li>
+                    <li><strong>採購時程：</strong>採購時程：代購人員將於 1/7~1/14採購。若遇商品缺貨、斷貨或限購，將第一時間通知您。</li>
+                    <li><strong>運送時程：</strong>商品採買後將統一 <strong>商品採買後將統一 1/16寄出。</strong></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-copyright">
+            <div class="social-icons">
+                <a href="https://line.me/ti/g2/yBmGmioZOe8gNpajkjO4e5xSCOwGuW7BfrQCAA?utm_source=invitation&utm_medium=link_copy&utm_campaign=default"
+                    target="_blank" rel="noopener noreferrer">
+                    <img src="../../assets/images/icons/line.png" alt="Line">
+                </a>
+                <a href="https://www.instagram.com/omo_select_/" target="_blank" rel="noopener noreferrer">
+                    <img src="../../assets/images/icons/instagram.png" alt="Instagram">
+                </a>
+                <a href="https://www.threads.com/@omo_select_?xmt=AQF0vSwwMKGPocnR1oZVtRQg_fdOhHp8hJV-haKVALt3HiA"
+                    target="_blank" rel="noopener noreferrer">
+                    <img src="../../assets/images/icons/threads.png" alt="Threads">
+                </a>
+            </div>
+            2025 OMO Select. All rights reserved.
+        </div>
+    </footer>
+
+    <!-- 購物車側邊欄 -->
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h3>購物車</h3>
+            <button class="close-cart" id="closeCart">✕</button>
+        </div>
+
+        <div class="cart-items" id="cartItems">
+            <div class="empty-cart">
+                <p>購物車是空的</p>
+                <p class="empty-cart-hint">快去挑選喜歡的商品吧！</p>
+            </div>
+        </div>
+
+        <div class="cart-footer">
+            <!-- 運送方式選擇 -->
+            <div class="shipping-method-selector">
+                <label>運送方式：</label>
+                <div class="shipping-options">
+                    <label class="shipping-option">
+                        <input type="radio" name="shippingMethod" value="pickup"
+                            onchange="Checkout.setShippingMethod('pickup')">
+                        <span>限台中市面交 <strong>免運</strong></span>
+                    </label>
+                    <label class="shipping-option">
+                        <input type="radio" name="shippingMethod" value="711" checked
+                            onchange="Checkout.setShippingMethod('711')">
+                        <span>7-11 店到店 <strong>NT$ 60</strong></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="cart-total">
+                <span>總計：</span>
+                <span class="total-amount" id="totalAmount">NT$ 0</span>
+            </div>
+            <button class="checkout-btn" id="checkoutBtn">前往結帳</button>
+        </div>
+    </div>
+
+    <!-- 商品詳情模態框 -->
+    <div class="modal" id="productModal">
+        <div class="modal-content product-detail">
+            <button class="modal-close" onclick="ProductDetail.close()">✕</button>
+            <div class="product-detail-grid">
+                <div class="product-detail-image">
+                    <img id="modalProductImage" src="" alt="">
+                </div>
+                <div class="product-detail-info">
+                    <h2 id="modalProductName"></h2>
+                    <p class="product-detail-price" id="modalProductPrice"></p>
+
+                    <!-- 商品選項容器 (動態產生) -->
+                    <div id="modalProductOptions" class="product-options-container"></div>
+
+                    <div class="quantity-selector">
+                        <label>數量：</label>
+                        <div class="qty-group">
+                            <button class="qty-btn" onclick="ProductDetail.decreaseQuantity()">-</button>
+                            <input type="number" id="modalQuantity" value="1" min="1" readonly>
+                            <button class="qty-btn" onclick="ProductDetail.increaseQuantity()">+</button>
+                        </div>
+                    </div>
+                    <button class="add-to-cart-btn" onclick="ProductDetail.addToCart()">
+                        加入購物車
+                    </button>
+
+                    <!-- 商品描述放在最後 -->
+                    <p class="product-detail-description" id="modalProductDescription"></p>
+                    <div class="product-detail-stock">
+                        庫存：<span id="modalProductStock"></span> 件
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 結帳模態框 -->
+    <div class="modal" id="checkoutModal">
+        <div class="modal-content checkout-form">
+            <button class="modal-close" onclick="Modal.close('checkoutModal')">✕</button>
+            <h2>填寫收件資訊</h2>
+
+            <form id="orderForm">
+                <div class="form-group">
+                    <label for="customerName">姓名 *</label>
+                    <input type="text" id="customerName" name="name" required placeholder="請輸入您的姓名">
+                </div>
+
+                <div class="form-group">
+                    <label for="customerPhone">手機號碼 *</label>
+                    <input type="tel" id="customerPhone" name="phone" required placeholder="0912345678">
+                </div>
+                <div class="form-group">
+                    <label for="customerLineId">Line ID *</label>
+                    <input type="text" id="customerLineId" name="lineId" required placeholder="請輸入 Line ID 以便聯繫">
+                </div>
+                <div class="form-group">
+                    <label for="customerEmail">電子信箱 *</label>
+                    <input type="email" id="customerEmail" name="email" required placeholder="example@email.com">
+                </div>
+
+                <!-- 711 店到店欄位區塊 -->
+                <div id="storeFieldsSection">
+                    <div class="shipping-notice">
+                        <p>📦 您選擇了 <strong>7-11 店到店</strong> 取貨</p>
+                        <p class="store-query-link">查詢門市：<a href="https://www.ibon.com.tw/retail_inquiry.aspx#gsc.tab=0"
+                                target="_blank">👉 點此查詢</a></p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="storeName">7-11 門市名稱 *</label>
+                        <input type="text" id="storeName" name="storeName" required placeholder="例如：信義門市">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="storeCode">門市店號 *</label>
+                        <input type="text" id="storeCode" name="storeCode" required placeholder="例如：123456">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="storeAddress">門市地址 *</label>
+                        <input type="text" id="storeAddress" name="storeAddress" required placeholder="例如：台北市信義區XX路XX號">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="customerNote">備注（選填）</label>
+                    <textarea id="customerNote" name="note" rows="3" placeholder="請在此填寫匯款後五碼。
+如有下訂客製化鑰匙圈，請附上英文"></textarea>
+                    <p class="form-hint"
+                        style="color: red; font-size: 40px; font-weight: bold; margin-top: 15px; line-height: 1.2;">
+                        匯款完成後請一定要至官方 Line 回覆：
+                        <a href="https://lin.ee/qEQwlef" target="_blank"
+                            style="color: red; text-decoration: underline;">@597gestz</a>
+                        <br>才算成立
+                    </p>
+                </div>
+
+                <div class="payment-info">
+                    <h3>匯款資訊</h3>
+                    <div class="payment-details">
+                        <div class="payment-item">
+                            <span class="payment-label">銀行名稱：</span>
+                            <span class="payment-value">國泰世華銀行（代碼 013）</span>
+                        </div>
+                        <div class="payment-item">
+                            <span class="payment-label">帳號：</span>
+                            <span class="payment-value account-number">204506258370</span>
+                        </div>
+                        <div class="payment-item">
+                            <span class="payment-label">任何問題可洽網頁最下方LINE | IG</span>
+                        </div>
+                        <div class="payment-item">
+                            <span class="payment-value">匯款完成後請聯繫我們匯款後五碼</span>
+                        </div>
+                    </div>
+                    <p class="payment-note">請於下單後 3 天內完成匯款，並保留匯款收據供查詢</p>
+                </div>
+
+                <!-- 訂單摘要（移至匯款資訊下方） -->
+                <div class="order-summary">
+                    <h3>訂單摘要</h3>
+                    <div id="orderSummary"></div>
+                    <div class="order-total">
+                        總金額：<span id="orderTotal">NT$ 0</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-order-btn">
+                    確認送出訂單
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 成功提示模態框 -->
+    <div class="modal" id="successModal">
+        <div class="modal-content success-message">
+            <div class="success-icon">✓</div>
+            <h2>訂單送出成功！</h2>
+            <p>您的訂單編號：<strong id="orderNumber"></strong></p>
+            <p class="success-hint">我們會盡快與您聯繫確認訂單</p>
+            <button class="continue-btn" onclick="Modal.close('successModal')">繼續購物</button>
+        </div>
+    </div>
+
+    <!-- 遮罩層 -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- 訂單查詢模態框 -->
+    <div class="modal" id="searchOrderModal">
+        <div class="modal-content search-order-form">
+            <button class="modal-close" onclick="closeSearchModal()">✕</button>
+            <h2>訂單查詢</h2>
+
+            <div class="search-input-group">
+                <p>請輸入訂購時的手機號碼查詢訂單狀態</p>
+                <div class="form-group">
+                    <input type="tel" id="searchPhone" placeholder="例如：0912345678"
+                        onkeypress="handleSearchKeyPress(event)">
+                    <button class="submit-order-btn" onclick="handleOrderSearch()" style="margin-top: 10px;">查詢</button>
+                </div>
+            </div>
+
+            <div id="searchResults" class="search-results">
+                <!-- 查詢結果會顯示在這裡 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- 模組化 JavaScript 載入 (新結構) -->
+    <!-- ============================================== -->
+
+    <!-- 1. 核心共用模組 -->
+    <script src="../core/api.js"></script>
+    <script src="../core/storage.js"></script>
+    <script src="../core/toast.js"></script>
+    <script src="../core/utils.js"></script>
+
+    <!-- 2. 前端購物功能模組 -->
+    <script src="modules/products.js"></script>
+    <script src="modules/cart.js"></script>
+    <script src="modules/modal.js"></script>
+    <script src="modules/product-detail.js"></script>
+    <script src="modules/checkout.js"></script>
+    <script src="modules/kol-store.js"></script>
+
+    <!-- 3. 頁面渲染器 -->
+    <script src="../page-renderer/page-renderer.js"></script>
+
+    <!-- 4. 主入口 -->
+    <script src="app.js"></script>
+</body>
+
+</html>

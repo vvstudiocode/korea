@@ -6,7 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Omo Select_韓國代購 | Korean Shopping</title>
     <meta name="description" content="提供最新韓國熱門商品代購服務，美妝保養、零食食品、生活用品應有盡有">
-    <link rel="stylesheet" href="styles.css?v=1.1">
+
+    <!-- 樣式表 -->
+    <link rel="stylesheet" href="src/store/styles/styles.css">
+    <link rel="stylesheet" href="src/page-renderer/page-renderer.css">
+
     <style>
         /* Critical Loading Styles */
         #loadingOverlay {
@@ -37,7 +41,7 @@
             font-weight: 600;
         }
     </style>
-    <link rel="stylesheet" href="page-renderer.css?v=1.0">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -55,12 +59,12 @@
         </video>
         <div class="loading-text">OMO Select</div>
     </div>
+
     <!-- 導航列 -->
     <nav class="navbar">
         <div class="nav-container">
             <div class="logo">
-                <img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/logo.png" alt="OMO Select Logo"
-                    class="logo-img">
+                <img src="../../assets/images/logo.png" alt="OMO Select Logo" class="logo-img">
                 <span class="logo-text">韓國代購</span>
             </div>
             <div class="nav-actions">
@@ -110,14 +114,14 @@
             <div class="social-icons">
                 <a href="https://line.me/ti/g2/yBmGmioZOe8gNpajkjO4e5xSCOwGuW7BfrQCAA?utm_source=invitation&utm_medium=link_copy&utm_campaign=default"
                     target="_blank" rel="noopener noreferrer">
-                    <img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/line.png" alt="Line">
+                    <img src="../../assets/images/icons/line.png" alt="Line">
                 </a>
                 <a href="https://www.instagram.com/omo_select_/" target="_blank" rel="noopener noreferrer">
-                    <img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/instagram.png" alt="Instagram">
+                    <img src="../../assets/images/icons/instagram.png" alt="Instagram">
                 </a>
                 <a href="https://www.threads.com/@omo_select_?xmt=AQF0vSwwMKGPocnR1oZVtRQg_fdOhHp8hJV-haKVALt3HiA"
                     target="_blank" rel="noopener noreferrer">
-                    <img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/threads.png" alt="Threads">
+                    <img src="../../assets/images/icons/threads.png" alt="Threads">
                 </a>
             </div>
             2025 OMO Select. All rights reserved.
@@ -145,12 +149,12 @@
                 <div class="shipping-options">
                     <label class="shipping-option">
                         <input type="radio" name="shippingMethod" value="pickup"
-                            onchange="updateShippingMethod('pickup')">
+                            onchange="Checkout.setShippingMethod('pickup')">
                         <span>限台中市面交 <strong>免運</strong></span>
                     </label>
                     <label class="shipping-option">
                         <input type="radio" name="shippingMethod" value="711" checked
-                            onchange="updateShippingMethod('711')">
+                            onchange="Checkout.setShippingMethod('711')">
                         <span>7-11 店到店 <strong>NT$ 60</strong></span>
                     </label>
                 </div>
@@ -167,7 +171,7 @@
     <!-- 商品詳情模態框 -->
     <div class="modal" id="productModal">
         <div class="modal-content product-detail">
-            <button class="modal-close" onclick="closeProductModal()">✕</button>
+            <button class="modal-close" onclick="ProductDetail.close()">✕</button>
             <div class="product-detail-grid">
                 <div class="product-detail-image">
                     <img id="modalProductImage" src="" alt="">
@@ -182,12 +186,12 @@
                     <div class="quantity-selector">
                         <label>數量：</label>
                         <div class="qty-group">
-                            <button class="qty-btn" onclick="decreaseQuantity()">-</button>
+                            <button class="qty-btn" onclick="ProductDetail.decreaseQuantity()">-</button>
                             <input type="number" id="modalQuantity" value="1" min="1" readonly>
-                            <button class="qty-btn" onclick="increaseQuantity()">+</button>
+                            <button class="qty-btn" onclick="ProductDetail.increaseQuantity()">+</button>
                         </div>
                     </div>
-                    <button class="add-to-cart-btn" onclick="addToCartFromModal()">
+                    <button class="add-to-cart-btn" onclick="ProductDetail.addToCart()">
                         加入購物車
                     </button>
 
@@ -204,28 +208,26 @@
     <!-- 結帳模態框 -->
     <div class="modal" id="checkoutModal">
         <div class="modal-content checkout-form">
-            <button class="modal-close" onclick="closeCheckoutModal()">✕</button>
+            <button class="modal-close" onclick="Modal.close('checkoutModal')">✕</button>
             <h2>填寫收件資訊</h2>
 
             <form id="orderForm">
-
-
                 <div class="form-group">
                     <label for="customerName">姓名 *</label>
-                    <input type="text" id="customerName" required placeholder="請輸入您的姓名">
+                    <input type="text" id="customerName" name="name" required placeholder="請輸入您的姓名">
                 </div>
 
                 <div class="form-group">
                     <label for="customerPhone">手機號碼 *</label>
-                    <input type="tel" id="customerPhone" required placeholder="0912345678">
+                    <input type="tel" id="customerPhone" name="phone" required placeholder="0912345678">
                 </div>
                 <div class="form-group">
                     <label for="customerLineId">Line ID *</label>
-                    <input type="text" id="customerLineId" required placeholder="請輸入 Line ID 以便聯繫">
+                    <input type="text" id="customerLineId" name="lineId" required placeholder="請輸入 Line ID 以便聯繫">
                 </div>
                 <div class="form-group">
                     <label for="customerEmail">電子信箱 *</label>
-                    <input type="email" id="customerEmail" required placeholder="example@email.com">
+                    <input type="email" id="customerEmail" name="email" required placeholder="example@email.com">
                 </div>
 
                 <!-- 711 店到店欄位區塊 -->
@@ -238,23 +240,23 @@
 
                     <div class="form-group">
                         <label for="storeName">7-11 門市名稱 *</label>
-                        <input type="text" id="storeName" required placeholder="例如：信義門市">
+                        <input type="text" id="storeName" name="storeName" required placeholder="例如：信義門市">
                     </div>
 
                     <div class="form-group">
                         <label for="storeCode">門市店號 *</label>
-                        <input type="text" id="storeCode" required placeholder="例如：123456">
+                        <input type="text" id="storeCode" name="storeCode" required placeholder="例如：123456">
                     </div>
 
                     <div class="form-group">
                         <label for="storeAddress">門市地址 *</label>
-                        <input type="text" id="storeAddress" required placeholder="例如：台北市信義區XX路XX號">
+                        <input type="text" id="storeAddress" name="storeAddress" required placeholder="例如：台北市信義區XX路XX號">
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label for="customerNote">備注（選填）</label>
-                    <textarea id="customerNote" rows="3" placeholder="請在此填寫匯款後五碼。
+                    <textarea id="customerNote" name="note" rows="3" placeholder="請在此填寫匯款後五碼。
 如有下訂客製化鑰匙圈，請附上英文"></textarea>
                     <p class="form-hint"
                         style="color: red; font-size: 40px; font-weight: bold; margin-top: 15px; line-height: 1.2;">
@@ -309,7 +311,7 @@
             <h2>訂單送出成功！</h2>
             <p>您的訂單編號：<strong id="orderNumber"></strong></p>
             <p class="success-hint">我們會盡快與您聯繫確認訂單</p>
-            <button class="continue-btn" onclick="closeSuccessModal()">繼續購物</button>
+            <button class="continue-btn" onclick="Modal.close('successModal')">繼續購物</button>
         </div>
     </div>
 
@@ -327,7 +329,7 @@
                 <div class="form-group">
                     <input type="tel" id="searchPhone" placeholder="例如：0912345678"
                         onkeypress="handleSearchKeyPress(event)">
-                    <button class="submit-order-btn" onclick="handleSearchOrder()" style="margin-top: 10px;">查詢</button>
+                    <button class="submit-order-btn" onclick="handleOrderSearch()" style="margin-top: 10px;">查詢</button>
                 </div>
             </div>
 
@@ -337,8 +339,29 @@
         </div>
     </div>
 
-    <script src="page-renderer.js?v=1.1"></script>
-    <script src="app.js?v=1.1"></script>
+    <!-- ============================================== -->
+    <!-- 模組化 JavaScript 載入 (新結構) -->
+    <!-- ============================================== -->
+
+    <!-- 1. 核心共用模組 -->
+    <script src="src/core/api.js"></script>
+    <script src="src/core/storage.js"></script>
+    <script src="src/core/toast.js"></script>
+    <script src="src/core/utils.js"></script>
+
+    <!-- 2. 前端購物功能模組 -->
+    <script src="src/store/modules/products.js"></script>
+    <script src="src/store/modules/cart.js"></script>
+    <script src="src/store/modules/modal.js"></script>
+    <script src="src/store/modules/product-detail.js"></script>
+    <script src="src/store/modules/checkout.js"></script>
+    <script src="src/store/modules/kol-store.js"></script>
+
+    <!-- 3. 頁面渲染器 -->
+    <script src="src/page-renderer/page-renderer.js"></script>
+
+    <!-- 4. 主入口 -->
+    <script src="src/store/app.js"></script>
 </body>
 
 </html>

@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- SEO Meta Tags - 由後台生成時替換 -->
+    <title>{{PRODUCT_NAME}} | OMO Select 韓國代購</title>
+    <meta name="description" content="{{PRODUCT_DESCRIPTION}}">
+    <meta name="keywords" content="{{PRODUCT_KEYWORDS}}">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="product">
+    <meta property="og:url" content="{{PRODUCT_URL}}">
+    <meta property="og:title" content="{{PRODUCT_NAME}} | OMO Select">
+    <meta property="og:description" content="{{PRODUCT_DESCRIPTION}}">
+    <meta property="og:image" content="{{PRODUCT_IMAGE}}">
+    <meta property="product:price:amount" content="{{PRODUCT_PRICE}}">
+    <meta property="product:price:currency" content="TWD">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="{{PRODUCT_NAME}}">
+    <meta property="twitter:description" content="{{PRODUCT_DESCRIPTION}}">
+    <meta property="twitter:image" content="{{PRODUCT_IMAGE}}">
+
+    <!-- 樣式表 -->
+    <link rel="stylesheet" href="/src/store/styles/styles.css">
+
+    <style>
+        :root {
+            --primary-color: #D68C94;
+            --accent-color: #D68C94;
+        }
+
+        .product-page {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .product-page-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .product-page-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .product-gallery {
+            position: relative;
+        }
+
+        .product-gallery img {
+            width: 100%;
+            border-radius: 12px;
+            object-fit: cover;
+        }
+
+        .product-thumbnails {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            overflow-x: auto;
+        }
+
+        .product-thumbnails img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border-color 0.2s;
+        }
+
+        .product-thumbnails img.active,
+        .product-thumbnails img:hover {
+            border-color: var(--primary-color);
+        }
+
+        .product-info h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .product-price {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            font-weight: 600;
+            margin: 15px 0;
+        }
+
+        .product-description {
+            color: #666;
+            line-height: 1.6;
+            margin: 20px 0;
+        }
+
+        .product-variants {
+            margin: 20px 0;
+        }
+
+        .variant-label {
+            font-weight: 500;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .variant-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .variant-btn {
+            padding: 10px 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #fff;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .variant-btn:hover,
+        .variant-btn.selected {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .variant-btn.selected {
+            background: rgba(214, 140, 148, 0.1);
+        }
+
+        .variant-btn.out-of-stock {
+            opacity: 0.5;
+            text-decoration: line-through;
+            cursor: not-allowed;
+        }
+
+        .quantity-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .qty-controls {
+            display: flex;
+            align-items: center;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .qty-controls button {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: #f5f5f5;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .qty-controls input {
+            width: 60px;
+            height: 40px;
+            border: none;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        .add-to-cart-large {
+            width: 100%;
+            padding: 15px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .add-to-cart-large:hover {
+            opacity: 0.9;
+        }
+
+        .add-to-cart-large:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .stock-info {
+            color: #888;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+
+        .breadcrumb {
+            padding: 15px 0;
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .breadcrumb a {
+            color: #666;
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            color: var(--primary-color);
+        }
+    </style>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body data-product-id="{{PRODUCT_ID}}">
+    <!-- 導航列 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <a href="/">
+                    <img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/logo.png" alt="OMO Select"
+                        class="logo-img">
+                    <span class="logo-text">韓國代購</span>
+                </a>
+            </div>
+            <div class="nav-actions">
+                <button class="cart-btn" id="cartBtn">
+                    🛒 購物車
+                    <span class="cart-badge" id="cartBadge">0</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 商品頁面內容 -->
+    <div class="product-page">
+        <!-- 麵包屑導航 -->
+        <div class="breadcrumb">
+            <a href="/">首頁</a> /
+            <a href="/?category={{PRODUCT_CATEGORY}}">{{PRODUCT_CATEGORY}}</a> /
+            <span>{{PRODUCT_NAME}}</span>
+        </div>
+
+        <div class="product-page-grid">
+            <!-- 商品圖片區 -->
+            <div class="product-gallery">
+                <img id="mainImage" src="{{PRODUCT_IMAGE}}" alt="{{PRODUCT_NAME}}">
+                <div class="product-thumbnails" id="thumbnails">
+                    {{PRODUCT_THUMBNAILS}}
+                </div>
+            </div>
+
+            <!-- 商品資訊區 -->
+            <div class="product-info">
+                <h1>{{PRODUCT_NAME}}</h1>
+                <div class="product-price" id="productPrice">NT$ {{PRODUCT_PRICE}}</div>
+
+                <!-- 規格選擇區 -->
+                <div class="product-variants" id="variantsContainer">
+                    {{PRODUCT_VARIANTS}}
+                </div>
+
+                <!-- 數量選擇 -->
+                <div class="quantity-row">
+                    <span>數量：</span>
+                    <div class="qty-controls">
+                        <button onclick="decreaseQty()">-</button>
+                        <input type="number" id="quantity" value="1" min="1" readonly>
+                        <button onclick="increaseQty()">+</button>
+                    </div>
+                </div>
+
+                <!-- 加入購物車按鈕 -->
+                <button class="add-to-cart-large" id="addToCartBtn" onclick="addProductToCart()">
+                    加入購物車
+                </button>
+
+                <div class="stock-info" id="stockInfo">
+                    庫存：<span id="stockCount">{{PRODUCT_STOCK}}</span> 件
+                </div>
+
+                <!-- 商品描述 -->
+                <div class="product-description">
+                    {{PRODUCT_DESCRIPTION}}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 購物車側邊欄 (與主站共用) -->
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h3>購物車</h3>
+            <button class="close-cart" id="closeCart">✕</button>
+        </div>
+        <div class="cart-items" id="cartItems"></div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>總計：</span>
+                <span class="total-amount" id="totalAmount">NT$ 0</span>
+            </div>
+            <button class="checkout-btn" onclick="window.location.href='/'">前往結帳</button>
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+
+    <!-- JavaScript -->
+    <script src="/src/core/api.js"></script>
+    <script src="/src/core/storage.js"></script>
+    <script src="/src/core/toast.js"></script>
+    <script src="/src/core/utils.js"></script>
+    <script src="/src/store/modules/cart.js"></script>
+    <script src="/src/store/modules/modal.js"></script>
+
+    <script>
+        // 商品資料 - 由後台生成時嵌入
+        window.PRODUCT_DATA = {{ PRODUCT_JSON }};
+
+        let selectedVariant = null;
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            Cart.init();
+            initVariants();
+            initThumbnails();
+
+            document.getElementById('cartBtn').addEventListener('click', () => Cart.toggle());
+            document.getElementById('closeCart').addEventListener('click', () => Cart.toggle());
+        });
+
+        function initVariants() {
+            const product = window.PRODUCT_DATA;
+            if (!product.variants || product.variants.length === 0) return;
+
+            // 初始選擇第一個有庫存的規格
+            selectedVariant = product.variants.find(v => v.stock > 0) || product.variants[0];
+            updateVariantUI();
+        }
+
+        function selectVariant(specName) {
+            const product = window.PRODUCT_DATA;
+            selectedVariant = product.variants.find(v => v.spec === specName);
+            updateVariantUI();
+        }
+
+        function updateVariantUI() {
+            if (!selectedVariant) return;
+
+            document.getElementById('productPrice').textContent = 'NT$ ' + selectedVariant.price.toLocaleString();
+            document.getElementById('stockCount').textContent = selectedVariant.stock;
+
+            const btn = document.getElementById('addToCartBtn');
+            if (selectedVariant.stock <= 0) {
+                btn.disabled = true;
+                btn.textContent = '已售完';
+            } else {
+                btn.disabled = false;
+                btn.textContent = '加入購物車';
+            }
+
+            // 更新選中狀態
+            document.querySelectorAll('.variant-btn').forEach(btn => {
+                btn.classList.toggle('selected', btn.dataset.spec === selectedVariant.spec);
+            });
+        }
+
+        function initThumbnails() {
+            document.querySelectorAll('.product-thumbnails img').forEach(img => {
+                img.addEventListener('click', () => {
+                    document.getElementById('mainImage').src = img.src;
+                    document.querySelectorAll('.product-thumbnails img').forEach(i => i.classList.remove('active'));
+                    img.classList.add('active');
+                });
+            });
+        }
+
+        function increaseQty() {
+            const input = document.getElementById('quantity');
+            input.value = parseInt(input.value) + 1;
+        }
+
+        function decreaseQty() {
+            const input = document.getElementById('quantity');
+            if (parseInt(input.value) > 1) {
+                input.value = parseInt(input.value) - 1;
+            }
+        }
+
+        function addProductToCart() {
+            const product = window.PRODUCT_DATA;
+            const qty = parseInt(document.getElementById('quantity').value);
+
+            Cart.add(product, qty, selectedVariant ? { spec: selectedVariant.spec } : {});
+            Toast.success('已加入購物車');
+        }
+    </script>
+</body>
+
+</html>
