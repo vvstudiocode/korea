@@ -936,20 +936,13 @@ const PageRenderer = {
         card.style.cssText = 'display:block; width:100%; text-align:center; cursor:pointer; background:transparent; position:relative; z-index:10;';
         card.setAttribute('data-id', p.id);
 
-        // 綁定點擊事件 (使用 addEventListener 以免被覆蓋)
+        // 綁定點擊事件 - 導航到商品頁面
         const clickHandler = (e) => {
-            // 阻止冒泡防止多重觸發，但允許內部按鈕運作
-            // if (e.target.closest('button')) return; // 如果有點擊到按鈕，通常按鈕自己有 stopPropagation
+            // 如果點擊的是按鈕，不觸發導航（讓按鈕自己處理）
+            if (e.target.closest('button')) return;
 
-            console.log('🖱️ Card Clicked:', p.id, p.name);
-            if (typeof window.showProductDetail === 'function') {
-                window.showProductDetail(p.id);
-            } else if (typeof showProductDetail === 'function') {
-                showProductDetail(p.id);
-            } else {
-                console.error('❌ showProductDetail function missing!');
-                alert('無法開啟商品詳情，請重新整理頁面試試');
-            }
+            console.log('🖱️ Card Clicked - Navigating to:', p.id);
+            window.location.href = '/p/' + p.id + '/';
         };
 
         card.addEventListener('click', clickHandler);
