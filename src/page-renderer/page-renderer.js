@@ -749,9 +749,16 @@ const PageRenderer = {
             } else {
                 // Official Mode
                 console.log('🏢 總部模式');
-                if (typeof products !== 'undefined' && products.length > 0) {
+                // 優先讀取 Products.items (新版模組化架構)
+                if (typeof Products !== 'undefined' && Products.items && Products.items.length > 0) {
+                    allProducts = Products.items;
+                    productSource = 'Products.items (Module)';
+                } else if (typeof products !== 'undefined' && products.length > 0) {
                     allProducts = products;
                     productSource = 'products';
+                } else if (typeof window.products !== 'undefined' && window.products.length > 0) {
+                    allProducts = window.products;
+                    productSource = 'window.products';
                 } else if (typeof availableProducts !== 'undefined' && availableProducts.length > 0) {
                     // 後台預覽模式可能用到
                     allProducts = availableProducts;
