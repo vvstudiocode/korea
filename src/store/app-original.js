@@ -53,9 +53,63 @@ async function initializeApp() {
     loadCartFromLocalStorage();
     updateCartUI();
 
-    // 2. 初始化頁面渲染器 (它內部會處理快取與遠端更新)
+    // 3. 處理 URL 參數 (LINE Bot 快速下單連結)
+    handleUrlParameters();
+
+    // 4. 初始化頁面渲染器 (它內部會處理快取與遠端更新)
     if (typeof PageRenderer !== 'undefined') {
         PageRenderer.init(currentStoreId);
+    }
+}
+
+/**
+ * 處理 URL 參數（支援 LINE Bot 快速下單連結）
+ */
+function handleUrlParameters() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('product');
+    const qty = parseInt(urlParams.get('qty')) || 1;
+
+    if (productId) {
+        console.log(`📱 LINE 快速下單: 商品 ${productId}, 數量 ${qty}`);
+
+        // 等待商品載入完成再處理
+        setTimeout(() => {
+            // 從所有可能的商品來源尋找
+            let targetProducts = products;
+            if (window.kolProducts && window.kolProducts.length > 0) {
+                targetProducts = window.kolProducts;
+            }
+
+            const product = targetProducts.find(p => String(p.id) === productId);
+
+            if (product) {
+                // 檢查是否需要選擇規格
+                const hasOptions = product.options && Object.keys(product.options).length > 0;
+
+                if (hasOptions) {
+                    // 有規格的商品，打開詳情讓用戶選擇
+                    showProductDetail(productId);
+                    showNotification(`請選擇規格後加入購物車`);
+                } else {
+                    // 無規格商品，直接加入購物車
+                    addToCart(product, qty, {});
+                    showNotification(`已加入 ${qty} 件「${product.name}」`);
+
+                    // 如果 URL 有 #checkout，自動打開購物車
+                    if (window.location.hash === '#checkout') {
+                        setTimeout(() => toggleCart(), 500);
+                    }
+                }
+            } else {
+                console.warn(`❌ 找不到商品: ${productId}`);
+                showNotification(`找不到商品 ${productId}`);
+            }
+
+            // 清除 URL 參數（避免重新載入時重複加入）
+            const newUrl = window.location.pathname + window.location.hash;
+            window.history.replaceState({}, document.title, newUrl);
+        }, 1000); // 延遲 1 秒確保商品已載入
     }
 }
 
