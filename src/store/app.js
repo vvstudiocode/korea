@@ -41,17 +41,21 @@ const App = {
         // 4. 初始化購物車
         Cart.init();
 
-        // 4.5 處理 URL 購物車參數（從 LINE Bot 傳入）
-        if (typeof UrlCart !== 'undefined') {
-            UrlCart.processUrl();
-        }
-
-        // 5. 設定事件監聽器
+        // 5. 設定事件監聯器
         this.setupEventListeners();
 
         // 6. 初始化頁面渲染器
         if (typeof PageRenderer !== 'undefined') {
-            PageRenderer.init(KolStore.getStoreId());
+            await PageRenderer.init(KolStore.getStoreId());
+        }
+
+        // 7. 處理 URL 購物車參數（從 LINE Bot 傳入）
+        // 重要：必須在 PageRenderer 完成後執行，確保 loading 已隱藏且商品已載入
+        if (typeof UrlCart !== 'undefined') {
+            // 等待 loading overlay 完全隱藏後再處理
+            setTimeout(() => {
+                UrlCart.processUrl();
+            }, 600); // 比 loading 隱藏延遲 (500ms) 多一點
         }
 
         console.log('✅ 應用程式初始化完成');

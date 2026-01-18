@@ -117,10 +117,14 @@ const UrlCart = {
         // 加入購物車
         Cart.add(product, qty, selectedOptions);
 
+        // 顯示成功提示
+        const specText = Object.values(selectedOptions).join('/');
+        Toast.success(`已加入購物車：${product.name}${specText ? ' (' + specText + ')' : ''} x ${qty}`);
+
         // 開啟購物車側邊欄
         setTimeout(() => {
             Cart.toggle();
-        }, 500);
+        }, 300);
 
         // 清除 URL 參數（避免重複加入）
         this.clearUrlParams();
