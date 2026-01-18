@@ -438,20 +438,20 @@
                 spec: selectedSpec || ''
             };
             
-            let cart = JSON.parse(localStorage.getItem('omo_cart') || '[]');
+            let cart = JSON.parse(localStorage.getItem('koreanShoppingCart') || '[]');
             const existingIdx = cart.findIndex(item => item.id === cartItem.id && item.spec === cartItem.spec);
             if (existingIdx >= 0) {
                 cart[existingIdx].quantity += qty;
             } else {
                 cart.push(cartItem);
             }
-            localStorage.setItem('omo_cart', JSON.stringify(cart));
+            localStorage.setItem('koreanShoppingCart', JSON.stringify(cart));
             updateCartCount();
             alert('已加入購物車！');
         }
 
         function updateCartCount() {
-            const cart = JSON.parse(localStorage.getItem('omo_cart') || '[]');
+            const cart = JSON.parse(localStorage.getItem('koreanShoppingCart') || '[]');
             const count = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
             document.getElementById('cartCount').textContent = count;
         }
@@ -463,7 +463,7 @@
         }
 
         function renderCart() {
-            const cart = JSON.parse(localStorage.getItem('omo_cart') || '[]');
+            const cart = JSON.parse(localStorage.getItem('koreanShoppingCart') || '[]');
             const body = document.getElementById('cartBody');
             const totalEl = document.getElementById('cartTotal');
             
@@ -498,19 +498,19 @@
         }
 
         function updateItemQty(idx, delta) {
-            let cart = JSON.parse(localStorage.getItem('omo_cart') || '[]');
+            let cart = JSON.parse(localStorage.getItem('koreanShoppingCart') || '[]');
             if (cart[idx]) {
                 cart[idx].quantity = Math.max(1, (cart[idx].quantity || 1) + delta);
-                localStorage.setItem('omo_cart', JSON.stringify(cart));
+                localStorage.setItem('koreanShoppingCart', JSON.stringify(cart));
                 updateCartCount();
                 renderCart();
             }
         }
 
         function removeItem(idx) {
-            let cart = JSON.parse(localStorage.getItem('omo_cart') || '[]');
+            let cart = JSON.parse(localStorage.getItem('koreanShoppingCart') || '[]');
             cart.splice(idx, 1);
-            localStorage.setItem('omo_cart', JSON.stringify(cart));
+            localStorage.setItem('koreanShoppingCart', JSON.stringify(cart));
             updateCartCount();
             renderCart();
         }

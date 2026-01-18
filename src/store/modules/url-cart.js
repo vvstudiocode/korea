@@ -15,16 +15,17 @@ const UrlCart = {
         const productId = Utils.getUrlParam('product');
         const qty = parseInt(Utils.getUrlParam('qty')) || 1;
         const spec = Utils.getUrlParam('spec');
+        const action = Utils.getUrlParam('action'); // 'add' or 'checkout'
 
         if (!productId) {
             console.log('📌 UrlCart: 無購物車參數');
             return false;
         }
 
-        console.log(`🛒 UrlCart: 處理購物車參數 - 商品: ${productId}, 數量: ${qty}, 規格: ${spec || '無'}`);
+        console.log(`🛒 UrlCart: 處理購物車參數 - 商品: ${productId}, 數量: ${qty}, 規格: ${spec || '無'}, 動作: ${action}`);
 
         // 等待商品資料載入後處理
-        this.waitForProduct(productId, qty, spec);
+        this.waitForProduct(productId, qty, spec, action);
         return true;
     },
 
@@ -33,8 +34,9 @@ const UrlCart = {
      * @param {string} productId - 商品 ID
      * @param {number} qty - 數量
      * @param {string} spec - 規格字串（可選）
+     * @param {string} action - 動作（'add' or 'checkout'）
      */
-    waitForProduct(productId, qty, spec) {
+    waitForProduct(productId, qty, spec, action) {
         const maxRetries = 20;
         let retries = 0;
 
@@ -43,7 +45,7 @@ const UrlCart = {
 
             if (product) {
                 console.log('✅ UrlCart: 找到商品', product.name);
-                this.addToCart(product, qty, spec);
+                this.addToCart(product, qty, spec, action);
                 return;
             }
 
@@ -65,8 +67,9 @@ const UrlCart = {
      * @param {Object} product - 商品物件
      * @param {number} qty - 數量
      * @param {string} spec - 規格字串（可選，格式如 "紅色/L"）
+     * @param {string} action - 動作
      */
-    addToCart(product, qty, spec) {
+    addToCart(product, qty, spec, action) {
         // 檢查是否有規格要求
         const hasOptions = product.options && Object.keys(product.options).length > 0;
 
@@ -121,10 +124,22 @@ const UrlCart = {
         const specText = Object.values(selectedOptions).join('/');
         Toast.success(`已加入購物車：${product.name}${specText ? ' (' + specText + ')' : ''} x ${qty}`);
 
-        // 開啟購物車側邊欄
-        setTimeout(() => {
-            Cart.toggle();
-        }, 300);
+        // 根據動作決定後續行為
+        if (action === 'checkout') {
+            console.log('🚀 UrlCart: 執行直接結帳');
+            setTimeout(() => {
+                if (typeof Checkout !== 'undefined') {
+                    Checkout.show();
+                } else {
+                    window.location.hash = 'checkout';
+                }
+            }, 300);
+        } else {
+            // 預設行為：開啟購物車側邊欄
+            setTimeout(() => {
+                Cart.toggle();
+            }, 300);
+        }
 
         // 清除 URL 參數（避免重複加入）
         this.clearUrlParams();
@@ -138,6 +153,7 @@ const UrlCart = {
         url.searchParams.delete('product');
         url.searchParams.delete('qty');
         url.searchParams.delete('spec');
+        url.searchParams.delete('action');
 
         // 保留 hash
         const hash = window.location.hash;

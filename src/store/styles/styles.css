@@ -1803,3 +1803,66 @@ body.no-scroll {
     transform: translateY(-3px);
     opacity: 0.8;
 }
+
+/* Product Page Override for Mobile */
+@media (max-width: 768px) {
+
+    /* 修正內聯樣式導致的過大問題 */
+    .product-page {
+        padding: 15px 24px !important;
+        /* 增加左右間距 */
+        margin-top: 10px !important;
+        overflow-x: hidden;
+        /* 防止溢出 */
+    }
+
+    /* 強制單欄顯示 */
+    .product-grid {
+        display: block !important;
+        width: 100% !important;
+    }
+
+    /* 縮小標題 */
+    .product-info h1 {
+        font-size: 1.3rem !important;
+        line-height: 1.4 !important;
+        margin-top: 15px !important;
+        margin-bottom: 10px !important;
+    }
+
+    /* 縮小價格 */
+    .product-price-display {
+        font-size: 1.2rem !important;
+        margin: 10px 0 !important;
+    }
+
+    /* 調整圖片容器 */
+    .gallery-main {
+        border-radius: 12px !important;
+        margin-bottom: 15px !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+    }
+
+    /* 數量選擇器 */
+    .qty-row {
+        margin: 15px 0 !important;
+        gap: 15px !important;
+    }
+
+    .qty-controls button {
+        width: 40px !important;
+        height: 40px !important;
+    }
+
+    .qty-controls input {
+        height: 40px !important;
+        width: 50px !important;
+    }
+
+    /* 加入購物車按鈕 */
+    .add-to-cart-btn {
+        padding: 12px !important;
+        font-size: 1rem !important;
+        margin-top: 10px !important;
+    }
+}
