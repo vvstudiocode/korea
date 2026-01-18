@@ -41,6 +41,11 @@ const App = {
         // 4. 初始化購物車
         Cart.init();
 
+        // 4.5 處理 URL 購物車參數（從 LINE Bot 傳入）
+        if (typeof UrlCart !== 'undefined') {
+            UrlCart.processUrl();
+        }
+
         // 5. 設定事件監聽器
         this.setupEventListeners();
 
