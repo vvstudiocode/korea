@@ -385,6 +385,17 @@
                     if (Math.abs(diff) > 50) slideImage(diff > 0 ? 1 : -1);
                 });
             }
+
+            // 監聽跨分頁購物車更新
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'koreanShoppingCart') {
+                    updateCartCount();
+                    // 如果側邊欄開著，也要更新內容
+                    if (document.getElementById('cartSidebar').classList.contains('open')) {
+                        renderCart();
+                    }
+                }
+            });
         });
 
         function slideImage(dir) {
@@ -427,29 +438,46 @@
 
         function addToCart() {
             const qty = parseInt(document.getElementById('quantity').value);
+            
+            // 建立選中規格物件 (與首頁格式相容: selectedOptions)
+            // 商品頁面通常只支援一個組合規格字串 (selectedSpec)
+            const selectedOptions = selectedSpec ? { "規格": selectedSpec } : {};
+            
+            // 產生唯一 ID: ID-{"規格":"Val"}
+            // 直接模擬簡單的 JSON 字串化 (因為 key 只有一個，順序沒差)
+            const optionsString = selectedSpec ? JSON.stringify({"規格": selectedSpec}) : '{}';
+            const cartItemId = PRODUCT.id + (selectedSpec ? '-' + optionsString : '');
+
             const cartItem = {
+                cartItemId: cartItemId,
                 id: PRODUCT.id,
                 name: PRODUCT.name,
+                spec: selectedSpec || '', 
                 price: currentPrice,
-                image: PRODUCT.image,
+                image: PRODUCT.image, // Main image URL
                 quantity: qty,
-                spec: selectedSpec || ''
+                selectedOptions: selectedOptions
             };
             
-            let cart = JSON.parse(localStorage.getItem('omo_cart') || '[]');
-            const existingIdx = cart.findIndex(item => item.id === cartItem.id && item.spec === cartItem.spec);
-            if (existingIdx >= 0) {
-                cart[existingIdx].quantity += qty;
+            let cart = JSON.parse(localStorage.getItem('koreanShoppingCart') || '[]');
+            
+            // 檢查重複 (優先使用 cartItemId 判斷)
+            const existingItem = cart.find(item => item.cartItemId === cartItemId);
+            
+            if (existingItem) {
+                existingItem.quantity += qty;
+                existingItem.price = currentPrice; // 更新價格
             } else {
                 cart.push(cartItem);
             }
-            localStorage.setItem('omo_cart', JSON.stringify(cart));
+            
+            localStorage.setItem('koreanShoppingCart', JSON.stringify(cart));
             updateCartCount();
             alert('已加入購物車！');
         }
 
         function updateCartCount() {
-            const cart = JSON.parse(localStorage.getItem('omo_cart') || '[]');
+            const cart = JSON.parse(localStorage.getItem('koreanShoppingCart') || '[]');
             const count = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
             document.getElementById('cartCount').textContent = count;
         }
@@ -461,7 +489,7 @@
         }
 
         function renderCart() {
-            const cart = JSON.parse(localStorage.getItem('omo_cart') || '[]');
+            const cart = JSON.parse(localStorage.getItem('koreanShoppingCart') || '[]');
             const body = document.getElementById('cartBody');
             const totalEl = document.getElementById('cartTotal');
             
@@ -475,12 +503,25 @@
             body.innerHTML = cart.map((item, idx) => {
                 const subtotal = (item.price || 0) * (item.quantity || 1);
                 total += subtotal;
+                
+                // 產生規格顯示 HTML
+                let optionsHtml = '';
+                if (item.selectedOptions && Object.keys(item.selectedOptions).length > 0) {
+                     optionsHtml = '<div class="cart-item-spec">' + 
+                        Object.entries(item.selectedOptions)
+                            .map(([key, value]) => `<span>${key}: ${value}</span>`)
+                            .join(' ') + 
+                        '</div>';
+                } else if (item.spec) {
+                     optionsHtml = `<div class="cart-item-spec">${item.spec}</div>`;
+                }
+
                 return `
                     <div class="cart-item">
                         <img src="${item.image}" alt="${item.name}">
                         <div class="cart-item-info">
                             <div class="cart-item-name">${item.name}</div>
-                            ${item.spec ? `<div class="cart-item-spec">${item.spec}</div>` : ''}
+                            ${optionsHtml}
                             <div class="cart-item-price">NT$ ${item.price.toLocaleString()}</div>
                             <div class="cart-item-qty">
                                 <button onclick="updateItemQty(${idx}, -1)">-</button>
@@ -496,19 +537,19 @@
         }
 
         function updateItemQty(idx, delta) {
-            let cart = JSON.parse(localStorage.getItem('omo_cart') || '[]');
+            let cart = JSON.parse(localStorage.getItem('koreanShoppingCart') || '[]');
             if (cart[idx]) {
                 cart[idx].quantity = Math.max(1, (cart[idx].quantity || 1) + delta);
-                localStorage.setItem('omo_cart', JSON.stringify(cart));
+                localStorage.setItem('koreanShoppingCart', JSON.stringify(cart));
                 updateCartCount();
                 renderCart();
             }
         }
 
         function removeItem(idx) {
-            let cart = JSON.parse(localStorage.getItem('omo_cart') || '[]');
+            let cart = JSON.parse(localStorage.getItem('koreanShoppingCart') || '[]');
             cart.splice(idx, 1);
-            localStorage.setItem('omo_cart', JSON.stringify(cart));
+            localStorage.setItem('koreanShoppingCart', JSON.stringify(cart));
             updateCartCount();
             renderCart();
         }
