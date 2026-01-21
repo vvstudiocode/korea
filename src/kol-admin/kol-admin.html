@@ -668,6 +668,120 @@
         </div>
     </div>
 
+    <!-- 編輯專屬商品 Modal (完整編輯) -->
+    <div id="editOwnProductModal" class="modal">
+        <div class="modal-content large-modal">
+            <div class="modal-header">
+                <h3>編輯專屬商品</h3>
+                <button class="close-btn" onclick="closeModal('editOwnProductModal')">✕</button>
+            </div>
+
+            <form id="editOwnProductForm" onsubmit="submitEditOwnProduct(event)">
+                <div class="modal-body">
+                    <input type="hidden" id="editOwnProdId">
+
+                    <div class="form-row">
+                        <div class="form-group" style="width:100%;">
+                            <label>商品名稱 *</label>
+                            <input type="text" id="editOwnProdName" required style="width:100%;">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label>品牌</label>
+                            <input type="text" id="editOwnProdBrand" placeholder="例如: Nike">
+                        </div>
+                        <div class="form-group half">
+                            <label>分類</label>
+                            <input type="text" id="editOwnProdCategory" list="categoryList">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group quarter">
+                            <label>售價 (台幣) *</label>
+                            <input type="number" id="editOwnProdPrice" required>
+                        </div>
+                        <div class="form-group quarter">
+                            <label>成本 (自我管理用)</label>
+                            <input type="number" id="editOwnProdCost">
+                        </div>
+                        <div class="form-group quarter">
+                            <label>庫存 *</label>
+                            <input type="number" id="editOwnProdStock" required>
+                        </div>
+                        <div class="form-group quarter">
+                            <label>狀態</label>
+                            <select id="editOwnProdStatus">
+                                <option value="active">上架</option>
+                                <option value="inactive">下架</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>商品描述</label>
+                        <textarea id="editOwnProdDesc" rows="3"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>商品圖片</label>
+                        <div class="image-upload-area">
+                            <div class="upload-zone"
+                                onclick="document.getElementById('editOwnProductImageInput').click()">
+                                <div class="upload-icon">📷</div>
+                                <p>點擊上傳圖片</p>
+                                <small>支援 JPG, PNG, WEBP</small>
+                            </div>
+                            <input type="file" id="editOwnProductImageInput" accept="image/*" multiple
+                                style="display:none" onchange="handleEditOwnImageSelect(event)">
+                            <div class="image-preview-container" id="editOwnProductImagePreview"></div>
+                            <input type="hidden" id="editOwnProdImages">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>規格設定</label>
+                        <div id="editOwnSpecContainer" class="spec-builder-container">
+                            <!-- 動態產生規格 -->
+                        </div>
+                        <button type="button" class="btn-small" onclick="addEditOwnSpecGroup()"
+                            style="margin-top: 5px;">
+                            + 新增規格類別
+                        </button>
+                    </div>
+
+                    <!-- 規格明細表格 -->
+                    <div class="form-group" id="editOwnVariantsSection" style="display: none;">
+                        <label>規格明細</label>
+                        <div class="variants-table-container">
+                            <table class="variants-table">
+                                <thead>
+                                    <tr>
+                                        <th>款式</th>
+                                        <th width="100">價格</th>
+                                        <th width="100">庫存</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="editOwnVariantsTableBody">
+                                    <!-- 動態產生 -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary"
+                        style="color:var(--danger-color); border-color:var(--danger-color);"
+                        onclick="deleteOwnProduct()">刪除商品</button>
+                    <button type="button" onclick="closeModal('editOwnProductModal')">取消</button>
+                    <button type="submit" class="accent-btn">儲存變更</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- KOL 新增/編輯訂單 Modal (複製自 Admin) -->
     <div id="kolOrderModal" class="modal kol-order-modal">
         <div class="modal-content large-modal">

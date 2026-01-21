@@ -871,11 +871,18 @@ async function confirmAddProduct() {
     }
 }
 
-// 編輯我的商品
+// 編輯我的商品 (分流處理)
 function openEditMyProduct(productId) {
     const product = kolProducts.find(p => p.id === productId);
     if (!product) return;
 
+    // 判斷商品類型：專屬商品開啟完整編輯，HQ 選品維持簡易編輯
+    if (product.type === 'own') {
+        openEditOwnProduct(product);
+        return;
+    }
+
+    // HQ 選品：維持現有簡易編輯
     document.getElementById('editProductId').value = product.id;
 
     // 顯示商品資訊
@@ -891,24 +898,17 @@ function openEditMyProduct(productId) {
     `;
 
     document.getElementById('editProductStatus').value = product.status;
+    document.getElementById('editProductPrice').value = product.customPrice || '';
 
-    const isOwn = product.type === 'own';
     const stockInput = document.getElementById('editProductStock');
     const stockHint = document.getElementById('editStockHint');
 
-    if (isOwn) {
-        stockInput.placeholder = "設定庫存數量";
-        stockHint.style.display = 'none';
-        stockInput.value = product.assignedStock || 0;
-        stockInput.disabled = false;
-    } else {
-        // Selected Product (HQ Managed)
-        stockInput.placeholder = "庫存由總部管理";
-        stockHint.style.display = 'block';
-        stockHint.textContent = "此商品庫存與總部同步，無法手動修改";
-        stockInput.value = product.availableStock; // This now comes from HQ stock via backend
-        stockInput.disabled = true; // Make Read-only
-    }
+    // Selected Product (HQ Managed)
+    stockInput.placeholder = "庫存由總部管理";
+    stockHint.style.display = 'block';
+    stockHint.textContent = "此商品庫存與總部同步，無法手動修改";
+    stockInput.value = product.availableStock;
+    stockInput.disabled = true;
 
     // 設置按鈕區
     const actionsDiv = document.querySelector('#editProductModal .modal-actions');
@@ -921,6 +921,7 @@ function openEditMyProduct(productId) {
 
     openModal('editProductModal');
 }
+
 
 async function removeMyProduct(productId) {
     if (!confirm('確定要刪除此商品嗎？此動作無法復原。')) return;
@@ -1312,9 +1313,15 @@ async function submitOwnProduct(event) {
             showToast('專屬商品建立成功！', 'success');
             closeModal('createOwnProductModal');
             loadMyProducts();
+
+            // 生成商品頁面
+            if (result.data && result.data.productId) {
+                generateProductPageAsync(result.data.productId);
+            }
         } else {
             showToast('建立失敗: ' + result.error, 'error');
         }
+
 
     } catch (err) {
         showToast('發生錯誤', 'error');
@@ -1325,8 +1332,370 @@ async function submitOwnProduct(event) {
 }
 
 // ============================================================
+// 編輯專屬商品功能 (完整編輯)
+// ============================================================
+
+let editOwnProductFiles = []; // 編輯時選擇的新圖片檔案
+let editOwnExistingImages = []; // 編輯時保留的現有圖片 URL
+let editOwnSpecGroups = []; // 編輯時的規格組
+let currentEditProduct = null; // 當前編輯的商品
+
+/**
+ * 開啟編輯專屬商品 Modal
+ */
+function openEditOwnProduct(product) {
+    currentEditProduct = product;
+    editOwnProductFiles = [];
+    editOwnExistingImages = product.images || [];
+
+    // 填充表單
+    document.getElementById('editOwnProdId').value = product.id;
+    document.getElementById('editOwnProdName').value = product.name || '';
+    document.getElementById('editOwnProdBrand').value = product.brand || '';
+    document.getElementById('editOwnProdCategory').value = product.category || '';
+    document.getElementById('editOwnProdPrice').value = product.customPrice || product.price || '';
+    document.getElementById('editOwnProdCost').value = product.wholesalePrice || '';
+    document.getElementById('editOwnProdStock').value = product.availableStock || product.stock || 0;
+    document.getElementById('editOwnProdStatus').value = product.status || 'active';
+    document.getElementById('editOwnProdDesc').value = product.description || '';
+
+    // 渲染現有圖片
+    renderEditOwnImagePreview();
+
+    // 載入規格
+    editOwnSpecGroups = [];
+    if (product.variants && product.variants.length > 0) {
+        // 從 variants 反推規格組
+        // 簡化處理：直接顯示 variants
+    }
+    renderEditOwnSpecBuilder();
+    renderEditOwnVariants();
+
+    openModal('editOwnProductModal');
+}
+
+/**
+ * 處理編輯時選擇新圖片
+ */
+function handleEditOwnImageSelect(event) {
+    const files = Array.from(event.target.files);
+    if (files.length === 0) return;
+    editOwnProductFiles = [...editOwnProductFiles, ...files];
+    renderEditOwnImagePreview();
+}
+
+/**
+ * 渲染編輯時的圖片預覽
+ */
+function renderEditOwnImagePreview() {
+    const container = document.getElementById('editOwnProductImagePreview');
+
+    // 現有圖片
+    const existingHtml = editOwnExistingImages.map((url, index) => `
+        <div class="preview-item">
+            <img src="${url}" title="現有圖片">
+            <button type="button" class="remove-btn" onclick="removeEditOwnExistingImage(${index})">×</button>
+        </div>
+    `).join('');
+
+    // 新上傳圖片
+    const newHtml = editOwnProductFiles.map((file, index) => `
+        <div class="preview-item">
+            <img src="${URL.createObjectURL(file)}" title="${file.name}">
+            <button type="button" class="remove-btn" onclick="removeEditOwnNewImage(${index})">×</button>
+        </div>
+    `).join('');
+
+    container.innerHTML = existingHtml + newHtml;
+}
+
+function removeEditOwnExistingImage(index) {
+    editOwnExistingImages.splice(index, 1);
+    renderEditOwnImagePreview();
+}
+
+function removeEditOwnNewImage(index) {
+    editOwnProductFiles.splice(index, 1);
+    renderEditOwnImagePreview();
+}
+
+/**
+ * 規格管理 (編輯用)
+ */
+function addEditOwnSpecGroup() {
+    if (editOwnSpecGroups.length >= 2) {
+        showToast('最多支援兩層規格', 'warning');
+        return;
+    }
+    editOwnSpecGroups.push({ name: '', options: [] });
+    renderEditOwnSpecBuilder();
+}
+
+function removeEditOwnSpecGroup(index) {
+    editOwnSpecGroups.splice(index, 1);
+    renderEditOwnSpecBuilder();
+    generateEditOwnVariants();
+}
+
+function updateEditOwnSpecName(index, value) {
+    editOwnSpecGroups[index].name = value;
+    generateEditOwnVariants();
+}
+
+function addEditOwnSpecOption(groupIndex) {
+    const input = document.getElementById(`editOwnSpecInput_${groupIndex}`);
+    const val = input.value.trim();
+    if (!val) return;
+
+    if (editOwnSpecGroups[groupIndex].options.includes(val)) {
+        showToast('選項已存在', 'warning');
+        return;
+    }
+
+    editOwnSpecGroups[groupIndex].options.push(val);
+    input.value = '';
+    renderEditOwnSpecBuilder();
+    generateEditOwnVariants();
+}
+
+function removeEditOwnSpecOption(groupIndex, optIndex) {
+    editOwnSpecGroups[groupIndex].options.splice(optIndex, 1);
+    renderEditOwnSpecBuilder();
+    generateEditOwnVariants();
+}
+
+function renderEditOwnSpecBuilder() {
+    const container = document.getElementById('editOwnSpecContainer');
+    if (editOwnSpecGroups.length === 0) {
+        container.innerHTML = '<p style="color:#888; font-size:0.9em;">尚未設定規格 (預設為單一規格)</p>';
+        return;
+    }
+
+    container.innerHTML = editOwnSpecGroups.map((group, idx) => `
+        <div class="spec-group">
+            <div class="spec-header">
+                <input type="text" placeholder="規格名稱 (例如: 顏色)" value="${group.name}" 
+                       onchange="updateEditOwnSpecName(${idx}, this.value)">
+                <button type="button" class="btn-text needs-confirm" onclick="removeEditOwnSpecGroup(${idx})">刪除</button>
+            </div>
+            <div class="spec-options">
+                ${group.options.map((opt, optIdx) => `
+                    <span class="spec-tag">${opt} <span onclick="removeEditOwnSpecOption(${idx}, ${optIdx})">×</span></span>
+                `).join('')}
+                <div class="add-option-box">
+                    <input type="text" id="editOwnSpecInput_${idx}" placeholder="輸入選項按 Enter" 
+                           onkeydown="if(event.key==='Enter'){event.preventDefault();addEditOwnSpecOption(${idx});}">
+                    <button type="button" onclick="addEditOwnSpecOption(${idx})">+</button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function generateEditOwnVariants() {
+    const tbody = document.getElementById('editOwnVariantsTableBody');
+    const container = document.getElementById('editOwnVariantsSection');
+
+    const validGroups = editOwnSpecGroups.filter(g => g.name && g.options.length > 0);
+    if (validGroups.length === 0) {
+        container.style.display = 'none';
+        return;
+    }
+
+    container.style.display = 'block';
+
+    // 產生笛卡爾積
+    let variants = [[]];
+    validGroups.forEach(group => {
+        const newVariants = [];
+        variants.forEach(variant => {
+            group.options.forEach(opt => {
+                newVariants.push([...variant, opt]);
+            });
+        });
+        variants = newVariants;
+    });
+
+    const basePrice = document.getElementById('editOwnProdPrice').value || '';
+    const baseStock = document.getElementById('editOwnProdStock').value || 0;
+
+    tbody.innerHTML = variants.map(v => {
+        const name = v.join(' / ');
+        return `
+            <tr class="variant-row" data-name="${name}">
+                <td>${name}</td>
+                <td><input type="number" class="v-price" value="${basePrice}" placeholder="價格"></td>
+                <td><input type="number" class="v-stock" value="${baseStock}" placeholder="庫存"></td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function renderEditOwnVariants() {
+    const container = document.getElementById('editOwnVariantsSection');
+    const tbody = document.getElementById('editOwnVariantsTableBody');
+
+    if (!currentEditProduct || !currentEditProduct.variants || currentEditProduct.variants.length === 0) {
+        container.style.display = 'none';
+        return;
+    }
+
+    container.style.display = 'block';
+    tbody.innerHTML = currentEditProduct.variants.map(v => `
+        <tr class="variant-row" data-name="${v.spec}">
+            <td>${v.spec}</td>
+            <td><input type="number" class="v-price" value="${v.price || currentEditProduct.price}" placeholder="價格"></td>
+            <td><input type="number" class="v-stock" value="${v.stock || 0}" placeholder="庫存"></td>
+        </tr>
+    `).join('');
+}
+
+/**
+ * 提交編輯專屬商品
+ */
+async function submitEditOwnProduct(event) {
+    event.preventDefault();
+
+    const productId = document.getElementById('editOwnProdId').value;
+    const name = document.getElementById('editOwnProdName').value.trim();
+    const price = document.getElementById('editOwnProdPrice').value;
+    const stock = document.getElementById('editOwnProdStock').value;
+
+    if (!name || !price || !stock) {
+        showToast('請填寫必填欄位', 'warning');
+        return;
+    }
+
+    showLoadingOverlay('儲存變更中...');
+
+    try {
+        // 1. 上傳新圖片
+        const allImages = [...editOwnExistingImages];
+
+        if (editOwnProductFiles.length > 0) {
+            for (let i = 0; i < editOwnProductFiles.length; i++) {
+                const file = editOwnProductFiles[i];
+                const reader = new FileReader();
+
+                const base64Promise = new Promise((resolve, reject) => {
+                    reader.onload = e => resolve(e.target.result.split(',')[1]);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                });
+
+                const base64 = await base64Promise;
+
+                document.getElementById('loadingMessage').textContent = `上傳圖片 ${i + 1}/${editOwnProductFiles.length}...`;
+
+                const uploadRes = await callKolApi('kolUploadImage', {
+                    imageBase64: base64,
+                    fileName: file.name
+                });
+
+                if (uploadRes.success) {
+                    allImages.push(uploadRes.data.url);
+                }
+            }
+        }
+
+        // 2. 收集規格資料
+        const variantRows = document.querySelectorAll('#editOwnVariantsTableBody .variant-row');
+        const variants = [];
+        variantRows.forEach(row => {
+            variants.push({
+                spec: row.dataset.name,
+                price: parseInt(row.querySelector('.v-price').value) || 0,
+                stock: parseInt(row.querySelector('.v-stock').value) || 0
+            });
+        });
+
+        // 3. 組裝更新資料
+        const productData = {
+            name: name,
+            category: document.getElementById('editOwnProdCategory').value,
+            brand: document.getElementById('editOwnProdBrand').value.trim(),
+            price: parseInt(price),
+            wholesalePrice: parseInt(document.getElementById('editOwnProdCost').value) || 0,
+            stock: parseInt(stock),
+            status: document.getElementById('editOwnProdStatus').value,
+            description: document.getElementById('editOwnProdDesc').value,
+            images: allImages,
+            variants: variants
+        };
+
+        document.getElementById('loadingMessage').textContent = '儲存商品資料...';
+
+        const result = await callKolApi('kolUpdateOwnProduct', {
+            productId: productId,
+            productData: productData
+        });
+
+        if (result.success) {
+            showToast('商品更新成功！', 'success');
+            closeModal('editOwnProductModal');
+            loadMyProducts();
+
+            // 生成商品頁面
+            generateProductPageAsync(productId);
+        } else {
+            showToast('更新失敗: ' + result.error, 'error');
+        }
+
+    } catch (err) {
+        showToast('發生錯誤', 'error');
+        console.error(err);
+    } finally {
+        hideLoadingOverlay();
+    }
+}
+
+/**
+ * 刪除專屬商品
+ */
+async function deleteOwnProduct() {
+    const productId = document.getElementById('editOwnProdId').value;
+    if (!productId) return;
+
+    if (!confirm('確定要刪除此商品嗎？此動作無法復原。')) return;
+
+    showLoadingOverlay('刪除商品中...');
+
+    try {
+        const result = await callKolApi('kolRemoveProduct', { productId: productId });
+
+        if (result.success) {
+            showToast('商品已刪除', 'success');
+            closeModal('editOwnProductModal');
+            loadMyProducts();
+        } else {
+            showToast('刪除失敗: ' + result.error, 'error');
+        }
+    } catch (err) {
+        showToast('刪除失敗', 'error');
+        console.error(err);
+    } finally {
+        hideLoadingOverlay();
+    }
+}
+
+/**
+ * 異步生成商品頁面
+ */
+async function generateProductPageAsync(productId) {
+    try {
+        const result = await callKolApi('kolGenerateProductPage', { productId: productId });
+        if (result.success && result.data && result.data.url) {
+            console.log('商品頁面已生成:', result.data.url);
+        }
+    } catch (err) {
+        console.error('生成商品頁面失敗:', err);
+    }
+}
+
+// ============================================================
 // 訂單管理
 // ============================================================
+
 
 async function loadKolOrders() {
     const tbody = document.getElementById('kolOrdersBody');
