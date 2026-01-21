@@ -14,6 +14,15 @@ const Cart = {
     init() {
         this.items = Storage.getCart();
         this.updateUI();
+
+        // 監聽跨分頁購物車更新
+        window.addEventListener('storage', (e) => {
+            if (e.key === Storage.CART_KEY) {
+                console.log('[Cart] 同步更新購物車');
+                this.items = Storage.getCart();
+                this.updateUI();
+            }
+        });
     },
 
     /**

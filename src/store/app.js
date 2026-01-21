@@ -55,6 +55,15 @@ const App = {
             // 等待 loading overlay 完全隱藏後再處理
             setTimeout(() => {
                 UrlCart.processUrl();
+
+                // 8. 處理 Hash 參數 (如 #checkout)
+                // 支援從商品頁跳轉直接結帳
+                if (window.location.hash === '#checkout') {
+                    console.log('🛒 檢測到 checkout hash，開啟結帳視窗');
+                    Checkout.show();
+                    // 清除 hash，避免重新整理時再次觸發
+                    history.replaceState(null, null, window.location.pathname + window.location.search);
+                }
             }, 600); // 比 loading 隱藏延遲 (500ms) 多一點
         }
 
