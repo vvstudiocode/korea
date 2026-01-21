@@ -811,7 +811,15 @@ function renderProducts(products) {
             <td style="color: #f59e0b; font-weight: 500;">${hqProfit}</td>
             <td style="color: #aaa; font-size:0.9em;">₩${p.priceKrw || 0}</td>
             <td style="font-weight:bold;">${totalStock}</td>
-            <td>${p.status}</td>
+            <td onclick="event.stopPropagation()">
+                <label class="toggle-switch">
+                    <input type="checkbox" 
+                           ${p.status === '上架' ? 'checked' : ''} 
+                           onchange="toggleProductStatus('${p.id}', this.checked)">
+                    <span class="toggle-slider"></span>
+                </label>
+                <span class="status-label ${p.status === '上架' ? 'status-active' : 'status-inactive'}">${p.status === '上架' ? '上架中' : '已下架'}</span>
+            </td>
             <td>
                 <div style="display:flex; gap:5px;" onclick="event.stopPropagation()">
                     <button class="action-btn" onclick="openProductModal('${p.id || ''}')">編輯</button>
@@ -861,6 +869,38 @@ function toggleProductDetail(productId) {
     if (detailRow) {
         detailRow.style.display = detailRow.style.display === 'none' ? 'table-row' : 'none';
     }
+}
+
+// 快速切換商品上架/下架狀態
+function toggleProductStatus(productId, isActive) {
+    const newStatus = isActive ? '上架' : '下架';
+
+    // 檢查是否已在 pending 中
+    const existingIndex = pendingProductUpdates.findIndex(p => String(p.id) === String(productId));
+
+    if (existingIndex !== -1) {
+        // 更新既有的 pending 記錄
+        pendingProductUpdates[existingIndex].status = newStatus;
+    } else {
+        // 從 currentProducts 取得完整資料
+        const product = currentProducts.find(p => String(p.id) === String(productId));
+        if (product) {
+            pendingProductUpdates.push({
+                ...product,
+                status: newStatus
+            });
+        }
+    }
+
+    // 同時更新 currentProducts 的狀態 (本地顯示用)
+    const productIndex = currentProducts.findIndex(p => String(p.id) === String(productId));
+    if (productIndex !== -1) {
+        currentProducts[productIndex].status = newStatus;
+    }
+
+    updateProductBatchUI();
+    renderProducts(currentProducts);
+    showToast(`商品狀態已變更為「${newStatus}」(暫存)`, 'info', 1500);
 }
 
 // 載入現有品牌列表 (用於自動完成)
