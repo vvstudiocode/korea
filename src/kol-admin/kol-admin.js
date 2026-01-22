@@ -2070,10 +2070,10 @@ async function loadKolFooter() {
 
         const footer = PageBuilder.footer || {};
 
-        document.getElementById('footerCopyright').value = footer.text || '';
-        document.getElementById('footerFb').value = footer.social?.facebook || '';
-        document.getElementById('footerIg').value = footer.social?.instagram || '';
-        document.getElementById('footerLine').value = footer.social?.line || '';
+        document.getElementById('footerCopyright').value = footer.copyright || footer.text || '';
+        document.getElementById('footerFb').value = footer.socialLinks?.facebook || footer.social?.facebook || '';
+        document.getElementById('footerIg').value = footer.socialLinks?.instagram || footer.social?.instagram || '';
+        document.getElementById('footerLine').value = footer.socialLinks?.line || footer.social?.line || '';
 
 
     } catch (error) {
@@ -2093,11 +2093,10 @@ async function saveKolFooter() {
         const line = document.getElementById('footerLine').value.trim();
         const newFooter = {
             enabled: true,
-            text: text,
-            social: {
+            copyright: text,
+            socialLinks: {
                 facebook, instagram, line
-            },
-            links: {}
+            }
         };
 
         // 更新 PageBuilder 的 footer 狀態
