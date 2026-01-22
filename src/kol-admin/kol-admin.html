@@ -322,21 +322,29 @@
                 </div>
             </div>
 
-            <!-- 6. 排版管理 (Page Builder) -->
+            <!-- 6. 排版管理 (Page Builder) - 僅供預覽 -->
             <div id="builderSection" class="view-section"
                 style="display: none; padding: 0; height: calc(100vh - 70px); overflow: hidden;">
                 <div class="visual-builder">
-                    <!-- 左側：編輯區 -->
-                    <div class="builder-sidebar">
-                        <div class="components-list" id="builderComponentsList">
+                    <!-- 左側：編輯區 (已停用) -->
+                    <div class="builder-sidebar" style="position: relative;">
+                        <!-- 停用遮罩 -->
+                        <div
+                            style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.85); z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px;">
+                            <div style="font-size: 3rem; margin-bottom: 10px;">🔒</div>
+                            <div style="font-weight: 600; color: #333; margin-bottom: 8px;">排版編輯功能目前停用</div>
+                            <div style="font-size: 0.9rem; color: #666;">請至「頁尾設定」調整頁尾資訊</div>
+                        </div>
+                        <div class="components-list" id="builderComponentsList"
+                            style="pointer-events: none; opacity: 0.5;">
                             <!-- 由 page-builder.js 動態產生 -->
                         </div>
-                        <div class="sidebar-footer">
-                            <button class="save-btn" id="saveLayoutBtn" onclick="PageBuilder.saveLayout()">儲存排版</button>
+                        <div class="sidebar-footer" style="pointer-events: none; opacity: 0.5;">
+                            <button class="save-btn" id="saveLayoutBtn" disabled>儲存排版</button>
                         </div>
                     </div>
 
-                    <!-- 右側：預覽區 -->
+                    <!-- 右側：預覽區 (僅供查看) -->
                     <div class="builder-preview">
                         <div class="preview-toolbar">
                             <div class="device-toggles">
@@ -346,7 +354,7 @@
                                     onclick="PageBuilder.setPreviewMode('mobile')">📱
                                     手機版</button>
                             </div>
-                            <div class="preview-status">即時預覽中</div>
+                            <div class="preview-status">預覽模式（編輯已停用）</div>
                         </div>
                         <div class="preview-viewport" id="previewViewport">
                             <div class="preview-container" id="pageBuilderPreviewRoot">
