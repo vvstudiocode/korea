@@ -15,7 +15,12 @@ const KolStore = {
      * @returns {Promise<boolean>} 是否為 KOL 商店模式
      */
     async init() {
-        const storeId = Utils.getUrlParam('store');
+        let storeId = Utils.getUrlParam('store');
+
+        // 支援頁面預設 Store ID (例如在獨立頁面中)
+        if (!storeId && window.currentStoreId) {
+            storeId = window.currentStoreId;
+        }
 
         if (!storeId) {
             console.log('📌 官方直營模式');

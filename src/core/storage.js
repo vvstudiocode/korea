@@ -58,7 +58,12 @@ const Storage = {
     },
 
     // ===== 購物車專用方法 =====
-    CART_KEY: 'koreanShoppingCart',
+    get CART_KEY() {
+        if (typeof window !== 'undefined' && window.currentStoreId) {
+            return 'kol_cart_' + window.currentStoreId;
+        }
+        return 'koreanShoppingCart';
+    },
 
     /**
      * 取得購物車內容

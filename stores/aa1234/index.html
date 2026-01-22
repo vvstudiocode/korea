@@ -1,321 +1,375 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ji3ji3</title>
+    <title>ji3ji3 | KOL 商店</title>
+    <meta name="description" content="ji3ji3 的專屬商店">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="../../src/store/styles/styles.css">
+    <link rel="stylesheet" href="../../src/page-renderer/page-renderer.css">
+
+    <style>
+        /* KOL Store Override */
+        :root {
+            --primary-color: #D68C94;
+            --primary-hover: #c67a82;
+            --bg-pink: #FDF2F2;
+        }
+
+        /* Critical Loading Styles */
+        #loadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #fcfbfb;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease;
+        }
+
+        #loadingOverlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-text {
+            color: var(--primary-color);
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            font-weight: 600;
+        }
+    </style>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary-color: #6366f1;
-            --primary-hover: #6366f1dd;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Noto Sans TC', sans-serif; background: #f8fafc; min-height: 100vh; }
-        
-        /* Header */
-        .store-header { background: white; padding: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); position: sticky; top: 0; z-index: 100; }
-        .header-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
-        .store-logo { height: 40px; object-fit: contain; }
-        .store-name { font-size: 1.3rem; font-weight: 700; color: var(--primary-color); }
-        .cart-btn { background: var(--primary-color); color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 8px; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 0.5rem; }
-        .cart-btn:hover { background: var(--primary-hover); }
-        .cart-count { background: white; color: var(--primary-color); padding: 0 0.5rem; border-radius: 10px; font-size: 0.85rem; font-weight: 700; }
-        
-        /* Main */
-        .main-content { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
-        
-        /* Products Grid */
-        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
-        @media (max-width: 640px) { .products-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; } }
-        
-        .product-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
-        .product-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
-        .product-img { width: 100%; aspect-ratio: 1; object-fit: cover; }
-        .product-info { padding: 1rem; }
-        .product-name { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.5rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .product-price { font-size: 1.1rem; font-weight: 700; color: var(--primary-color); }
-        
-        /* Modal */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; padding: 1rem; }
-        .modal-overlay.active { display: flex; }
-        .modal-content { background: white; border-radius: 16px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
-        .modal-header { padding: 1rem; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
-        .modal-header h3 { font-size: 1.1rem; }
-        .modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666; }
-        .modal-body { padding: 1rem; }
-        
-        /* Cart Sidebar */
-        .cart-sidebar { position: fixed; right: -400px; top: 0; width: 100%; max-width: 400px; height: 100%; background: white; box-shadow: -4px 0 24px rgba(0,0,0,0.15); z-index: 1001; transition: right 0.3s ease; display: flex; flex-direction: column; }
-        .cart-sidebar.open { right: 0; }
-        .cart-header { padding: 1rem; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
-        .cart-items { flex: 1; overflow-y: auto; padding: 1rem; }
-        .cart-item { display: flex; gap: 1rem; padding: 1rem 0; border-bottom: 1px solid #f0f0f0; }
-        .cart-item-img { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; }
-        .cart-item-info { flex: 1; }
-        .cart-item-name { font-weight: 600; font-size: 0.9rem; }
-        .cart-item-spec { font-size: 0.8rem; color: #666; }
-        .cart-item-qty { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem; }
-        .qty-btn { width: 28px; height: 28px; border: 1px solid #ddd; background: white; border-radius: 4px; cursor: pointer; font-weight: 700; }
-        .cart-footer { padding: 1rem; border-top: 1px solid #eee; }
-        .cart-total { display: flex; justify-content: space-between; font-weight: 700; font-size: 1.1rem; margin-bottom: 1rem; }
-        .checkout-btn { width: 100%; padding: 1rem; background: var(--primary-color); color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 1rem; cursor: pointer; }
-        .checkout-btn:hover { background: var(--primary-hover); }
-        .cart-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1000; }
-        .cart-overlay.open { display: block; }
-        
-        /* Loading */
-        .loading { text-align: center; padding: 3rem; color: #888; }
-        
-        /* Empty State */
-        .empty-state { text-align: center; padding: 3rem; color: #888; }
-    </style>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Playfair+Display:wght@400;600;700&family=Poppins:wght@300;400;600&display=swap"
+        rel="stylesheet">
 </head>
+
 <body>
-    <header class="store-header">
-        <div class="header-inner">
-            <div style="display: flex; align-items: center; gap: 0.8rem;">
-                
-                <span class="store-name">ji3ji3</span>
+    <!-- Initialize Store ID -->
+    <script>
+        window.currentStoreId = 'aa1234';
+    </script>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay">
+        <video autoplay loop muted playsinline style="width: 150px; height: 150px; object-fit: contain;">
+            <source
+                src="https://raw.githubusercontent.com/vvstudiocode/korea/main/ce3ffe25-03c7-4f87-bfac-be6495d83780.mp4"
+                type="video/mp4">
+        </video>
+        <div class="loading-text">Welcome</div>
+    </div>
+
+    <!-- 導航列 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <a href="./">
+                    <img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/logo.png" alt="Logo"
+                        class="logo-img">
+                    <span class="logo-text">ji3ji3</span>
+                </a>
             </div>
-            <button class="cart-btn" onclick="openCart()">
-                🛒 購物車 <span class="cart-count" id="cartCount">0</span>
-            </button>
+            <div class="nav-actions">
+                <button class="search-btn" id="searchBtn" onclick="openSearchModal()">
+                    🔍 訂單查詢
+                </button>
+                <button class="cart-btn" id="cartBtn">
+                    🛒 購物車
+                    <span class="cart-badge" id="cartBadge">0</span>
+                </button>
+            </div>
         </div>
-    </header>
-    
-    <main class="main-content">
-        <div class="products-grid" id="productsGrid">
-            <div class="loading">載入商品中...</div>
-        </div>
+    </nav>
+
+    <!-- 主要內容區 -->
+    <main class="main-container">
+        <!-- PageRenderer will render content here -->
+        <div id="pageBuilderRoot"></div>
+        <!-- Fallback Grid if PageRenderer fails or empty -->
+        <div id="productsGrid" style="display:none;"></div>
     </main>
-    
-    <!-- Cart Sidebar -->
-    <div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
+
+    <!-- 頁尾 -->
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <ul>
+                    <li class="section-header"><strong>一、實體採買承諾</strong></li>
+                    <li>本店所有商品皆為代購人員於韓國當地實體門市/專櫃/官方通路親自採買，保證正品。</li>
+
+                    <li class="section-header"><strong>二、價格結構透明化</strong></li>
+                    <li>商品頁面或報價所顯示的價格，皆已包含商品原價、韓國境內運費（若有）、國際運費、關稅（若產生）及本服務之代購費用。</li>
+                    <li>無需再支付其他費用（除非後續產生特殊要求或二次補運費之情況，將另行告知）。</li>
+
+                    <li class="section-header"><strong>三、付款方式與期限</strong></li>
+                    <li>選定商品並確認訂單內容後，請於 <strong>24小時</strong> 內完成全額匯款。</li>
+                    <li>請務必將匯款證明截圖並私訊 Line:@567gestz 給小幫手，並告知您的訂單編號/姓名，待確認款項後，訂單即正式成立。</li>
+                    <li>未於期限內完成匯款者，視同放棄訂單，將不另行通知。</li>
+
+                    <li class="section-header"><strong>四、訂單成立後不接受取消/更改</strong></li>
+                    <li>代購服務屬於客製化給付，一旦訂單成立並付款後，即不接受任何理由（如跑單、改變心意、顏色尺寸不合等）要求取消、退款或更改訂單內容。請務必在下單前再次確認。</li>
+
+                    <li class="section-header"><strong>五、採買與寄送時程</strong></li>
+                    <li><strong>採購時程：</strong>採購時程：代購人員將於 1/7~1/14採購。若遇商品缺貨、斷貨或限購，將第一時間通知您。</li>
+                    <li><strong>運送時程：</strong>商品採買後將統一 <strong>商品採買後將統一 1/16寄出。</strong></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-copyright">
+            <div class="social-icons">
+                <a href="https://line.me/ti/g2/yBmGmioZOe8gNpajkjO4e5xSCOwGuW7BfrQCAA" target="_blank"
+                    rel="noopener noreferrer">
+                    <img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/line.png" alt="Line">
+                </a>
+                <a href="https://www.instagram.com/omo_select_/" target="_blank" rel="noopener noreferrer">
+                    <img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/instagram.png" alt="Instagram">
+                </a>
+            </div>
+            2025 OMO Select. All rights reserved.
+        </div>
+    </footer>
+
+    <!-- 購物車側邊欄 -->
     <div class="cart-sidebar" id="cartSidebar">
         <div class="cart-header">
             <h3>購物車</h3>
-            <button class="modal-close" onclick="closeCart()">✕</button>
+            <button class="close-cart" id="closeCart">✕</button>
         </div>
+
         <div class="cart-items" id="cartItems">
-            <div class="empty-state">購物車是空的</div>
-        </div>
-        <div class="cart-footer">
-            <div class="cart-total">
-                <span>總計</span>
-                <span id="cartTotal">NT$ 0</span>
+            <div class="empty-cart">
+                <p>購物車是空的</p>
+                <p class="empty-cart-hint">快去挑選喜歡的商品吧！</p>
             </div>
-            <button class="checkout-btn" onclick="goToCheckout()">前往結帳</button>
+        </div>
+
+        <div class="cart-footer">
+            <!-- 運送方式選擇 -->
+            <div class="shipping-method-selector">
+                <label>運送方式：</label>
+                <div class="shipping-options">
+                    <label class="shipping-option">
+                        <input type="radio" name="shippingMethod" value="pickup"
+                            onchange="Checkout.setShippingMethod('pickup')">
+                        <span>限台中市面交 <strong>免運</strong></span>
+                    </label>
+                    <label class="shipping-option">
+                        <input type="radio" name="shippingMethod" value="711" checked
+                            onchange="Checkout.setShippingMethod('711')">
+                        <span>7-11 店到店 <strong>NT$ 60</strong></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="cart-total">
+                <span>總計：</span>
+                <span class="total-amount" id="totalAmount">NT$ 0</span>
+            </div>
+            <button class="checkout-btn" id="checkoutBtn">前往結帳</button>
         </div>
     </div>
-    
-    <!-- Product Modal -->
-    <div class="modal-overlay" id="productModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modalProductName">商品名稱</h3>
-                <button class="modal-close" onclick="closeProductModal()">✕</button>
-            </div>
-            <div class="modal-body" id="modalBody">
-                <!-- Dynamic content -->
+
+    <!-- 商品詳情模態框 -->
+    <div class="modal" id="productModal">
+        <div class="modal-content product-detail">
+            <button class="modal-close" onclick="ProductDetail.close()">✕</button>
+            <div class="product-detail-grid">
+                <div class="product-detail-image">
+                    <img id="modalProductImage" src="" alt="">
+                </div>
+                <div class="product-detail-info">
+                    <h2 id="modalProductName"></h2>
+                    <p class="product-detail-price" id="modalProductPrice"></p>
+
+                    <!-- 商品選項容器 (動態產生) -->
+                    <div id="modalProductOptions" class="product-options-container"></div>
+
+                    <div class="quantity-selector">
+                        <label>數量：</label>
+                        <div class="qty-group">
+                            <button class="qty-btn" onclick="ProductDetail.decreaseQuantity()">-</button>
+                            <input type="number" id="modalQuantity" value="1" min="1" readonly>
+                            <button class="qty-btn" onclick="ProductDetail.increaseQuantity()">+</button>
+                        </div>
+                    </div>
+                    <button class="add-to-cart-btn" onclick="ProductDetail.addToCart()">
+                        加入購物車
+                    </button>
+
+                    <!-- 商品描述放在最後 -->
+                    <p class="product-detail-description" id="modalProductDescription"></p>
+                    <div class="product-detail-stock">
+                        庫存：<span id="modalProductStock"></span> 件
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <script>
-        const STORE_ID = 'aa1234';
-        const API_URL = 'https://script.google.com/macros/s/AKfycby7V5VwHfn_Tb-wpg_SSrme2c2P5bin6qjhxEkr80RDLg6p5TPn2EXySkpG9qnyvfNF/exec';
-        let products = [];
-        let cart = JSON.parse(localStorage.getItem('kol_cart_' + STORE_ID) || '[]');
-        
-        // Load products
-        async function loadProducts() {
-            try {
-                const res = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({ action: 'getStoreProducts', storeId: STORE_ID })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    products = data.data.products || [];
-                    renderProducts();
-                }
-            } catch (e) {
-                document.getElementById('productsGrid').innerHTML = '<div class="empty-state">載入失敗</div>';
-            }
-        }
-        
-        function renderProducts() {
-            const grid = document.getElementById('productsGrid');
-            if (products.length === 0) {
-                grid.innerHTML = '<div class="empty-state">目前沒有商品</div>';
-                return;
-            }
-            grid.innerHTML = products.map(p => {
-                const img = (p.image || '').split(',')[0] || 'https://via.placeholder.com/300';
-                return `
-                    <div class="product-card" onclick="openProductModal('${p.id}')">
-                        <img src="${img}" alt="${p.name}" class="product-img">
-                        <div class="product-info">
-                            <div class="product-name">${p.name}</div>
-                            <div class="product-price">NT$ ${p.price.toLocaleString()}</div>
-                        </div>
+    <!-- 結帳模態框 -->
+    <div class="modal" id="checkoutModal">
+        <div class="modal-content checkout-form">
+            <button class="modal-close" onclick="Modal.close('checkoutModal')">✕</button>
+            <h2>填寫收件資訊</h2>
+
+            <form id="orderForm">
+                <div class="form-group">
+                    <label for="customerName">姓名 *</label>
+                    <input type="text" id="customerName" name="name" required placeholder="請輸入您的姓名">
+                </div>
+
+                <div class="form-group">
+                    <label for="customerPhone">手機號碼 *</label>
+                    <input type="tel" id="customerPhone" name="phone" required placeholder="0912345678">
+                </div>
+                <div class="form-group">
+                    <label for="customerLineId">Line ID *</label>
+                    <input type="text" id="customerLineId" name="lineId" required placeholder="請輸入 Line ID 以便聯繫">
+                </div>
+                <div class="form-group">
+                    <label for="customerEmail">電子信箱 *</label>
+                    <input type="email" id="customerEmail" name="email" required placeholder="example@email.com">
+                </div>
+
+                <!-- 711 店到店欄位區塊 -->
+                <div id="storeFieldsSection">
+                    <div class="shipping-notice">
+                        <p>📦 您選擇了 <strong>7-11 店到店</strong> 取貨</p>
+                        <p class="store-query-link">查詢門市：<a href="https://www.ibon.com.tw/retail_inquiry.aspx#gsc.tab=0"
+                                target="_blank">👉 點此查詢</a></p>
                     </div>
-                `;
-            }).join('');
-        }
-        
-        function openProductModal(productId) {
-            const p = products.find(x => x.id === productId);
-            if (!p) return;
-            
-            document.getElementById('modalProductName').textContent = p.name;
-            const img = (p.image || '').split(',')[0] || 'https://via.placeholder.com/300';
-            
-            let variantsHtml = '';
-            if (p.variants && p.variants.length > 0) {
-                variantsHtml = '<div style="margin-bottom:1rem;"><label style="font-weight:600;margin-bottom:0.5rem;display:block;">選擇規格</label><select id="variantSelect" style="width:100%;padding:0.8rem;border:1px solid #ddd;border-radius:8px;">' + p.variants.map((v, i) => `<option value="${i}">${v.spec || v.name} - NT$ ${v.price}</option>`).join('') + '</select></div>';
-            }
-            
-            document.getElementById('modalBody').innerHTML = `
-                <img src="${img}" style="width:100%;border-radius:8px;margin-bottom:1rem;">
-                <p style="color:#666;margin-bottom:1rem;">${p.description || ''}</p>
-                <div style="font-size:1.2rem;font-weight:700;color:var(--primary-color);margin-bottom:1rem;">NT$ ${p.price.toLocaleString()}</div>
-                ${variantsHtml}
-                <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem;">
-                    <span style="font-weight:600;">數量</span>
-                    <div style="display:flex;align-items:center;gap:0.5rem;">
-                        <button class="qty-btn" onclick="changeQty(-1)">-</button>
-                        <span id="qtyDisplay" style="width:40px;text-align:center;">1</span>
-                        <button class="qty-btn" onclick="changeQty(1)">+</button>
+
+                    <div class="form-group">
+                        <label for="storeName">7-11 門市名稱 *</label>
+                        <input type="text" id="storeName" name="storeName" required placeholder="例如：信義門市">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="storeCode">門市店號 *</label>
+                        <input type="text" id="storeCode" name="storeCode" required placeholder="例如：123456">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="storeAddress">門市地址 *</label>
+                        <input type="text" id="storeAddress" name="storeAddress" required placeholder="例如：台北市信義區XX路XX號">
                     </div>
                 </div>
-                <button onclick="addToCart('${p.id}')" style="width:100%;padding:1rem;background:var(--primary-color);color:white;border:none;border-radius:8px;font-weight:600;font-size:1rem;cursor:pointer;">加入購物車</button>
-            `;
-            document.getElementById('productModal').classList.add('active');
-            window.currentProductQty = 1;
-        }
-        
-        function closeProductModal() {
-            document.getElementById('productModal').classList.remove('active');
-        }
-        
-        window.currentProductQty = 1;
-        function changeQty(delta) {
-            window.currentProductQty = Math.max(1, window.currentProductQty + delta);
-            document.getElementById('qtyDisplay').textContent = window.currentProductQty;
-        }
-        
-        function addToCart(productId) {
-            const p = products.find(x => x.id === productId);
-            if (!p) return;
-            
-            let spec = '';
-            let price = p.price;
-            const variantSelect = document.getElementById('variantSelect');
-            if (variantSelect && p.variants && p.variants.length > 0) {
-                const v = p.variants[variantSelect.value];
-                spec = v.spec || v.name;
-                price = v.price;
-            }
-            
-            const existingIndex = cart.findIndex(c => c.id === productId && c.spec === spec);
-            if (existingIndex >= 0) {
-                cart[existingIndex].qty += window.currentProductQty;
-            } else {
-                cart.push({
-                    id: productId,
-                    name: p.name,
-                    image: (p.image || '').split(',')[0],
-                    spec: spec,
-                    price: price,
-                    qty: window.currentProductQty
-                });
-            }
-            
-            saveCart();
-            closeProductModal();
-            renderCart();
-            updateCartCount();
-        }
-        
-        function saveCart() {
-            localStorage.setItem('kol_cart_' + STORE_ID, JSON.stringify(cart));
-        }
-        
-        function updateCartCount() {
-            const count = cart.reduce((sum, c) => sum + c.qty, 0);
-            document.getElementById('cartCount').textContent = count;
-        }
-        
-        function renderCart() {
-            const container = document.getElementById('cartItems');
-            if (cart.length === 0) {
-                container.innerHTML = '<div class="empty-state">購物車是空的</div>';
-                document.getElementById('cartTotal').textContent = 'NT$ 0';
-                return;
-            }
-            container.innerHTML = cart.map((c, i) => `
-                <div class="cart-item">
-                    <img src="${c.image || 'https://via.placeholder.com/60'}" class="cart-item-img">
-                    <div class="cart-item-info">
-                        <div class="cart-item-name">${c.name}</div>
-                        <div class="cart-item-spec">${c.spec || ''} - NT$ ${c.price.toLocaleString()}</div>
-                        <div class="cart-item-qty">
-                            <button class="qty-btn" onclick="updateCartQty(${i}, -1)">-</button>
-                            <span>${c.qty}</span>
-                            <button class="qty-btn" onclick="updateCartQty(${i}, 1)">+</button>
-                            <button onclick="removeFromCart(${i})" style="margin-left:auto;background:none;border:none;color:#e53935;cursor:pointer;">刪除</button>
+
+                <div class="form-group">
+                    <label for="customerNote">備注（選填）</label>
+                    <textarea id="customerNote" name="note" rows="3" placeholder="請在此填寫匯款後五碼。
+如有下訂客製化鑰匙圈，請附上英文"></textarea>
+                    <p class="form-hint"
+                        style="color: red; font-size: 40px; font-weight: bold; margin-top: 15px; line-height: 1.2;">
+                        匯款完成後請一定要至官方 Line 回覆：
+                        <a href="https://lin.ee/qEQwlef" target="_blank"
+                            style="color: red; text-decoration: underline;">@597gestz</a>
+                        <br>才算成立
+                    </p>
+                </div>
+
+                <div class="payment-info">
+                    <h3>匯款資訊</h3>
+                    <div class="payment-details">
+                        <div class="payment-item">
+                            <span class="payment-label">銀行名稱：</span>
+                            <span class="payment-value">國泰世華銀行（代碼 013）</span>
+                        </div>
+                        <div class="payment-item">
+                            <span class="payment-label">帳號：</span>
+                            <span class="payment-value account-number">204506258370</span>
+                        </div>
+                        <div class="payment-item">
+                            <span class="payment-label">任何問題可洽網頁最下方LINE | IG</span>
+                        </div>
+                        <div class="payment-item">
+                            <span class="payment-value">匯款完成後請聯繫我們匯款後五碼</span>
                         </div>
                     </div>
+                    <p class="payment-note">請於下單後 3 天內完成匯款，並保留匯款收據供查詢</p>
                 </div>
-            `).join('');
-            
-            const total = cart.reduce((sum, c) => sum + c.price * c.qty, 0);
-            document.getElementById('cartTotal').textContent = 'NT$ ' + total.toLocaleString();
-        }
-        
-        function updateCartQty(index, delta) {
-            cart[index].qty = Math.max(1, cart[index].qty + delta);
-            saveCart();
-            renderCart();
-            updateCartCount();
-        }
-        
-        function removeFromCart(index) {
-            cart.splice(index, 1);
-            saveCart();
-            renderCart();
-            updateCartCount();
-        }
-        
-        function openCart() {
-            document.getElementById('cartSidebar').classList.add('open');
-            document.getElementById('cartOverlay').classList.add('open');
-        }
-        
-        function closeCart() {
-            document.getElementById('cartSidebar').classList.remove('open');
-            document.getElementById('cartOverlay').classList.remove('open');
-        }
-        
-        function goToCheckout() {
-            if (cart.length === 0) {
-                alert('購物車是空的');
-                return;
-            }
-            // Redirect to main site checkout with cart data
-            const cartData = encodeURIComponent(JSON.stringify({ storeId: STORE_ID, items: cart }));
-            window.location.href = 'https://vvstudiocode.github.io/korea/?checkout=' + cartData;
-        }
-        
-        // Initialize
-        loadProducts();
-        updateCartCount();
-        renderCart();
-    </script>
+
+                <!-- 訂單摘要 -->
+                <div class="order-summary">
+                    <h3>訂單摘要</h3>
+                    <div id="orderSummary"></div>
+                    <div class="order-total">
+                        總金額：<span id="orderTotal">NT$ 0</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-order-btn">
+                    確認送出訂單
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 成功提示模態框 -->
+    <div class="modal" id="successModal">
+        <div class="modal-content success-message">
+            <div class="success-icon">✓</div>
+            <h2>訂單送出成功！</h2>
+            <p>您的訂單編號：<strong id="orderNumber"></strong></p>
+            <p class="success-hint">我們會盡快與您聯繫確認訂單</p>
+            <button class="continue-btn" onclick="Modal.close('successModal')">繼續購物</button>
+        </div>
+    </div>
+
+    <!-- 遮罩層 -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- 訂單查詢模態框 -->
+    <div class="modal" id="searchOrderModal">
+        <div class="modal-content search-order-form">
+            <button class="modal-close" onclick="closeSearchModal()">✕</button>
+            <h2>訂單查詢</h2>
+            <div class="search-input-group">
+                <p>請輸入訂購時的手機號碼查詢訂單狀態</p>
+                <div class="form-group">
+                    <input type="tel" id="searchPhone" placeholder="例如：0912345678"
+                        onkeypress="handleSearchKeyPress(event)">
+                    <button class="submit-order-btn" onclick="handleOrderSearch()" style="margin-top: 10px;">查詢</button>
+                </div>
+            </div>
+            <div id="searchResults" class="search-results"></div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <!-- 1. 核心共用模組 (Path from stores/aa1234/ to src/...) -->
+    <script src="../../src/core/api.js"></script>
+    <script src="../../src/core/storage.js"></script>
+    <script src="../../src/core/toast.js"></script>
+    <script src="../../src/core/utils.js"></script>
+
+    <!-- 2. 前端購物功能模組 -->
+    <script src="../../src/store/modules/products.js"></script>
+    <script src="../../src/store/modules/cart.js"></script>
+    <script src="../../src/store/modules/modal.js"></script>
+    <script src="../../src/store/modules/product-detail.js"></script>
+    <script src="../../src/store/modules/checkout.js"></script>
+    <script src="../../src/store/modules/kol-store.js"></script>
+    <script src="../../src/store/modules/url-cart.js"></script>
+
+    <!-- 3. 頁面渲染器 -->
+    <script src="../../src/page-renderer/page-renderer.js"></script>
+
+    <!-- 4. 主入口 -->
+    <script src="../../src/store/app.js"></script>
 </body>
+
 </html>

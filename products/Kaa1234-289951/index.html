@@ -4,183 +4,370 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>好好好 - ji3ji3</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap"
-        rel="stylesheet">
+    <title>好好好 | ji3ji3</title>
+    <meta name="description" content="好好好 - ji3ji3 嚴選商品">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="../../src/store/styles/styles.css">
+
     <style>
+        /* KOL Store Override */
         :root {
-            --primary-color: #d8e0c2;
+            --primary-color: #D68C94;
+            --primary-hover: #c67a82;
+            --bg-pink: #FDF2F2;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: 'Noto Sans TC', sans-serif;
-            background: #f8fafc;
-        }
-
-        .header {
-            background: white;
-            padding: 1rem;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        }
-
-        .header-inner {
-            max-width: 800px;
+        /* Product Page Specific Styles */
+        .product-page {
+            max-width: 1200px;
             margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 20px;
         }
 
-        .store-name {
-            font-weight: 700;
-            color: var(--primary-color);
+        .product-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-top: 20px;
         }
 
-        .back-btn {
-            color: var(--primary-color);
-            text-decoration: none;
+        /* Gallery */
+        .product-gallery {
+            position: relative;
         }
 
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 1.5rem;
-        }
-
-        .product-image {
+        .product-gallery img {
             width: 100%;
-            aspect-ratio: 1;
-            object-fit: cover;
             border-radius: 12px;
-            margin-bottom: 1.5rem;
         }
 
-        .product-name {
+        .gallery-main {
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            background: #f5f5f5;
+            aspect-ratio: 1;
+        }
+
+        .gallery-main img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Product Info */
+        .product-info h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            color: #333;
+            line-height: 1.3;
+        }
+
+        .product-price-display {
             font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-
-        .product-price {
-            font-size: 1.3rem;
-            font-weight: 700;
             color: var(--primary-color);
-            margin-bottom: 1rem;
+            font-weight: 600;
+            margin: 15px 0;
         }
 
-        .product-desc {
+        .product-description {
             color: #666;
-            line-height: 1.6;
-            margin-bottom: 1.5rem;
-            white-space: pre-wrap;
+            line-height: 1.8;
+            margin: 20px 0;
+            white-space: pre-line;
         }
 
+        /* Quantity */
         .qty-row {
             display: flex;
             align-items: center;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
+            gap: 15px;
+            margin: 20px 0;
         }
 
-        .qty-btn {
-            width: 36px;
-            height: 36px;
+        .qty-controls {
+            display: flex;
             border: 1px solid #ddd;
-            background: white;
-            border-radius: 6px;
-            font-size: 1.2rem;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .qty-controls button {
+            width: 44px;
+            height: 44px;
+            border: none;
+            background: #f5f5f5;
             cursor: pointer;
+            font-size: 1.2rem;
         }
 
-        .qty-display {
-            width: 50px;
+        .qty-controls button:hover {
+            background: #eee;
+        }
+
+        .qty-controls input {
+            width: 60px;
+            height: 44px;
+            border: none;
             text-align: center;
-            font-weight: 600;
+            font-size: 1rem;
         }
 
-        .add-btn {
+        /* Add to Cart */
+        .add-to-cart-btn {
             width: 100%;
-            padding: 1rem;
+            padding: 16px;
             background: var(--primary-color);
             color: white;
             border: none;
             border-radius: 8px;
-            font-size: 1rem;
+            font-size: 1.1rem;
             font-weight: 600;
             cursor: pointer;
+            transition: opacity 0.2s;
         }
 
-        .add-btn:hover {
+        .add-to-cart-btn:hover {
             opacity: 0.9;
         }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            color: #333;
+            text-decoration: none;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+
+        .back-btn:hover {
+            color: var(--primary-color);
+        }
+
+        @media (max-width: 768px) {
+            .product-grid {
+                grid-template-columns: 1fr;
+                gap: 25px;
+            }
+
+            .product-info h1 {
+                font-size: 1.4rem;
+            }
+        }
     </style>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Playfair+Display:wght@400;600;700&family=Poppins:wght@300;400;600&display=swap"
+        rel="stylesheet">
 </head>
 
 <body>
-    <header class="header">
-        <div class="header-inner">
-            <a href="/korea/stores/aa1234/" class="back-btn">← 返回商店</a>
-            <span class="store-name">ji3ji3</span>
-        </div>
-    </header>
-    <main class="container">
-        <img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/images/products/kolaa1234/1769020285150_A4LTS__85057.webp"
-            alt="好好好" class="product-image">
-        <h1 class="product-name">好好好</h1>
-        <div class="product-price" id="displayPrice">NT$ 1,111</div>
-        <p class="product-desc">好好抄</p>
-
-        <div class="qty-row">
-            <span>數量</span>
-            <button class="qty-btn" onclick="changeQty(-1)">-</button>
-            <span class="qty-display" id="qtyDisplay">1</span>
-            <button class="qty-btn" onclick="changeQty(1)">+</button>
-        </div>
-        <button class="add-btn" onclick="addToCart()">加入購物車</button>
-    </main>
+    <!-- Initialize Store ID -->
     <script>
-        const STORE_ID = 'aa1234';
-        const PRODUCT = { "id": "Kaa1234-289951", "name": "好好好", "price": 1111, "image": "https://raw.githubusercontent.com/vvstudiocode/korea/main/images/products/kolaa1234/1769020285150_A4LTS__85057.webp", "variants": [] };
-        let qty = 1;
+        window.currentStoreId = 'aa1234';
+    </script>
 
-        function changeQty(delta) {
-            qty = Math.max(1, qty + delta);
-            document.getElementById('qtyDisplay').textContent = qty;
+    <!-- 導航列 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <a href="../../stores/aa1234/">
+                    <img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/logo.png" alt="Logo"
+                        class="logo-img">
+                    <span class="logo-text">ji3ji3</span>
+                </a>
+            </div>
+            <div class="nav-actions">
+                <button class="cart-btn" id="cartBtn" onclick="Cart.toggle()">
+                    🛒 購物車
+                    <span class="cart-badge" id="cartBadge">0</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要內容區 -->
+    <main class="product-page">
+        <a href="../../stores/aa1234/" class="back-btn">← 返回商店</a>
+
+        <div class="product-grid">
+            <!-- Gallery -->
+            <div class="product-gallery">
+                <div class="gallery-main">
+                    <img id="mainImage" src="" alt="商品圖片">
+                </div>
+            </div>
+
+            <!-- Info -->
+            <div class="product-info">
+                <h1 id="productName"></h1>
+                <div class="product-price-display" id="productPrice"></div>
+
+                <div class="qty-row">
+                    <span>數量：</span>
+                    <div class="qty-controls">
+                        <button onclick="updateQty(-1)">-</button>
+                        <input type="number" id="qtyInput" value="1" min="1" readonly>
+                        <button onclick="updateQty(1)">+</button>
+                    </div>
+                </div>
+
+                <button class="add-to-cart-btn" onclick="addToCart()">
+                    加入購物車
+                </button>
+
+                <div class="product-description" id="productDesc"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 頁尾 -->
+    <footer class="site-footer">
+        <div class="footer-copyright">
+            2025 OMO Select. All rights reserved.
+        </div>
+    </footer>
+
+    <!-- 購物車側邊欄 -->
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h3>購物車</h3>
+            <button class="close-cart" id="closeCart" onclick="Cart.toggle()">✕</button>
+        </div>
+        <div class="cart-items" id="cartItems"></div>
+        <div class="cart-footer">
+            <div class="shipping-method-selector">
+                <label>運送方式：</label>
+                <div class="shipping-options">
+                    <label class="shipping-option">
+                        <input type="radio" name="shippingMethod" value="pickup"
+                            onchange="Checkout.setShippingMethod('pickup')">
+                        <span>限台中市面交 <strong>免運</strong></span>
+                    </label>
+                    <label class="shipping-option">
+                        <input type="radio" name="shippingMethod" value="711" checked
+                            onchange="Checkout.setShippingMethod('711')">
+                        <span>7-11 店到店 <strong>NT$ 60</strong></span>
+                    </label>
+                </div>
+            </div>
+            <div class="cart-total">
+                <span>總計：</span>
+                <span class="total-amount" id="totalAmount">NT$ 0</span>
+            </div>
+            <button class="checkout-btn" id="checkoutBtn" onclick="Checkout.show()">前往結帳</button>
+        </div>
+    </div>
+
+    <!-- 遮罩層 -->
+    <div class="overlay" id="overlay" onclick="Cart.toggle()"></div>
+
+    <!-- 結帳與成功模態框 -->
+    <div class="modal" id="checkoutModal">
+        <div class="modal-content checkout-form">
+            <button class="modal-close" onclick="Modal.close('checkoutModal')">✕</button>
+            <h2>填寫收件資訊</h2>
+            <form id="orderForm">
+                <!-- Reusing logic from checkout.js, needs form with specific IDs -->
+                <div class="form-group"><label>姓名 *</label><input type="text" id="customerName" name="name" required>
+                </div>
+                <div class="form-group"><label>手機 *</label><input type="tel" id="customerPhone" name="phone" required>
+                </div>
+                <div class="form-group"><label>Line ID *</label><input type="text" id="customerLineId" name="lineId"
+                        required></div>
+                <div class="form-group"><label>Email *</label><input type="email" id="customerEmail" name="email"
+                        required></div>
+
+                <div id="storeFieldsSection">
+                    <div class="shipping-notice">
+                        <p>📦 7-11 店到店取貨</p>
+                    </div>
+                    <div class="form-group"><label>門市名稱 *</label><input type="text" id="storeName" name="storeName"
+                            required></div>
+                    <div class="form-group"><label>門市店號 *</label><input type="text" id="storeCode" name="storeCode"
+                            required></div>
+                    <div class="form-group"><label>門市地址 *</label><input type="text" id="storeAddress"
+                            name="storeAddress" required></div>
+                </div>
+
+                <div class="form-group"><label>備注</label><textarea id="customerNote" name="note" rows="3"></textarea>
+                </div>
+
+                <div class="order-summary">
+                    <h3>訂單摘要</h3>
+                    <div id="orderSummary"></div>
+                    <div class="order-total">總金額：<span id="orderTotal">NT$ 0</span></div>
+                </div>
+                <button type="submit" class="submit-order-btn">確認送出訂單</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="successModal">
+        <div class="modal-content success-message">
+            <div class="success-icon">✓</div>
+            <h2>訂單送出成功！</h2>
+            <p>編號：<strong id="orderNumber"></strong></p>
+            <button class="continue-btn" onclick="Modal.close('successModal')">繼續購物</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../../src/core/api.js"></script>
+    <script src="../../src/core/storage.js"></script>
+    <script src="../../src/core/toast.js"></script>
+    <script src="../../src/core/utils.js"></script>
+    <script src="../../src/store/modules/products.js"></script>
+    <script src="../../src/store/modules/cart.js"></script>
+    <script src="../../src/store/modules/modal.js"></script>
+    <script src="../../src/store/modules/checkout.js"></script>
+    <script src="../../src/store/modules/kol-store.js"></script>
+
+    <script>
+        // Product Data
+        const PRODUCT = {
+            "id": "Kaa1234-289951",
+            "name": "好好好",
+            "price": 1111,
+            "image": "https://raw.githubusercontent.com/vvstudiocode/korea/main/images/products/kolaa1234/1769020285150_A4LTS__85057.webp",
+            "description": "好好抄"
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Init store context
+            await KolStore.init();
+            // Init Cart
+            Cart.init();
+
+            // Render Product
+            renderProduct();
+
+            // Setup Checkout Form Listener
+            document.getElementById('orderForm').addEventListener('submit', (e) => Checkout.handleSubmit(e));
+        });
+
+        function renderProduct() {
+            document.title = PRODUCT.name + ' | ji3ji3';
+            document.getElementById('mainImage').src = PRODUCT.image;
+            document.getElementById('productName').textContent = PRODUCT.name;
+            document.getElementById('productPrice').textContent = 'NT$ ' + PRODUCT.price.toLocaleString();
+            document.getElementById('productDesc').textContent = PRODUCT.description;
         }
 
-        function updatePrice() {
-            const select = document.getElementById('variantSelect');
-            if (select) {
-                const price = parseInt(select.options[select.selectedIndex].dataset.price);
-                document.getElementById('displayPrice').textContent = 'NT$ ' + price.toLocaleString();
-            }
+        function updateQty(delta) {
+            const input = document.getElementById('qtyInput');
+            const newVal = Math.max(1, parseInt(input.value) + delta);
+            input.value = newVal;
         }
 
         function addToCart() {
-            let cart = JSON.parse(localStorage.getItem('kol_cart_' + STORE_ID) || '[]');
-            let spec = '';
-            let price = PRODUCT.price;
-            const select = document.getElementById('variantSelect');
-            if (select && PRODUCT.variants.length > 0) {
-                const v = PRODUCT.variants[select.value];
-                spec = v.spec || v.name;
-                price = v.price || PRODUCT.price;
-            }
-            const existing = cart.findIndex(c => c.id === PRODUCT.id && c.spec === spec);
-            if (existing >= 0) {
-                cart[existing].qty += qty;
-            } else {
-                cart.push({ id: PRODUCT.id, name: PRODUCT.name, image: PRODUCT.image, spec, price, qty });
-            }
-            localStorage.setItem('kol_cart_' + STORE_ID, JSON.stringify(cart));
-            alert('已加入購物車！');
-            window.location.href = '../';
+            const qty = parseInt(document.getElementById('qtyInput').value);
+            Cart.add(PRODUCT, qty);
         }
     </script>
 </body>
