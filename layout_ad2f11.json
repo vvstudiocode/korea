@@ -1,1 +1,29 @@
-{"sections":[{"type":"product_list","title":"","sourceType":"auto","category":"全部","limit":999,"marginTop":0}],"footer":{"copyright":"© 2026 fg234f3","facebook":"","instagram":"","line":""}}
+{
+  "version": "1.0",
+  "lastUpdated": "2026-01-22T18:17:49.561Z",
+  "sections": [
+    {
+      "type": "product_list",
+      "title": "",
+      "sourceType": "auto",
+      "category": "全部",
+      "limit": 999,
+      "marginTop": 0
+    }
+  ],
+  "footer": {
+    "enabled": true,
+    "text": "",
+    "social": {
+      "facebook": "",
+      "instagram": "",
+      "line": "https://natuliquetaiwan.shoplineapp.com/"
+    },
+    "links": {}
+  },
+  "global": {
+    "backgroundColor": "#ffffff",
+    "fontFamily": "Noto Sans TC",
+    "fontSize": "16px"
+  }
+}
