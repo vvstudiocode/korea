@@ -313,6 +313,23 @@
                 <div class="product-price-display" id="priceDisplay">NT$ 2,290</div>
                 
                 
+                <div class="variant-group">
+                    <span class="variant-label">規格：</span>
+                    <div class="variant-options">
+                        <button class="variant-btn " 
+                                   data-spec="小" 
+                                   data-price="1340" 
+                                   data-stock="99"
+                                   onclick="selectVariant(this)"
+                                   >小</button>
+                        <button class="variant-btn " 
+                                   data-spec="大" 
+                                   data-price="1340" 
+                                   data-stock="99"
+                                   onclick="selectVariant(this)"
+                                   >大</button>
+                    </div>
+                </div>
 
                 <div class="qty-row">
                     <span>數量：</span>
@@ -328,7 +345,7 @@
                 </button>
 
                 <div class="stock-info">
-                    庫存：<span id="stockDisplay">99</span> 件
+                    庫存：<span id="stockDisplay">198</span> 件
                 </div>
 
                 <div class="product-description">
@@ -339,7 +356,7 @@
     </div>
 
     <script>
-        const PRODUCT = {"id":"P950427","name":"無尾熊信封","price":2290,"image":"https://raw.githubusercontent.com/vvstudiocode/korea/main/images/products/jellycat/MES6K__25932.jpg","stock":99,"variants":[]};
+        const PRODUCT = {"id":"P950427","name":"無尾熊信封","price":2290,"image":"https://raw.githubusercontent.com/vvstudiocode/korea/main/images/products/jellycat/MES6K__25932.jpg","stock":198,"variants":[{"spec":"小","price":1340,"cost":986,"stock":99,"image":""},{"spec":"大","price":1340,"cost":986,"stock":99,"image":""}]};
         
         let selectedSpec = null;
         let currentPrice = PRODUCT.price;
