@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>fg234f3</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --primary-hover: #6366f1dd;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Noto Sans TC', sans-serif; background: #f8fafc; min-height: 100vh; }
+        
+        /* Header */
+        .store-header { background: white; padding: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); position: sticky; top: 0; z-index: 100; }
+        .header-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+        .store-logo { height: 40px; object-fit: contain; }
+        .store-name { font-size: 1.3rem; font-weight: 700; color: var(--primary-color); }
+        .cart-btn { background: var(--primary-color); color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 8px; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 0.5rem; }
+        .cart-btn:hover { background: var(--primary-hover); }
+        .cart-count { background: white; color: var(--primary-color); padding: 0 0.5rem; border-radius: 10px; font-size: 0.85rem; font-weight: 700; }
+        
+        /* Main */
+        .main-content { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
+        
+        /* Products Grid */
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
+        @media (max-width: 640px) { .products-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; } }
+        
+        .product-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
+        .product-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+        .product-img { width: 100%; aspect-ratio: 1; object-fit: cover; }
+        .product-info { padding: 1rem; }
+        .product-name { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.5rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .product-price { font-size: 1.1rem; font-weight: 700; color: var(--primary-color); }
+        
+        /* Modal */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; padding: 1rem; }
+        .modal-overlay.active { display: flex; }
+        .modal-content { background: white; border-radius: 16px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
+        .modal-header { padding: 1rem; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .modal-header h3 { font-size: 1.1rem; }
+        .modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666; }
+        .modal-body { padding: 1rem; }
+        
+        /* Cart Sidebar */
+        .cart-sidebar { position: fixed; right: -400px; top: 0; width: 100%; max-width: 400px; height: 100%; background: white; box-shadow: -4px 0 24px rgba(0,0,0,0.15); z-index: 1001; transition: right 0.3s ease; display: flex; flex-direction: column; }
+        .cart-sidebar.open { right: 0; }
+        .cart-header { padding: 1rem; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .cart-items { flex: 1; overflow-y: auto; padding: 1rem; }
+        .cart-item { display: flex; gap: 1rem; padding: 1rem 0; border-bottom: 1px solid #f0f0f0; }
+        .cart-item-img { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; }
+        .cart-item-info { flex: 1; }
+        .cart-item-name { font-weight: 600; font-size: 0.9rem; }
+        .cart-item-spec { font-size: 0.8rem; color: #666; }
+        .cart-item-qty { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem; }
+        .qty-btn { width: 28px; height: 28px; border: 1px solid #ddd; background: white; border-radius: 4px; cursor: pointer; font-weight: 700; }
+        .cart-footer { padding: 1rem; border-top: 1px solid #eee; }
+        .cart-total { display: flex; justify-content: space-between; font-weight: 700; font-size: 1.1rem; margin-bottom: 1rem; }
+        .checkout-btn { width: 100%; padding: 1rem; background: var(--primary-color); color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 1rem; cursor: pointer; }
+        .checkout-btn:hover { background: var(--primary-hover); }
+        .cart-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1000; }
+        .cart-overlay.open { display: block; }
+        
+        /* Loading */
+        .loading { text-align: center; padding: 3rem; color: #888; }
+        
+        /* Empty State */
+        .empty-state { text-align: center; padding: 3rem; color: #888; }
+    </style>
+</head>
+<body>
+    <header class="store-header">
+        <div class="header-inner">
+            <div style="display: flex; align-items: center; gap: 0.8rem;">
+                
+                <span class="store-name">fg234f3</span>
+            </div>
+            <button class="cart-btn" onclick="openCart()">
+                🛒 購物車 <span class="cart-count" id="cartCount">0</span>
+            </button>
+        </div>
+    </header>
+    
+    <main class="main-content">
+        <div class="products-grid" id="productsGrid">
+            <div class="loading">載入商品中...</div>
+        </div>
+    </main>
+    
+    <!-- Cart Sidebar -->
+    <div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h3>購物車</h3>
+            <button class="modal-close" onclick="closeCart()">✕</button>
+        </div>
+        <div class="cart-items" id="cartItems">
+            <div class="empty-state">購物車是空的</div>
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>總計</span>
+                <span id="cartTotal">NT$ 0</span>
+            </div>
+            <button class="checkout-btn" onclick="goToCheckout()">前往結帳</button>
+        </div>
+    </div>
+    
+    <!-- Product Modal -->
+    <div class="modal-overlay" id="productModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalProductName">商品名稱</h3>
+                <button class="modal-close" onclick="closeProductModal()">✕</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Dynamic content -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const STORE_ID = 'ad2f11';
+        const API_URL = 'https://script.google.com/macros/s/AKfycby7V5VwHfn_Tb-wpg_SSrme2c2P5bin6qjhxEkr80RDLg6p5TPn2EXySkpG9qnyvfNF/exec';
+        let products = [];
+        let cart = JSON.parse(localStorage.getItem('kol_cart_' + STORE_ID) || '[]');
+        
+        // Load products
+        async function loadProducts() {
+            try {
+                const res = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action: 'getStoreProducts', storeId: STORE_ID })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    products = data.data.products || [];
+                    renderProducts();
+                }
+            } catch (e) {
+                document.getElementById('productsGrid').innerHTML = '<div class="empty-state">載入失敗</div>';
+            }
+        }
+        
+        function renderProducts() {
+            const grid = document.getElementById('productsGrid');
+            if (products.length === 0) {
+                grid.innerHTML = '<div class="empty-state">目前沒有商品</div>';
+                return;
+            }
+            grid.innerHTML = products.map(p => {
+                const img = (p.image || '').split(',')[0] || 'https://via.placeholder.com/300';
+                return `
+                    <div class="product-card" onclick="openProductModal('${p.id}')">
+                        <img src="${img}" alt="${p.name}" class="product-img">
+                        <div class="product-info">
+                            <div class="product-name">${p.name}</div>
+                            <div class="product-price">NT$ ${p.price.toLocaleString()}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function openProductModal(productId) {
+            const p = products.find(x => x.id === productId);
+            if (!p) return;
+            
+            document.getElementById('modalProductName').textContent = p.name;
+            const img = (p.image || '').split(',')[0] || 'https://via.placeholder.com/300';
+            
+            let variantsHtml = '';
+            if (p.variants && p.variants.length > 0) {
+                variantsHtml = '<div style="margin-bottom:1rem;"><label style="font-weight:600;margin-bottom:0.5rem;display:block;">選擇規格</label><select id="variantSelect" style="width:100%;padding:0.8rem;border:1px solid #ddd;border-radius:8px;">' + p.variants.map((v, i) => `<option value="${i}">${v.spec || v.name} - NT$ ${v.price}</option>`).join('') + '</select></div>';
+            }
+            
+            document.getElementById('modalBody').innerHTML = `
+                <img src="${img}" style="width:100%;border-radius:8px;margin-bottom:1rem;">
+                <p style="color:#666;margin-bottom:1rem;">${p.description || ''}</p>
+                <div style="font-size:1.2rem;font-weight:700;color:var(--primary-color);margin-bottom:1rem;">NT$ ${p.price.toLocaleString()}</div>
+                ${variantsHtml}
+                <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem;">
+                    <span style="font-weight:600;">數量</span>
+                    <div style="display:flex;align-items:center;gap:0.5rem;">
+                        <button class="qty-btn" onclick="changeQty(-1)">-</button>
+                        <span id="qtyDisplay" style="width:40px;text-align:center;">1</span>
+                        <button class="qty-btn" onclick="changeQty(1)">+</button>
+                    </div>
+                </div>
+                <button onclick="addToCart('${p.id}')" style="width:100%;padding:1rem;background:var(--primary-color);color:white;border:none;border-radius:8px;font-weight:600;font-size:1rem;cursor:pointer;">加入購物車</button>
+            `;
+            document.getElementById('productModal').classList.add('active');
+            window.currentProductQty = 1;
+        }
+        
+        function closeProductModal() {
+            document.getElementById('productModal').classList.remove('active');
+        }
+        
+        window.currentProductQty = 1;
+        function changeQty(delta) {
+            window.currentProductQty = Math.max(1, window.currentProductQty + delta);
+            document.getElementById('qtyDisplay').textContent = window.currentProductQty;
+        }
+        
+        function addToCart(productId) {
+            const p = products.find(x => x.id === productId);
+            if (!p) return;
+            
+            let spec = '';
+            let price = p.price;
+            const variantSelect = document.getElementById('variantSelect');
+            if (variantSelect && p.variants && p.variants.length > 0) {
+                const v = p.variants[variantSelect.value];
+                spec = v.spec || v.name;
+                price = v.price;
+            }
+            
+            const existingIndex = cart.findIndex(c => c.id === productId && c.spec === spec);
+            if (existingIndex >= 0) {
+                cart[existingIndex].qty += window.currentProductQty;
+            } else {
+                cart.push({
+                    id: productId,
+                    name: p.name,
+                    image: (p.image || '').split(',')[0],
+                    spec: spec,
+                    price: price,
+                    qty: window.currentProductQty
+                });
+            }
+            
+            saveCart();
+            closeProductModal();
+            renderCart();
+            updateCartCount();
+        }
+        
+        function saveCart() {
+            localStorage.setItem('kol_cart_' + STORE_ID, JSON.stringify(cart));
+        }
+        
+        function updateCartCount() {
+            const count = cart.reduce((sum, c) => sum + c.qty, 0);
+            document.getElementById('cartCount').textContent = count;
+        }
+        
+        function renderCart() {
+            const container = document.getElementById('cartItems');
+            if (cart.length === 0) {
+                container.innerHTML = '<div class="empty-state">購物車是空的</div>';
+                document.getElementById('cartTotal').textContent = 'NT$ 0';
+                return;
+            }
+            container.innerHTML = cart.map((c, i) => `
+                <div class="cart-item">
+                    <img src="${c.image || 'https://via.placeholder.com/60'}" class="cart-item-img">
+                    <div class="cart-item-info">
+                        <div class="cart-item-name">${c.name}</div>
+                        <div class="cart-item-spec">${c.spec || ''} - NT$ ${c.price.toLocaleString()}</div>
+                        <div class="cart-item-qty">
+                            <button class="qty-btn" onclick="updateCartQty(${i}, -1)">-</button>
+                            <span>${c.qty}</span>
+                            <button class="qty-btn" onclick="updateCartQty(${i}, 1)">+</button>
+                            <button onclick="removeFromCart(${i})" style="margin-left:auto;background:none;border:none;color:#e53935;cursor:pointer;">刪除</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            const total = cart.reduce((sum, c) => sum + c.price * c.qty, 0);
+            document.getElementById('cartTotal').textContent = 'NT$ ' + total.toLocaleString();
+        }
+        
+        function updateCartQty(index, delta) {
+            cart[index].qty = Math.max(1, cart[index].qty + delta);
+            saveCart();
+            renderCart();
+            updateCartCount();
+        }
+        
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            saveCart();
+            renderCart();
+            updateCartCount();
+        }
+        
+        function openCart() {
+            document.getElementById('cartSidebar').classList.add('open');
+            document.getElementById('cartOverlay').classList.add('open');
+        }
+        
+        function closeCart() {
+            document.getElementById('cartSidebar').classList.remove('open');
+            document.getElementById('cartOverlay').classList.remove('open');
+        }
+        
+        function goToCheckout() {
+            if (cart.length === 0) {
+                alert('購物車是空的');
+                return;
+            }
+            // Redirect to main site checkout with cart data
+            const cartData = encodeURIComponent(JSON.stringify({ storeId: STORE_ID, items: cart }));
+            window.location.href = 'https://vvstudiocode.github.io/korea/?checkout=' + cartData;
+        }
+        
+        // Initialize
+        loadProducts();
+        updateCartCount();
+        renderCart();
+    </script>
+</body>
+</html>
