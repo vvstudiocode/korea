@@ -110,7 +110,7 @@ function hideLoadingOverlay() {
 function callApi(subAction, payload = {}) {
     // 映射舊的 action 名稱到新的 KOL action
     const actionMap = {
-        'saveLayoutToGitHub': 'kolSaveLayout'
+        'saveLayoutToGitHub': 'saveLayout'
     };
 
     const mappedAction = actionMap[subAction] || subAction;
@@ -2074,7 +2074,7 @@ async function loadKolFooter() {
         document.getElementById('footerFb').value = footer.social?.facebook || '';
         document.getElementById('footerIg').value = footer.social?.instagram || '';
         document.getElementById('footerLine').value = footer.social?.line || '';
-        document.getElementById('footerSupport').value = footer.links?.support || '';
+
 
     } catch (error) {
         console.error('Error loading footer:', error);
@@ -2091,17 +2091,13 @@ async function saveKolFooter() {
         const facebook = document.getElementById('footerFb').value.trim();
         const instagram = document.getElementById('footerIg').value.trim();
         const line = document.getElementById('footerLine').value.trim();
-        const support = document.getElementById('footerSupport').value.trim();
-
         const newFooter = {
             enabled: true,
             text: text,
             social: {
                 facebook, instagram, line
             },
-            links: {
-                support
-            }
+            links: {}
         };
 
         // 更新 PageBuilder 的 footer 狀態
