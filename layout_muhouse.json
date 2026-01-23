@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastUpdated": "2026-01-23T05:20:47.372Z",
+  "lastUpdated": "2026-01-23T05:23:40.084Z",
   "sections": [
     {
       "type": "product_list",
@@ -18,11 +18,17 @@
       "facebook": "",
       "instagram": "",
       "line": "tinyurl.com/bdhymmn4"
-    }
+    },
+    "notices": [
+      {
+        "title": "新區塊標題",
+        "content": "區塊內容..."
+      }
+    ]
   },
   "global": {
-    "backgroundColor": "#c3f3e3",
-    "fontFamily": "Microsoft JhengHei",
+    "backgroundColor": "#ffffff",
+    "fontFamily": "Noto Sans TC",
     "fontSize": "16px",
     "title": "小沐屋",
     "logo": "https://raw.githubusercontent.com/vvstudiocode/korea/main/images/products/kolmuhouse/1769135758235____-2.jpg"
