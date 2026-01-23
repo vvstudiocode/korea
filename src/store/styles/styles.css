@@ -334,6 +334,8 @@ h4 {
     width: 380px;
     max-width: 100vw;
     height: 100vh;
+    height: 100dvh;
+    /* Mobile browser address bar fix */
     background: var(--bg-white);
     box-shadow: -10px 0 40px rgba(0, 0, 0, 0.05);
     z-index: 1000;
@@ -467,8 +469,11 @@ h4 {
 
 .cart-footer {
     padding: 1rem 1.5rem;
-    /* Reduced padding */
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+    /* iOS Safe Area */
     background: var(--bg-pink);
+    flex-shrink: 0;
+    /* Prevent footer form shrinking */
 }
 
 .cart-total {

@@ -2475,22 +2475,22 @@ function submitManualOrder() {
     }
 
     const orderData = {
-        customer: {
-            name: customerName,
-            phone: customerPhone,
-            email: document.getElementById('detailEmail').value.trim(),
-            lineId: document.getElementById('detailLine').value.trim()
-        },
-        shipping: {
-            method: document.getElementById('detailShipping').value,
-            storeName: document.getElementById('detailStoreName').value.trim(),
-            storeCode: document.getElementById('detailStoreCode').value.trim(),
-            address: document.getElementById('detailStoreAddress').value.trim(),
-            fee: parseInt(document.getElementById('detailShippingFee').value) || 0
-        },
+        // Flattened structure for GAS backend
+        customerName: customerName,
+        customerPhone: customerPhone,
+        email: document.getElementById('detailEmail').value.trim(),
+        lineId: document.getElementById('detailLine').value.trim(),
+
+        shippingMethod: document.getElementById('detailShipping').value,
+        storeName: document.getElementById('detailStoreName').value.trim(),
+        storeCode: document.getElementById('detailStoreCode').value.trim(),
+        storeAddress: document.getElementById('detailStoreAddress').value.trim(),
+        shippingFee: parseInt(document.getElementById('detailShippingFee').value) || 0,
+
         items: tempOrderItems,
         total: parseInt(document.getElementById('detailTotal').textContent.replace(/[^\d]/g, '')) || 0,
-        note: document.getElementById('detailNote').value.trim()
+        note: document.getElementById('detailNote').value.trim(),
+        status: '待處理'
     };
 
     const btn = document.querySelector('#orderDetailModal .accent-btn');
