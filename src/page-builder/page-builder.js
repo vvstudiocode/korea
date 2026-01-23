@@ -362,19 +362,18 @@ const PageBuilder = {
 
         // 1. 全域設定區塊
         const globalDiv = document.createElement('div');
-        // KOL 模式下添加 disabled 樣式
-        globalDiv.className = `comp-item global-item ${this.editingGlobal ? 'active' : ''} ${isKolMode ? 'disabled-item' : ''}`;
+        // KOL 模式下允許編輯全域設定 (背景、字體)
+        globalDiv.className = `comp-item global-item ${this.editingGlobal ? 'active' : ''}`;
 
-        const globalClickAction = isKolMode ? '' : 'onclick="PageBuilder.toggleGlobalEdit()"';
-        const globalCursor = isKolMode ? 'default' : 'pointer';
-        const globalOpacity = isKolMode ? 'opacity: 0.6;' : '';
+        const globalClickAction = 'onclick="PageBuilder.toggleGlobalEdit()"';
+        const globalCursor = 'pointer';
+        const globalOpacity = '';
 
         globalDiv.innerHTML = `
             <div class="comp-item-header" style="background: #e3f2fd; border-bottom: 2px solid #2196f3; ${globalOpacity}">
                 <div class="comp-drag-handle" style="visibility:hidden;"></div>
                 <div class="comp-info" ${globalClickAction} style="cursor:${globalCursor}; flex: 1;">
                     <span class="comp-name" style="font-weight:bold; color:#0d47a1; margin-left: 0;">全域設定</span>
-                    ${isKolMode ? '<span style="font-size:12px; color:#666; margin-left:10px;">(僅總部可編輯)</span>' : ''}
                 </div>
                 <div class="comp-actions">
                     <!-- edit btn removed -->
@@ -1329,6 +1328,14 @@ const PageBuilder = {
         showLoadingOverlay(); // Show Global Loading
 
         try {
+            // Sync KOL store info to global settings to prevent data loss or mismatch
+            if (typeof kolStoreInfo !== 'undefined' && this.storeId) {
+                if (!this.global) this.global = {};
+                // Ensure we protect the title and logo determined by KOL settings
+                if (kolStoreInfo.storeName) this.global.title = kolStoreInfo.storeName;
+                if (kolStoreInfo.logoUrl) this.global.logo = kolStoreInfo.logoUrl;
+            }
+
             const layoutData = {
                 version: '1.0',
                 lastUpdated: new Date().toISOString(),
