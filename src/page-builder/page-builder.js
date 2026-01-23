@@ -357,14 +357,24 @@ const PageBuilder = {
 
         list.innerHTML = '';
 
+        // 判斷是否為 KOL 模式 (有 storeId)
+        const isKolMode = !!this.storeId;
+
         // 1. 全域設定區塊
         const globalDiv = document.createElement('div');
-        globalDiv.className = `comp-item global-item ${this.editingGlobal ? 'active' : ''}`;
+        // KOL 模式下添加 disabled 樣式
+        globalDiv.className = `comp-item global-item ${this.editingGlobal ? 'active' : ''} ${isKolMode ? 'disabled-item' : ''}`;
+
+        const globalClickAction = isKolMode ? '' : 'onclick="PageBuilder.toggleGlobalEdit()"';
+        const globalCursor = isKolMode ? 'default' : 'pointer';
+        const globalOpacity = isKolMode ? 'opacity: 0.6;' : '';
+
         globalDiv.innerHTML = `
-            <div class="comp-item-header" style="background: #e3f2fd; border-bottom: 2px solid #2196f3;">
+            <div class="comp-item-header" style="background: #e3f2fd; border-bottom: 2px solid #2196f3; ${globalOpacity}">
                 <div class="comp-drag-handle" style="visibility:hidden;"></div>
-                <div class="comp-info" onclick="PageBuilder.toggleGlobalEdit()" style="cursor:pointer; flex: 1;">
+                <div class="comp-info" ${globalClickAction} style="cursor:${globalCursor}; flex: 1;">
                     <span class="comp-name" style="font-weight:bold; color:#0d47a1; margin-left: 0;">全域設定</span>
+                    ${isKolMode ? '<span style="font-size:12px; color:#666; margin-left:10px;">(僅總部可編輯)</span>' : ''}
                 </div>
                 <div class="comp-actions">
                     <!-- edit btn removed -->
@@ -375,7 +385,7 @@ const PageBuilder = {
             </div>
         `;
 
-        if (this.editingGlobal) {
+        if (this.editingGlobal && !isKolMode) {
             this.renderGlobalForm(globalDiv.querySelector('#edit-form-global'));
         }
 
@@ -384,20 +394,30 @@ const PageBuilder = {
         // 渲染區塊列表
         this.layout.forEach((comp, index) => {
             const div = document.createElement('div');
-            div.className = `comp-item ${this.editingIndex === index && !this.editingFooter ? 'active' : ''}`;
+            // KOL 模式下添加 disabled 樣式，並不允許 active
+            div.className = `comp-item ${(!isKolMode && this.editingIndex === index && !this.editingFooter) ? 'active' : ''} ${isKolMode ? 'disabled-item' : ''}`;
             div.dataset.index = index;
 
             const info = this.getComponentTypeInfo(comp.type);
+            const itemClickAction = isKolMode ? '' : `onclick="PageBuilder.toggleEdit(${index})"`;
+            const itemCursor = isKolMode ? 'default' : 'pointer';
+            const itemOpacity = isKolMode ? 'opacity: 0.6;' : '';
+
+            // KOL 模式下不顯示刪除按鈕和拖滑鼠標
+            const deleteBtn = isKolMode ? '' : `<button class="comp-btn delete" onclick="PageBuilder.removeComponent(${index})">刪除</button>`;
+            const dragHandleStyle = isKolMode ? 'visibility: hidden;' : 'touch-action: none;';
+            const dragHandleContent = isKolMode ? '' : '☰';
 
             div.innerHTML = `
-                <div class="comp-item-header">
-                    <div class="comp-drag-handle" title="拖拽排序" style="touch-action: none;">☰</div>
-                    <div class="comp-info" onclick="PageBuilder.toggleEdit(${index})" style="cursor:pointer; flex: 1;">
+                <div class="comp-item-header" style="${itemOpacity}">
+                    <div class="comp-drag-handle" title="拖拽排序" style="${dragHandleStyle}">${dragHandleContent}</div>
+                    <div class="comp-info" ${itemClickAction} style="cursor:${itemCursor}; flex: 1;">
                         <span class="comp-name">${comp.title || info.name}</span>
                         <span class="comp-type-tag">${info.name}</span>
+                        ${isKolMode ? '<span style="font-size:11px; color:#999; margin-left:5px;">(唯讀)</span>' : ''}
                     </div>
                     <div class="comp-actions">
-                        <button class="comp-btn delete" onclick="PageBuilder.removeComponent(${index})">刪除</button>
+                        ${deleteBtn}
                     </div>
                 </div>
                 <div class="comp-edit-panel">
@@ -405,43 +425,47 @@ const PageBuilder = {
                 </div>
             `;
 
-            if (this.editingIndex === index && !this.editingFooter) {
+            if (!isKolMode && this.editingIndex === index && !this.editingFooter) {
                 this.renderInlineForm(div.querySelector(`#edit-form-${index}`), comp, index);
             }
 
-            div.addEventListener('mouseenter', () => this.highlightPreview(index));
-            div.addEventListener('mouseleave', () => this.clearHighlight());
+            if (!isKolMode) {
+                div.addEventListener('mouseenter', () => this.highlightPreview(index));
+                div.addEventListener('mouseleave', () => this.clearHighlight());
 
-            const handle = div.querySelector('.comp-drag-handle');
-            handle.draggable = true;
-            handle.addEventListener('dragstart', (e) => {
-                div.classList.add('dragging');
-                e.dataTransfer.setData('text/plain', index);
-            });
-            handle.addEventListener('dragend', () => div.classList.remove('dragging'));
-            div.addEventListener('dragover', (e) => e.preventDefault());
-            div.addEventListener('drop', (e) => {
-                e.preventDefault();
-                const fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
-                const toIndex = index;
-                this.reorderComponents(fromIndex, toIndex);
-            });
+                const handle = div.querySelector('.comp-drag-handle');
+                handle.draggable = true;
+                handle.addEventListener('dragstart', (e) => {
+                    div.classList.add('dragging');
+                    e.dataTransfer.setData('text/plain', index);
+                });
+                handle.addEventListener('dragend', () => div.classList.remove('dragging'));
+                div.addEventListener('dragover', (e) => e.preventDefault());
+                div.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    const fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
+                    const toIndex = index;
+                    this.reorderComponents(fromIndex, toIndex);
+                });
 
-            // Mobile Touch Support
-            handle.addEventListener('touchstart', (e) => this.handleTouchStart(e, div, index), { passive: false });
-            handle.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: false });
-            handle.addEventListener('touchend', (e) => this.handleTouchEnd(e));
+                // Mobile Touch Support
+                handle.addEventListener('touchstart', (e) => this.handleTouchStart(e, div, index), { passive: false });
+                handle.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: false });
+                handle.addEventListener('touchend', (e) => this.handleTouchEnd(e));
+            }
 
             list.appendChild(div);
         });
 
-        // 在所有自訂元件之後，加入「新增區塊」按鈕
-        const addBtnContainer = document.createElement('div');
-        addBtnContainer.style.cssText = 'padding: 5px 0; display: flex; justify-content: center; margin-bottom: 10px;';
-        addBtnContainer.innerHTML = `
-            <button class="add-block-btn" onclick="openModal('addCompModal')" title="新增區塊">＋ 區塊</button>
-        `;
-        list.appendChild(addBtnContainer);
+        // 在所有自訂元件之後，加入「新增區塊」按鈕 (僅非 KOL 模式顯示)
+        if (!isKolMode) {
+            const addBtnContainer = document.createElement('div');
+            addBtnContainer.style.cssText = 'padding: 5px 0; display: flex; justify-content: center; margin-bottom: 10px;';
+            addBtnContainer.innerHTML = `
+                <button class="add-block-btn" onclick="openModal('addCompModal')" title="新增區塊">＋ 區塊</button>
+            `;
+            list.appendChild(addBtnContainer);
+        }
 
         // 渲染頁尾區塊 (固定在最下方)
         const footerDiv = document.createElement('div');
