@@ -655,8 +655,14 @@ function updateSortButtonVisibility(show = false) {
     if (show) {
         if (!btn) {
             // Fix: Try toolbar first, then header
-            const container = document.querySelector('#productsView .toolbar') || document.querySelector('#productsView .page-header');
+            let container = document.querySelector('#productsView .toolbar');
+
+            // If toolbar doesn't exist or we want to ensure unique button
+            if (!container) container = document.querySelector('#productsView .page-header');
             if (!container) return;
+
+            // Check if button already exists in container (double check)
+            if (document.getElementById('saveKolSortBtn')) return;
 
             btn = document.createElement('button');
             btn.id = 'saveKolSortBtn';
@@ -1031,41 +1037,90 @@ async function saveAllProductChanges() {
 
         // 2. Collect modified products
         const modifiedProducts = kolProducts.filter(p => p._modified);
-        const updates = modifiedProducts.map(p => ({
-            productId: p.id,
-            updates: {
-                customPrice: p.customPrice, // Use customPrice for KOL price
-                price: p.customPrice,       // Sync price
-                stock: p.stock,
-                status: p.status
-            }
-        }));
 
-        console.log('Saving all changes:', { sortedIds, updates });
+        // Split updates into HQ (simple) and OWN (full)
+        const updatesHQ = [];
+        const updatesOwn = [];
+
+        modifiedProducts.forEach(p => {
+            if (p.type === 'own' && p._pendingData) {
+                // Full update for Own Product
+                updatesOwn.push({
+                    productId: p.id,
+                    productData: p._pendingData
+                });
+            } else if (p.type === 'own') { // Own product but only simple status/stock toggle (no pendingData)
+                // Construct full data from current object as fallback
+                updatesOwn.push({
+                    productId: p.id,
+                    productData: {
+                        name: p.name,
+                        category: p.category,
+                        brand: p.brand,
+                        price: p.price,
+                        wholesalePrice: p.wholesalePrice || 0,
+                        stock: p.stock,
+                        status: p.status,
+                        description: p.description,
+                        images: p.images,
+                        variants: p.variants
+                    }
+                });
+            } else {
+                // HQ Product (Simple Update)
+                updatesHQ.push({
+                    productId: p.id,
+                    updates: {
+                        customPrice: p.customPrice,
+                        price: p.customPrice,
+                        stock: p.stock,
+                        status: p.status
+                    }
+                });
+            }
+        });
+
+        console.log('Saving all changes:', { sortedIds, updatesHQ, updatesOwn });
 
         // First save order
         const sortResult = await callKolApi('kolReorderProducts', { orderedIds: sortedIds });
 
-        // Then save individual updates (in parallel or sequence)
-        // Ideally backend should support batchUpdate, but for now we loop
         let updateErrors = 0;
-        if (updates.length > 0) {
-            // Using Promise.all for concurrency
-            const results = await Promise.all(updates.map(item =>
+
+        // Process HQ Updates
+        if (updatesHQ.length > 0) {
+            const results = await Promise.all(updatesHQ.map(item =>
                 callKolApi('kolUpdateProduct', {
                     storeId: kolStoreId,
                     productId: item.productId,
                     updates: item.updates
                 })
             ));
+            updateErrors += results.filter(r => !r.success).length;
+        }
 
-            updateErrors = results.filter(r => !r.success).length;
+        // Process Own Product Updates
+        if (updatesOwn.length > 0) {
+            const results = await Promise.all(updatesOwn.map(item =>
+                callKolApi('kolUpdateOwnProduct', {
+                    productId: item.productId,
+                    productData: item.productData
+                }).then(res => {
+                    // Regenerate Page for Own Products
+                    if (res.success) generateProductPageAsync(item.productId);
+                    return res;
+                })
+            ));
+            updateErrors += results.filter(r => !r.success).length;
         }
 
         if (sortResult.success && updateErrors === 0) {
             showToast('所有變更已儲存', 'success');
             // Clear modified flags
-            kolProducts.forEach(p => delete p._modified);
+            kolProducts.forEach(p => {
+                delete p._modified;
+                delete p._pendingData;
+            });
             renderMyProducts(kolProducts); // Re-render to clear highlights
             btn.remove();
         } else {
@@ -1631,26 +1686,32 @@ function renderEditOwnVariants() {
     `).join('');
 }
 
+
 /**
- * 提交編輯專屬商品
+ * 提交編輯專屬商品 (改為暫存)
  */
 async function submitEditOwnProduct(event) {
     event.preventDefault();
 
     const productId = document.getElementById('editOwnProdId').value;
     const name = document.getElementById('editOwnProdName').value.trim();
-    const price = document.getElementById('editOwnProdPrice').value;
-    const stock = document.getElementById('editOwnProdStock').value;
+    const price = parseInt(document.getElementById('editOwnProdPrice').value);
+    const stock = parseInt(document.getElementById('editOwnProdStock').value);
+    const status = document.getElementById('editOwnProdStatus').value;
+    const desc = document.getElementById('editOwnProdDesc').value;
+    const category = document.getElementById('editOwnProdCategory').value;
+    const brand = document.getElementById('editOwnProdBrand').value.trim();
+    const cost = parseInt(document.getElementById('editOwnProdCost').value) || 0;
 
-    if (!name || !price || !stock) {
+    if (!name || isNaN(price) || isNaN(stock)) {
         showToast('請填寫必填欄位', 'warning');
         return;
     }
 
-    showLoadingOverlay('儲存變更中...');
+    showLoadingOverlay('處理圖片中...');
 
     try {
-        // 1. 上傳新圖片
+        // 1. 上傳新圖片 (圖片必須先上傳拿到 URL)
         const allImages = [...editOwnExistingImages];
 
         if (editOwnProductFiles.length > 0) {
@@ -1690,37 +1751,35 @@ async function submitEditOwnProduct(event) {
             });
         });
 
-        // 3. 組裝更新資料
-        const productData = {
-            name: name,
-            category: document.getElementById('editOwnProdCategory').value,
-            brand: document.getElementById('editOwnProdBrand').value.trim(),
-            price: parseInt(price),
-            wholesalePrice: parseInt(document.getElementById('editOwnProdCost').value) || 0,
-            stock: parseInt(stock),
-            status: document.getElementById('editOwnProdStatus').value,
-            description: document.getElementById('editOwnProdDesc').value,
-            images: allImages,
-            variants: variants
-        };
+        // 3. 更新本地物件 (暫存)
+        const product = kolProducts.find(p => p.id === productId);
+        if (product) {
+            product.name = name;
+            product.customPrice = price; // Display price
+            product.price = price;       // Actual price
+            product.stock = stock;
+            product.availableStock = stock;
+            product.status = status;
+            product.description = desc;
+            product.category = category;
+            product.brand = brand;
+            product.wholesalePrice = cost;
+            product.images = allImages;
+            product.image = allImages.join(','); // Legacy support
+            product.variants = variants;
 
-        document.getElementById('loadingMessage').textContent = '儲存商品資料...';
-
-        const result = await callKolApi('kolUpdateOwnProduct', {
-            productId: productId,
-            productData: productData
-        });
-
-        if (result.success) {
-            showToast('商品更新成功！', 'success');
-            closeModal('editOwnProductModal');
-            loadMyProducts();
-
-            // 生成商品頁面
-            generateProductPageAsync(productId);
-        } else {
-            showToast('更新失敗: ' + result.error, 'error');
+            // Mark as modified with full data payload
+            product._modified = true;
+            product._pendingData = {
+                name, category, brand, price, wholesalePrice: cost,
+                stock, status, description: desc, images: allImages, variants
+            };
         }
+
+        showToast('已更新到暫存區，請點擊上方「儲存所有變更」來生效', 'info');
+        closeModal('editOwnProductModal');
+        renderMyProducts(kolProducts);
+        updateSortButtonVisibility(true);
 
     } catch (err) {
         showToast('發生錯誤', 'error');
