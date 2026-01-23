@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastUpdated": "2026-01-22T18:31:13.043Z",
+  "lastUpdated": "2026-01-23T02:47:18.076Z",
   "sections": [
     {
       "type": "product_list",
@@ -18,7 +18,13 @@
       "facebook": "",
       "instagram": "",
       "line": "https://natuliquetaiwan.shoplineapp.com/"
-    }
+    },
+    "notices": [
+      {
+        "title": "新區塊標題",
+        "content": "區塊內容..."
+      }
+    ]
   },
   "global": {
     "backgroundColor": "#ffffff",
