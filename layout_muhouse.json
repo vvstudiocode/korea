@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastUpdated": "2026-01-23T06:29:43.774Z",
+  "lastUpdated": "2026-01-23T07:02:07.156Z",
   "sections": [
     {
       "type": "product_list",
@@ -17,7 +17,8 @@
     "socialLinks": {
       "facebook": "",
       "instagram": "https://www.instagram.com/muhouse_26/",
-      "line": "https://line.me/ti/g2/G1ZQUghmX-6JUBT6PSsUzQnAB7OeG_1kVYfmnA?utm_source=invitation&utm_medium=link_copy&utm_campaign=default"
+      "line": "https://line.me/ti/g2/G1ZQUghmX-6JUBT6PSsUzQnAB7OeG_1kVYfmnA?utm_source=invitation&utm_medium=link_copy&utm_campaign=default",
+      "threads": "https://www.threads.com/@muhouse_26?xmt=AQF0cOi8VaPJ9VexgquS0DdRZ6cBI6eu_NcH8iE29PDfdbA"
     }
   },
   "global": {
@@ -25,6 +26,6 @@
     "fontFamily": "Noto Sans TC",
     "fontSize": "16px",
     "title": "小沐屋",
-    "logo": "https://raw.githubusercontent.com/vvstudiocode/korea/main/images/products/kolmuhouse/1769149358729________2026-01-23_142001.jpg"
+    "logo": "https://raw.githubusercontent.com/vvstudiocode/korea/main/images/products/kolmuhouse/1769151164608________2026-01-23_145226.jpg"
   }
 }
