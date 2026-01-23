@@ -1413,6 +1413,28 @@ const PageBuilder = {
             // 等待主要內容渲染完成
             await PageRenderer.render(container, this.layout);
 
+            // 應用全域設定 (背景、字體等)
+            if (this.global) {
+                // PageRenderer.applyGlobalSettings 會修改 body 樣式
+                // 在 PageBuilder 預覽中，我們可能希望只影響預覽區塊
+                // 但 PageRenderer 預設是改 document.body (lines 448-451)
+                // 我們需要讓它支援只改預覽容器，或手動覆蓋
+
+                // 如果 PageRenderer 支援傳入 container 或有特殊模式最好
+                // 這裡我們先嘗試覆蓋預覽容器的樣式
+                if (this.global.backgroundColor) {
+                    container.style.backgroundColor = this.global.backgroundColor;
+                    // Also set preview viewport background to match
+                    const viewport = document.getElementById('previewViewport');
+                    if (viewport) viewport.style.backgroundColor = this.global.backgroundColor;
+                }
+                if (this.global.fontFamily) container.style.fontFamily = this.global.fontFamily;
+
+                // 也要呼叫 PageRenderer 的 apply 以防它有其他邏輯 (雖然它會改 body，但在 iframe 或獨立頁面沒差，但在 admin 後台可能會改到後台背景)
+                // ⚠️ 注意：在 Admin 後台直接呼叫 applyGlobalSettings 會改到後台的 body 背景！
+                // 所以我們應該手動只改 preview container，而不呼叫 PageRenderer.applyGlobalSettings (除非該函數有保護機制)
+            }
+
             // 渲染頁尾預覽區塊 (確保在最後)
             if (this.footer) {
                 this.renderFooterPreview(container);
