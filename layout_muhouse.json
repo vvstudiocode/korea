@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastUpdated": "2026-01-23T01:31:37.751Z",
+  "lastUpdated": "2026-01-23T05:20:28.620Z",
   "sections": [
     {
       "type": "product_list",
@@ -21,8 +21,10 @@
     }
   },
   "global": {
-    "backgroundColor": "#ffffff",
-    "fontFamily": "Noto Sans TC",
-    "fontSize": "16px"
+    "backgroundColor": "#c3f3e3",
+    "fontFamily": "Microsoft JhengHei",
+    "fontSize": "16px",
+    "title": "小沐屋",
+    "logo": "https://raw.githubusercontent.com/vvstudiocode/korea/main/images/products/kolmuhouse/1769135758235____-2.jpg"
   }
 }
