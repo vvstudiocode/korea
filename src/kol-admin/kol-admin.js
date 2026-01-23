@@ -297,9 +297,9 @@ async function kolSwitchTab(tabId) {
         document.getElementById('footerView').style.display = 'block';
         document.getElementById('pageTitle').textContent = '頁尾設定';
         if (typeof loadKolFooter === 'function') loadKolFooter();
-    } else if (tabId === 'layout') {
+    } else if (tabId === 'builder') {
         document.getElementById('builderSection').style.display = 'block';
-        document.getElementById('pageTitle').textContent = '排版管理';
+        document.getElementById('pageTitle').textContent = '首頁排版';
 
         // 確保商品資料已載入，用於排版預覽
         if (kolProducts.length === 0 && typeof loadMyProducts === 'function') {
@@ -329,7 +329,7 @@ async function kolSwitchTab(tabId) {
     }
 
     // 切換 Tab 後滾動到最上方
-    const currentViewId = tabId === 'layout' ? 'builderSection' : (tabId === 'dashboard' ? 'dashboardView' : tabId + 'View');
+    const currentViewId = tabId === 'builder' ? 'builderSection' : (tabId === 'dashboard' ? 'dashboardView' : tabId + 'View');
     const viewEl = document.getElementById(currentViewId);
     if (viewEl) {
         viewEl.scrollTop = 0;
