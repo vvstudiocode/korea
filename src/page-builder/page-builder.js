@@ -413,7 +413,7 @@ const PageBuilder = {
                     <div class="comp-info" ${itemClickAction} style="cursor:${itemCursor}; flex: 1;">
                         <span class="comp-name">${comp.title || info.name}</span>
                         <span class="comp-type-tag">${info.name}</span>
-                        ${isKolMode ? '<span style="font-size:11px; color:#999; margin-left:5px;">(唯讀)</span>' : ''}
+                        ${isKolMode ? '<span style="font-size:11px; color:#999; margin-left:5px;">(即將開放)</span>' : ''}
                     </div>
                     <div class="comp-actions">
                         ${deleteBtn}
