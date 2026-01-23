@@ -384,7 +384,7 @@ const PageBuilder = {
             </div>
         `;
 
-        if (this.editingGlobal && !isKolMode) {
+        if (this.editingGlobal) {
             this.renderGlobalForm(globalDiv.querySelector('#edit-form-global'));
         }
 
