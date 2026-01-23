@@ -490,10 +490,20 @@ function renderMyProducts(products) {
         const profit = (p.customPrice || 0) - (p.wholesalePrice || 0);
         const imageUrl = (p.image || '').split(',')[0].trim() || 'https://via.placeholder.com/50';
         const typeTag = p.type === 'own' ? '<span class="tag tag-own">自建</span>' : '';
-        const statusBadge = p.status === 'active' ? '<span class="status-badge status-done">上架中</span>' : '<span class="status-badge status-pending">下架</span>';
+        const isModified = p._modified;
+        const modifiedStyle = isModified ? 'background-color: #fff3cd;' : '';
+
+        // Status Toggle Switch
+        const isChecked = p.status === 'active' ? 'checked' : '';
+        const statusHtml = `
+            <label class="switch" onclick="event.stopPropagation()">
+                <input type="checkbox" ${isChecked} onchange="toggleProductStatus('${p.id}')">
+                <span class="slider round"></span>
+            </label>
+        `;
 
         return `
-        <tr class="product-row" draggable="true" data-id="${p.id}" data-index="${index}" onclick="showKolProductDetail('${p.id}')">
+        <tr class="product-row" draggable="true" data-id="${p.id}" data-index="${index}" onclick="showKolProductDetail('${p.id}')" style="${modifiedStyle}">
             <td class="drag-handle" onclick="event.stopPropagation()">⠿</td>
             <td><img src="${imageUrl}" class="table-thumb"></td>
             <td>${p.name} ${typeTag}</td>
@@ -502,7 +512,7 @@ function renderMyProducts(products) {
             <td style="color:#28a745; font-weight:500;">${formatCurrency(profit)}</td>
             <td>${p.availableStock || p.stock || 0}</td>
             <td>${p.soldQty || 0}</td>
-            <td>${statusBadge}</td>
+            <td>${statusHtml}</td>
             <td>
                 <button class="action-btn" onclick="event.stopPropagation(); openEditMyProduct('${p.id}')">編輯</button>
             </td>
@@ -512,6 +522,16 @@ function renderMyProducts(products) {
 
     enableKolProductDragAndDrop();
     updateSortButtonVisibility();
+}
+
+function toggleProductStatus(productId) {
+    const product = kolProducts.find(p => String(p.id) === String(productId));
+    if (product) {
+        product.status = product.status === 'active' ? 'inactive' : 'active';
+        product._modified = true;
+        renderMyProducts(kolProducts);
+        updateSortButtonVisibility(true); // Show save button
+    }
 }
 
 // KOL Product Drag & Drop Logic
@@ -644,8 +664,8 @@ function updateSortButtonVisibility(show = false) {
             btn.style.marginLeft = '10px';
             btn.style.backgroundColor = '#17a2b8';
             btn.style.color = 'white';
-            btn.innerHTML = '💾 儲存排序';
-            btn.onclick = saveKolProductSort;
+            btn.innerHTML = '💾 儲存所有變更';
+            btn.onclick = saveAllProductChanges;
             container.appendChild(btn);
         }
     } else {
@@ -660,19 +680,23 @@ async function saveKolProductSort() {
     btn.disabled = true;
 
     try {
+        // Alias to new function if called directly
+        return saveAllProductChanges();
+        /*
         const sortedIds = kolProducts.map(p => p.id);
         const result = await callKolApi('kolReorderProducts', { orderedIds: sortedIds });
+        */
         if (result.success) {
             showToast('排序已儲存', 'success');
             btn.remove();
         } else {
             showToast('儲存失敗: ' + result.error, 'error');
-            btn.textContent = '💾 儲存排序';
+            btn.textContent = '💾 儲存所有變更';
             btn.disabled = false;
         }
     } catch (e) {
         showToast('連線錯誤', 'error');
-        btn.textContent = '💾 儲存排序';
+        btn.textContent = '💾 儲存所有變更';
         btn.disabled = false;
     }
 }
@@ -978,25 +1002,82 @@ async function saveMyProduct() {
 
     showLoadingOverlay('儲存商品變更...');
 
-    try {
-        const result = await callKolApi('kolUpdateProduct', {
-            storeId: kolStoreId,
-            productId: productId,
-            updates: updates
-        });
+    // 更新本地狀態
+    product.customPrice = price; // Update the display price
+    product.price = price;       // Update underlying price
+    product.stock = stock;
+    product.availableStock = stock;
+    product.status = status;
+    product._modified = true;
 
-        if (result.success) {
-            showToast('商品已更新', 'success');
-            closeModal('editProductModal');
-            loadMyProducts(); // 重新載入列表
-        } else {
-            showToast('更新失敗: ' + result.error, 'error');
+    showToast('已更新到暫存區，請點擊上方「儲存所有變更」來生效', 'info');
+    closeModal('editProductModal');
+    renderMyProducts(kolProducts);
+    updateSortButtonVisibility(true);
+
+    hideLoadingOverlay();
+}
+
+async function saveAllProductChanges() {
+    const btn = document.getElementById('saveKolSortBtn');
+    if (!btn) return;
+    const originalText = btn.textContent;
+    btn.textContent = '儲存中...';
+    btn.disabled = true;
+
+    try {
+        // 1. Save Sort Order (Always save order)
+        const sortedIds = kolProducts.map(p => p.id);
+
+        // 2. Collect modified products
+        const modifiedProducts = kolProducts.filter(p => p._modified);
+        const updates = modifiedProducts.map(p => ({
+            productId: p.id,
+            updates: {
+                customPrice: p.customPrice, // Use customPrice for KOL price
+                price: p.customPrice,       // Sync price
+                stock: p.stock,
+                status: p.status
+            }
+        }));
+
+        console.log('Saving all changes:', { sortedIds, updates });
+
+        // First save order
+        const sortResult = await callKolApi('kolReorderProducts', { orderedIds: sortedIds });
+
+        // Then save individual updates (in parallel or sequence)
+        // Ideally backend should support batchUpdate, but for now we loop
+        let updateErrors = 0;
+        if (updates.length > 0) {
+            // Using Promise.all for concurrency
+            const results = await Promise.all(updates.map(item =>
+                callKolApi('kolUpdateProduct', {
+                    storeId: kolStoreId,
+                    productId: item.productId,
+                    updates: item.updates
+                })
+            ));
+
+            updateErrors = results.filter(r => !r.success).length;
         }
-    } catch (err) {
-        showToast('更新失敗', 'error');
-        console.error(err);
-    } finally {
-        hideLoadingOverlay();
+
+        if (sortResult.success && updateErrors === 0) {
+            showToast('所有變更已儲存', 'success');
+            // Clear modified flags
+            kolProducts.forEach(p => delete p._modified);
+            renderMyProducts(kolProducts); // Re-render to clear highlights
+            btn.remove();
+        } else {
+            showToast(`儲存完成，但有 ${updateErrors} 筆商品更新失敗`, 'warning');
+            btn.textContent = originalText;
+            btn.disabled = false;
+        }
+    } catch (e) {
+        showToast('連線錯誤', 'error');
+        console.error(e);
+        btn.textContent = originalText;
+        btn.disabled = false;
     }
 }
 
