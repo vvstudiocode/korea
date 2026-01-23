@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastUpdated": "2026-01-23T06:05:47.584Z",
+  "lastUpdated": "2026-01-23T06:28:34.759Z",
   "sections": [
     {
       "type": "product_list",
@@ -17,41 +17,14 @@
     "socialLinks": {
       "facebook": "",
       "instagram": "https://www.instagram.com/muhouse_26/",
-      "line": "tinyurl.com/bdhymmn4",
-      "threads": "https://www.threads.com/@muhouse_26?xmt=AQF0KgMpiQldjI2dvR4mwoY0MJtwV5GLpckwJO7gmGiSPzk"
-    },
-    "notices": [
-      {
-        "title": "📍📍小沐屋｜購買內容與注意事項📍📍",
-        "content": "📝為保障雙方權益，請於下單前詳細閱讀以下代購說明，完成下單即視為同意所有內容。"
-      },
-      {
-        "title": "一、實體採買承諾🧺",
-        "content": "本店所有代購商品皆為小幫手於國外當地實體門市/專櫃/官方通路親自採買,保證正品。"
-      },
-      {
-        "title": "二、價格結構透明化✨",
-        "content": "商品頁面或報價所關元的價格,皆已包含商品原價、韓國境內運費(若有)、國際運費、關稅(若產生)及本服務之代消費費用。\n無需再支付其他費用(除非後續產生特殊要求或二次補運費之情況,將另行告知)。"
-      },
-      {
-        "title": "三、付款方式與期限💵",
-        "content": "選定商品並確認訂單內容後,請於24小時內完成全額匯款。\n請務必將匯款證明截圖並私訊📩IG:muhouse_26給小幫手,並告知訂單編號/姓名,待確認款項後,訂單即正式成立。\n未於期限內完成匯款者,視同放棄訂單,將不另行通知。\n四、訂單成立後不接受取消/更改。"
-      },
-      {
-        "title": "四、訂單成立後不接受取消／更改❌",
-        "content": "代購商品屬「客製化服務」，一經完成付款並成立訂單後，恕不接受取消、退款、臨時改變心意或更改款式／尺寸／顏色。"
-      },
-      {
-        "title": "五、採買與寄送時程📦",
-        "content": "採買時間依實際出國或採買行程為主，到貨後將依序整理、包裝並通知寄出，無法指定到貨日期，急單請勿下單。"
-      }
-    ]
+      "line": "https://l.instagram.com/?u=https%3A%2F%2Ftinyurl.com%2Fbdhymmn4%3Futm_source%3Dig%26utm_medium%3Dsocial%26utm_content%3Dlink_in_bio%26fbclid%3DPAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQMMjU2MjgxMDQwNTU4AAGnjxWao4ApFyWXvqc_CK_8kEtWntyDXOiBgPPJDU8-PVqZvRY2U2WgwvlX7RI_aem_EdeH-B7UBTTB3_Mjka_zog&e=AT10lZQkI8_ipRIKa7LFhSv6T7n7M3KFsxxly8N8Dq8a9aRuEYhPczm2BDldX2pmOpetD2x1vV-6y6vrIOIaa6d6ztcOlVdwJ_pQ7aa_9A"
+    }
   },
   "global": {
     "backgroundColor": "#ffffff",
     "fontFamily": "Noto Sans TC",
     "fontSize": "16px",
     "title": "小沐屋",
-    "logo": "https://raw.githubusercontent.com/vvstudiocode/korea/main/images/products/kolmuhouse/1769135758235____-2.jpg"
+    "logo": "https://raw.githubusercontent.com/vvstudiocode/korea/main/images/products/kolmuhouse/1769149358729________2026-01-23_142001.jpg"
   }
 }
