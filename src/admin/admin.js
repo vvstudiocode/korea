@@ -708,9 +708,12 @@ function saveOrderDetailToBatch(orderId) {
     const updates = {
         customerName: document.getElementById('detailName').value,
         customerPhone: document.getElementById('detailPhone').value,
+        email: document.getElementById('detailEmail').value,
+        lineId: document.getElementById('detailLine').value,
         shippingMethod: document.getElementById('detailShipping').value,
         shippingFee: parseInt(document.getElementById('detailShippingFee').value) || 0,
         storeName: document.getElementById('detailStoreName').value,
+        storeCode: document.getElementById('detailStoreCode').value,
         storeAddress: document.getElementById('detailStoreAddress').value,
         note: document.getElementById('detailNote').value,
         items: tempOrderItems,
