@@ -942,7 +942,15 @@ const PageRenderer = {
             if (e.target.closest('button')) return;
 
             console.log('🖱️ Card Clicked - Opening in new tab:', p.id);
-            window.open('/korea/products/' + p.id + '/', '_blank');
+
+            // 判斷連結路徑
+            let url = '/korea/products/' + p.id + '/';
+            // 如果是 KOL 商店模式且是 KOL 自建商品 (ID 開頭為 K 或 type 為 own)
+            if (this.currentStoreId && (String(p.id).startsWith('K') || p.type === 'own')) {
+                url = `/korea/stores/${this.currentStoreId}/products/${p.id}/`;
+            }
+
+            window.open(url, '_blank');
         };
 
         card.addEventListener('click', clickHandler);
