@@ -2,9 +2,29 @@
  * Storage 模組 - 封裝 LocalStorage 操作
  * Rule #4 分離性: 將策略與機制分離
  * Rule #8 穩健性: 穩健性來自透明與簡單
+ * 
+ * 🔒 商店隔離：使用 SITE_CONFIG.id 作為 localStorage key 前綴
+ *    - 總部 (無 SITE_CONFIG): 使用 'omo_' 前綴
+ *    - 獨立網站 (有 SITE_CONFIG): 使用 '{siteId}_' 前綴
  */
 
 const Storage = {
+    // ===== 商店前綴 (核心隔離機制) =====
+    /**
+     * 取得當前商店的 localStorage key 前綴
+     * @returns {string} 前綴字串 (如 'omo_' 或 'sharon_')
+     */
+    get STORE_PREFIX() {
+        if (typeof window !== 'undefined') {
+            // 優先使用新的 SITE_CONFIG (由 site-generator 產生的網站)
+            if (window.SITE_CONFIG && window.SITE_CONFIG.id) {
+                return window.SITE_CONFIG.id + '_';
+            }
+        }
+        // 總部預設使用 'omo_' 前綴
+        return 'omo_';
+    },
+
     /**
      * 儲存資料到 LocalStorage
      * @param {string} key - 儲存鍵
@@ -58,11 +78,11 @@ const Storage = {
     },
 
     // ===== 購物車專用方法 =====
+    /**
+     * 購物車 Key (帶商店前綴)
+     */
     get CART_KEY() {
-        if (typeof window !== 'undefined' && window.currentStoreId) {
-            return 'kol_cart_' + window.currentStoreId;
-        }
-        return 'koreanShoppingCart';
+        return this.STORE_PREFIX + 'cart';
     },
 
     /**
@@ -88,8 +108,45 @@ const Storage = {
         this.remove(this.CART_KEY);
     },
 
+    // ===== 版面配置快取 =====
+    /**
+     * 版面配置快取 Key (帶商店前綴)
+     */
+    get LAYOUT_CACHE_KEY() {
+        return this.STORE_PREFIX + 'cached_layout';
+    },
+
+    /**
+     * 儲存版面配置到快取
+     * @param {Object} layout - 版面配置物件
+     */
+    cacheLayout(layout) {
+        this.set(this.LAYOUT_CACHE_KEY, layout);
+    },
+
+    /**
+     * 從快取取得版面配置
+     * @returns {Object|null} 版面配置或 null
+     */
+    getCachedLayout() {
+        return this.get(this.LAYOUT_CACHE_KEY);
+    },
+
+    /**
+     * 清除版面配置快取
+     */
+    clearLayoutCache() {
+        this.remove(this.LAYOUT_CACHE_KEY);
+    },
+
     // ===== 商品快取專用方法 =====
-    PRODUCTS_CACHE_KEY: 'koreanShoppingProducts',
+    /**
+     * 商品快取 Key (帶商店前綴)
+     */
+    get PRODUCTS_CACHE_KEY() {
+        return this.STORE_PREFIX + 'products_cache';
+    },
+
     CACHE_EXPIRY_MS: 5 * 60 * 1000, // 5 分鐘
 
     /**
@@ -125,6 +182,30 @@ const Storage = {
      */
     clearProductsCache() {
         this.remove(this.PRODUCTS_CACHE_KEY);
+    },
+
+    // ===== 工具方法 =====
+    /**
+     * 取得當前商店 ID
+     * @returns {string|null} 商店 ID 或 null (總部)
+     */
+    getStoreId() {
+        if (typeof window !== 'undefined' && window.SITE_CONFIG && window.SITE_CONFIG.id) {
+            return window.SITE_CONFIG.id;
+        }
+        return null;
+    },
+
+    /**
+     * 取得首頁 URL (用於返回按鈕)
+     * @returns {string} 首頁 URL
+     */
+    getHomeUrl() {
+        const storeId = this.getStoreId();
+        if (storeId) {
+            return '/korea/stores/' + storeId + '/';
+        }
+        return '/korea/';
     }
 };
 

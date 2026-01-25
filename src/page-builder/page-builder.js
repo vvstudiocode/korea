@@ -1354,8 +1354,10 @@ const PageBuilder = {
 
             if (data.success) {
                 showToast('首頁排版儲存成功！', 'success');
-                // 同時更新 localStorage 快取
-                localStorage.setItem('omo_cached_layout', JSON.stringify(layoutData));
+                // 同時更新 localStorage 快取 - 使用 Storage 模組
+                if (typeof Storage !== 'undefined') {
+                    Storage.cacheLayout(layoutData);
+                }
             } else {
                 // Fallback: 儲存到 GAS 網站設定
                 console.warn('GitHub save failed, falling back to GAS...');

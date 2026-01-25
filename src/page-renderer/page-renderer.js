@@ -1,9 +1,9 @@
 /**
- * Modular Page Renderer (Visual Version) v2.1
+ * Modular Page Renderer (Visual Version) v2.2
  * - GitHub Direct Access for faster loading
  * - Footer section rendering
  * - Dynamic spacing support
- * - KOL Store Mode support
+ * - Store Mode support (uses Storage module for isolation)
  */
 
 // ----------------------------------------------------
@@ -128,7 +128,7 @@ const PageRenderer = {
     currentStoreId: null,
 
     init: async function (storeId = null) {
-        console.log('🚀 PageRenderer v2.1 Initialized' + (storeId ? ` (Store: ${storeId})` : ''));
+        console.log('🚀 PageRenderer v2.2 Initialized' + (storeId ? ` (Store: ${storeId})` : ''));
 
         // 儲存 storeId 供其他方法使用
         this.currentStoreId = storeId;
@@ -136,11 +136,11 @@ const PageRenderer = {
         const container = document.getElementById('pageBuilderRoot');
         if (!container) return;
 
-        // 1. 立即從快取讀取並渲染 (防止閃爍)
-        const cachedLayout = localStorage.getItem('omo_cached_layout');
+        // 1. 立即從快取讀取並渲染 (防止閃爍) - 使用 Storage 模組
+        const cachedLayout = typeof Storage !== 'undefined' ? Storage.getCachedLayout() : null;
         if (cachedLayout) {
             try {
-                const parsed = JSON.parse(cachedLayout);
+                const parsed = typeof cachedLayout === 'string' ? JSON.parse(cachedLayout) : cachedLayout;
                 this.render(container, parsed.sections || parsed);
                 this.renderFooter(parsed.footer);
                 this.applyGlobalSettings(parsed.global);
@@ -153,8 +153,10 @@ const PageRenderer = {
         // 2. 非同步從 GitHub 獲取最新排版
         const layout = await this.fetchLayout();
         if (layout) {
-            // 更新快取
-            localStorage.setItem('omo_cached_layout', JSON.stringify(layout));
+            // 更新快取 - 使用 Storage 模組
+            if (typeof Storage !== 'undefined') {
+                Storage.cacheLayout(layout);
+            }
             // 重新渲染最新內容
             this.render(container, layout.sections || layout);
             this.renderFooter(layout.footer);

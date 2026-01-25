@@ -197,17 +197,17 @@ const Checkout = {
                 }),
                 subtotal: Cart.getSubtotal(),
                 total: Cart.getSubtotal() + this.getShippingFee(),
-                storeId: window.currentStoreId || null,
-                orderType: window.currentStoreId ? 'kol' : 'direct',
+                storeId: (typeof Storage !== 'undefined' ? Storage.getStoreId() : null),
+                orderType: (typeof Storage !== 'undefined' && Storage.getStoreId()) ? 'store' : 'direct',
                 // 為了相容 GAS 接收端，加入個別欄位
                 storeName: formData.get('storeName') || '',
                 storeCode: formData.get('storeCode') || '',
                 storeAddress: formData.get('storeAddress') || ''
             };
 
-            // 提交訂單
-            // 第二個參數為 isKol，如果是 KOL 商店則為 true
-            const result = await API.submitOrder(orderData, !!window.currentStoreId);
+            // 第二個參數為 isStore，如果是獨立商店則為 true
+            const isStore = typeof Storage !== 'undefined' && !!Storage.getStoreId();
+            const result = await API.submitOrder(orderData, isStore);
 
             if (result.success) {
                 // 清空購物車

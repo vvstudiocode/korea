@@ -5,7 +5,7 @@
  * 
  * 載入順序：
  * 1. src/core/*.js (API, Storage, Toast, Utils)
- * 2. src/store/modules/*.js (Products, Cart, Checkout, Modal, ProductDetail, KolStore)
+ * 2. src/store/modules/*.js (Products, Cart, Checkout, Modal, ProductDetail)
  * 3. src/store/app.js (本檔案)
  * 4. src/page-renderer/page-renderer.js (選用)
  */
@@ -25,38 +25,35 @@ const App = {
         }
         window.scrollTo(0, 0);
 
-        // 1. 初始化 KOL 商店模式
-        await KolStore.init();
-
-        // 2. 處理快取排版
-        const cachedLayout = localStorage.getItem('omo_cached_layout');
+        // 1. 處理快取排版 (使用 Storage 模組，自動處理商店前綴)
+        const cachedLayout = Storage.getCachedLayout();
         if (cachedLayout) {
             const defaultSection = document.querySelector('.products-section');
             if (defaultSection) defaultSection.style.display = 'none';
         }
 
-        // 3. 載入商品
-        await Products.load(KolStore.getStoreId());
+        // 2. 載入商品 (使用 Storage 模組取得商店 ID)
+        await Products.load(Storage.getStoreId());
 
-        // 4. 初始化購物車
+        // 3. 初始化購物車
         Cart.init();
 
-        // 5. 設定事件監聯器
+        // 4. 設定事件監聯器
         this.setupEventListeners();
 
-        // 6. 初始化頁面渲染器
+        // 5. 初始化頁面渲染器
         if (typeof PageRenderer !== 'undefined') {
-            await PageRenderer.init(KolStore.getStoreId());
+            await PageRenderer.init(Storage.getStoreId());
         }
 
-        // 7. 處理 URL 購物車參數（從 LINE Bot 傳入）
+        // 6. 處理 URL 購物車參數（從 LINE Bot 傳入）
         // 重要：必須在 PageRenderer 完成後執行，確保 loading 已隱藏且商品已載入
         if (typeof UrlCart !== 'undefined') {
             // 等待 loading overlay 完全隱藏後再處理
             setTimeout(() => {
                 UrlCart.processUrl();
 
-                // 8. 處理 Hash 參數 (如 #checkout)
+                // 7. 處理 Hash 參數 (如 #checkout)
                 // 支援從商品頁跳轉直接結帳
                 if (window.location.hash === '#checkout') {
                     console.log('🛒 檢測到 checkout hash，開啟結帳視窗');
