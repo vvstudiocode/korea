@@ -3810,19 +3810,30 @@ async function updateGeneratedSiteUI(siteId) {
  * 重置生成器表單
  */
 function resetSiteGeneratorForm() {
-    document.getElementById('newSiteId').value = '';
-    document.getElementById('newSiteId').disabled = false;
-    document.getElementById('newSiteId').style.backgroundColor = '';
+    const siteIdField = document.getElementById('newSiteId');
+    if (siteIdField) {
+        siteIdField.value = '';
+        siteIdField.disabled = false;
+        siteIdField.style.backgroundColor = '';
+    }
 
-    document.getElementById('newSiteName').value = '';
-    document.getElementById('newSiteApiUrl').value = '';
-    document.getElementById('newSiteDescription').value = '';
+    const siteNameField = document.getElementById('newSiteName');
+    if (siteNameField) siteNameField.value = '';
 
-    // 恢復按鈕
-    const btn = document.querySelector('#siteGeneratorView .btn-primary');
-    btn.textContent = '🚀 產生網站';
-    btn.setAttribute('onclick', 'generateNewSite()');
+    const apiUrlField = document.getElementById('newSiteApiUrl');
+    if (apiUrlField) apiUrlField.value = '';
+
+    const descField = document.getElementById('newSiteDescription');
+    if (descField) descField.value = '';
+
+    // 恢復 Modal 按鈕
+    const btn = document.getElementById('btnGenerateSite');
+    if (btn) {
+        btn.textContent = '🚀 產生網站';
+        btn.onclick = generateNewSite;
+    }
 
     // 隱藏結果區
-    document.getElementById('siteGeneratorResult').style.display = 'none';
+    const resultDiv = document.getElementById('siteGeneratorResult');
+    if (resultDiv) resultDiv.style.display = 'none';
 }
