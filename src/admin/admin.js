@@ -253,6 +253,7 @@ function switchTab(tabId) {
         document.getElementById('siteGeneratorView').style.display = 'block';
         document.getElementById('pageTitle').textContent = '網站生成器';
         document.getElementById('batchActions').style.display = 'none';
+        loadGeneratedSites();
     }
 
     // 手機版：選完分頁後自動收起側邊欄
@@ -3589,8 +3590,7 @@ async function generateNewSite() {
     showLoadingOverlay();
 
     try {
-        const result = await callApi('siteGeneratorAction', {
-            subAction: 'createNewSite',
+        const result = await callApi('createNewSite', {
             siteId: siteId,
             siteName: siteName,
             apiUrl: apiUrl,
@@ -3616,10 +3616,7 @@ async function generateNewSite() {
             showToast('網站產生成功！', 'success');
 
             // 清空表單
-            document.getElementById('newSiteId').value = '';
-            document.getElementById('newSiteName').value = '';
-            document.getElementById('newSiteApiUrl').value = '';
-            document.getElementById('newSiteDescription').value = '';
+            resetSiteGeneratorForm();
         } else {
             alert('產生失敗：' + (result.error || result.message || '未知錯誤'));
         }
@@ -3628,4 +3625,173 @@ async function generateNewSite() {
         alert('產生失敗：' + error.message);
         console.error('generateNewSite error:', error);
     }
+}
+
+/**
+ * 載入已生成的網站列表
+ */
+async function loadGeneratedSites() {
+    try {
+        const result = await callApi('getGeneratedSites');
+        if (result.success) {
+            renderGeneratedSites(result.data.sites || []);
+        } else {
+            console.error('loadGeneratedSites error:', result.error);
+        }
+    } catch (error) {
+        console.error('loadGeneratedSites error:', error);
+    }
+}
+
+/**
+ * 渲染已生成的網站列表
+ */
+function renderGeneratedSites(sites) {
+    const tbody = document.getElementById('generatedSitesTableBody');
+
+    if (!sites || sites.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#888;">尚未生成任何網站</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = sites.map(site => {
+        const createdDate = site.createdAt ? new Date(site.createdAt).toLocaleDateString('zh-TW') : '-';
+        // 使用 encodeURIComponent 避免引號問題
+        const editData = encodeURIComponent(JSON.stringify(site));
+
+        return `
+            <tr>
+                <td>${site.siteId}</td>
+                <td>${site.siteName}</td>
+                <td>${createdDate}</td>
+                <td>
+                    <a href="${site.storeUrl}" target="_blank" class="btn-small">前台</a>
+                    <a href="${site.adminUrl}" target="_blank" class="btn-small">後台</a>
+                    <button class="btn-small" onclick="editGeneratedSiteUI('${editData}')">編輯</button>
+                    <button class="btn-small" style="background:#dc3545;color:white;border:none;" onclick="deleteGeneratedSiteUI('${site.siteId}')">刪除</button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+/**
+ * UI 操作：刪除生成網站
+ */
+async function deleteGeneratedSiteUI(siteId) {
+    if (!confirm(`確定要刪除網站 ${siteId} 嗎？\n此動作將無法復原，並會從 GitHub 移除該網站資料夾。`)) {
+        return;
+    }
+
+    showLoadingOverlay();
+
+    try {
+        const result = await callApi('deleteSite', { siteId: siteId });
+        hideLoadingOverlay();
+
+        if (result.success) {
+            showToast('網站已刪除', 'success');
+            loadGeneratedSites(); // 重新整理列表
+        } else {
+            alert('刪除失敗：' + (result.error || '未知錯誤'));
+        }
+    } catch (error) {
+        hideLoadingOverlay();
+        alert('刪除失敗：' + error.message);
+    }
+}
+
+/**
+ * UI 操作：編輯生成網站 (帶入資料到表單)
+ */
+function editGeneratedSiteUI(encodedData) {
+    try {
+        const site = JSON.parse(decodeURIComponent(encodedData));
+
+        // 填入表單
+        document.getElementById('newSiteId').value = site.siteId;
+        document.getElementById('newSiteName').value = site.siteName;
+        document.getElementById('newSiteApiUrl').value = site.apiUrl;
+        document.getElementById('newSiteDescription').value = ''; // 描述欄位暫不支援帶回 (因為 Sheet 沒存)
+
+        // ID 欄位設為唯讀 (不可修改 ID)
+        document.getElementById('newSiteId').disabled = true;
+        document.getElementById('newSiteId').style.backgroundColor = '#f0f0f0';
+
+        // 修改按鈕行為
+        const btn = document.querySelector('#siteGeneratorView .btn-primary');
+        btn.textContent = '💾 更新網站設定';
+        btn.onclick = () => updateGeneratedSiteUI(site.siteId);
+
+        // 顯示提示
+        showToast('已載入網站資料，請修改後按更新', 'info');
+
+        // 捲動到表單
+        document.getElementById('siteGeneratorView').scrollIntoView({ behavior: 'smooth' });
+
+    } catch (e) {
+        console.error('editGeneratedSiteUI error:', e);
+    }
+}
+
+/**
+ * UI 操作：執行更新
+ */
+async function updateGeneratedSiteUI(siteId) {
+    const siteName = document.getElementById('newSiteName').value.trim();
+    const apiUrl = document.getElementById('newSiteApiUrl').value.trim();
+    const siteDescription = document.getElementById('newSiteDescription').value.trim();
+
+    if (!siteName || !apiUrl) {
+        alert('名稱與 API URL 為必填');
+        return;
+    }
+
+    showLoadingOverlay();
+
+    try {
+        const result = await callApi('updateSite', {
+            siteId: siteId,
+            siteName: siteName,
+            apiUrl: apiUrl,
+            siteDescription: siteDescription
+        });
+
+        hideLoadingOverlay();
+
+        if (result.success) {
+            showToast('網站更新成功！', 'success');
+
+            // 重置表單狀態
+            resetSiteGeneratorForm();
+            loadGeneratedSites();
+
+        } else {
+            alert('更新失敗：' + (result.error || '未知錯誤'));
+        }
+    } catch (error) {
+        hideLoadingOverlay();
+        alert('更新失敗：' + error.message);
+    }
+}
+
+/**
+ * 重置生成器表單
+ */
+function resetSiteGeneratorForm() {
+    document.getElementById('newSiteId').value = '';
+    document.getElementById('newSiteId').disabled = false;
+    document.getElementById('newSiteId').style.backgroundColor = '';
+
+    document.getElementById('newSiteName').value = '';
+    document.getElementById('newSiteApiUrl').value = '';
+    document.getElementById('newSiteDescription').value = '';
+
+    // 恢復按鈕
+    const btn = document.querySelector('#siteGeneratorView .btn-primary');
+    btn.textContent = '🚀 產生網站';
+    btn.setAttribute('onclick', 'generateNewSite()');
+
+    // 隱藏結果區
+    document.getElementById('siteGeneratorResult').style.display = 'none';
 }

@@ -14,7 +14,6 @@ images/products/
 # ===== 敏感資訊 =====
 # GAS 後端原始碼（包含 API 金鑰）
 gas-backend/
-
 # 舊版備份
 _legacy/
 
