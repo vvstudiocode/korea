@@ -3696,7 +3696,21 @@ async function deleteGeneratedSiteUI(siteId) {
 }
 
 /**
- * UI 操作：編輯生成網站 (帶入資料到表單)
+ * 開啟網站生成器 Modal (新增模式)
+ */
+function openSiteGeneratorModal() {
+    resetSiteGeneratorForm();
+    document.getElementById('siteGenModalTitle').textContent = '建立新網站';
+
+    const btn = document.getElementById('btnGenerateSite');
+    btn.textContent = '🚀 產生網站';
+    btn.onclick = generateNewSite;
+
+    openModal('siteGeneratorModal');
+}
+
+/**
+ * UI 操作：編輯生成網站 (帶入資料到 Modal)
  */
 function editGeneratedSiteUI(encodedData) {
     try {
@@ -3706,26 +3720,49 @@ function editGeneratedSiteUI(encodedData) {
         document.getElementById('newSiteId').value = site.siteId;
         document.getElementById('newSiteName').value = site.siteName;
         document.getElementById('newSiteApiUrl').value = site.apiUrl;
-        document.getElementById('newSiteDescription').value = ''; // 描述欄位暫不支援帶回 (因為 Sheet 沒存)
+        document.getElementById('newSiteDescription').value = '';
 
-        // ID 欄位設為唯讀 (不可修改 ID)
+        // ID 欄位設為唯讀
         document.getElementById('newSiteId').disabled = true;
         document.getElementById('newSiteId').style.backgroundColor = '#f0f0f0';
 
-        // 修改按鈕行為
-        const btn = document.querySelector('#siteGeneratorView .btn-primary');
+        // 修改 Modal 標題與按鈕
+        document.getElementById('siteGenModalTitle').textContent = '編輯網站設定';
+
+        const btn = document.getElementById('btnGenerateSite');
         btn.textContent = '💾 更新網站設定';
         btn.onclick = () => updateGeneratedSiteUI(site.siteId);
 
-        // 顯示提示
-        showToast('已載入網站資料，請修改後按更新', 'info');
-
-        // 捲動到表單
-        document.getElementById('siteGeneratorView').scrollIntoView({ behavior: 'smooth' });
+        // 開啟 Modal
+        openModal('siteGeneratorModal');
 
     } catch (e) {
         console.error('editGeneratedSiteUI error:', e);
     }
+}
+
+/**
+ * 重置生成器表單 & 關閉 Modal
+ */
+function resetSiteGeneratorForm() {
+    document.getElementById('newSiteId').value = '';
+    document.getElementById('newSiteId').disabled = false;
+    document.getElementById('newSiteId').style.backgroundColor = '';
+
+    document.getElementById('newSiteName').value = '';
+    document.getElementById('newSiteApiUrl').value = '';
+    document.getElementById('newSiteDescription').value = '';
+
+    // 隱藏結果區
+    document.getElementById('siteGeneratorResult').style.display = 'none';
+
+    // 如果 Modal 是開著的，可以選擇關閉它 (或只清空)
+    // 這裡我們選擇只在成功後關閉，或手動取消。
+    // 但此函數也被用來初始化，所以不強制關閉。
+
+    // 如果是成功後的呼叫，通常會有一個 flag 或直接 close
+    // 暫時這裡只做清空。關閉動作由呼叫者決定 (例如 generateNewSite 成功後)
+    closeModal('siteGeneratorModal');
 }
 
 /**
