@@ -1,8 +1,17 @@
 /**
- * CMS Admin Logic V3.5 (Order & Product Batch Updates)
+ * CMS Admin Logic V4.0 (Site Generator Support)
+ * Rule #17 可擴展性: 支援動態 API URL 設定
  */
 
-const GAS_API_URL = 'https://script.google.com/macros/s/AKfycby7V5VwHfn_Tb-wpg_SSrme2c2P5bin6qjhxEkr80RDLg6p5TPn2EXySkpG9qnyvfNF/exec';
+/**
+ * 預設 GAS API URL (總部)
+ */
+const DEFAULT_GAS_API_URL = 'https://script.google.com/macros/s/AKfycby7V5VwHfn_Tb-wpg_SSrme2c2P5bin6qjhxEkr80RDLg6p5TPn2EXySkpG9qnyvfNF/exec';
+
+/**
+ * 動態 API URL - 優先使用 SITE_CONFIG (由生成器注入)
+ */
+const GAS_API_URL = (typeof window !== 'undefined' && window.SITE_CONFIG?.apiUrl) || DEFAULT_GAS_API_URL;
 let currentPassword = '';
 let currentOrders = [];
 let currentProducts = [];
@@ -240,6 +249,10 @@ function switchTab(tabId) {
         document.getElementById('pageTitle').textContent = '團購業績總覽';
         document.getElementById('batchActions').style.display = 'none';
         initKolStatsMonthSelect();
+    } else if (tabId === 'sitegenerator') {
+        document.getElementById('siteGeneratorView').style.display = 'block';
+        document.getElementById('pageTitle').textContent = '網站生成器';
+        document.getElementById('batchActions').style.display = 'none';
     }
 
     // 手機版：選完分頁後自動收起側邊欄
@@ -3539,5 +3552,80 @@ function updateItemPrice(index, newPrice) {
             alert('請輸入有效的價格');
             renderOrderItems(); // 重置回原值
         }
+    }
+}
+
+// ============================================================
+// 網站生成器
+// ============================================================
+
+/**
+ * 產生新的獨立網站
+ */
+async function generateNewSite() {
+    const siteId = document.getElementById('newSiteId').value.trim();
+    const siteName = document.getElementById('newSiteName').value.trim();
+    const apiUrl = document.getElementById('newSiteApiUrl').value.trim();
+    const siteDescription = document.getElementById('newSiteDescription').value.trim();
+
+    // 驗證
+    if (!siteId || !siteName || !apiUrl) {
+        alert('請填寫所有必填欄位 (網站 ID、名稱、GAS API URL)');
+        return;
+    }
+
+    // 驗證 ID 格式
+    if (!/^[a-z0-9_]+$/.test(siteId)) {
+        alert('網站 ID 僅限使用英文小寫、數字和底線');
+        return;
+    }
+
+    // 驗證 URL 格式
+    if (!apiUrl.startsWith('https://script.google.com/macros/')) {
+        alert('GAS API URL 格式不正確，請確認是否為 Google Apps Script 部署網址');
+        return;
+    }
+
+    showLoadingOverlay();
+
+    try {
+        const result = await callApi('siteGeneratorAction', {
+            subAction: 'createNewSite',
+            siteId: siteId,
+            siteName: siteName,
+            apiUrl: apiUrl,
+            siteDescription: siteDescription
+        });
+
+        hideLoadingOverlay();
+
+        if (result.success) {
+            // 顯示結果
+            const resultDiv = document.getElementById('siteGeneratorResult');
+            resultDiv.style.display = 'block';
+
+            const storeUrlLink = document.getElementById('generatedStoreUrl');
+            const adminUrlLink = document.getElementById('generatedAdminUrl');
+
+            storeUrlLink.href = result.data.storeUrl;
+            storeUrlLink.textContent = result.data.storeUrl;
+
+            adminUrlLink.href = result.data.adminUrl;
+            adminUrlLink.textContent = result.data.adminUrl;
+
+            showToast('網站產生成功！', 'success');
+
+            // 清空表單
+            document.getElementById('newSiteId').value = '';
+            document.getElementById('newSiteName').value = '';
+            document.getElementById('newSiteApiUrl').value = '';
+            document.getElementById('newSiteDescription').value = '';
+        } else {
+            alert('產生失敗：' + (result.error || result.message || '未知錯誤'));
+        }
+    } catch (error) {
+        hideLoadingOverlay();
+        alert('產生失敗：' + error.message);
+        console.error('generateNewSite error:', error);
     }
 }

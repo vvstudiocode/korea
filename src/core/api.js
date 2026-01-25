@@ -4,9 +4,15 @@
  * Rule #12 修復規則: 錯誤時提早且大聲地失敗
  */
 
+/**
+ * 預設 GAS API URL (總部)
+ * Rule #17 可擴展性: 為未來設計
+ */
+const DEFAULT_API_URL = 'https://script.google.com/macros/s/AKfycby7V5VwHfn_Tb-wpg_SSrme2c2P5bin6qjhxEkr80RDLg6p5TPn2EXySkpG9qnyvfNF/exec';
+
 const API = {
-    // GAS API 基礎 URL
-    BASE_URL: 'https://script.google.com/macros/s/AKfycby7V5VwHfn_Tb-wpg_SSrme2c2P5bin6qjhxEkr80RDLg6p5TPn2EXySkpG9qnyvfNF/exec',
+    // GAS API 基礎 URL - 支援動態設定 (window.SITE_CONFIG.apiUrl)
+    BASE_URL: (typeof window !== 'undefined' && window.SITE_CONFIG?.apiUrl) || DEFAULT_API_URL,
 
     /**
      * 發送 API 請求

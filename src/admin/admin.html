@@ -61,6 +61,8 @@
                         class="text">賣場管理</span></li>
                 <li id="tab-kolstats" onclick="switchTab('kolstats')" data-tooltip="團購業績"><span
                         class="icon">◈</span><span class="text">團購業績</span></li>
+                <li id="tab-sitegenerator" onclick="switchTab('sitegenerator')" data-tooltip="網站生成器"><span
+                        class="icon">⚙</span><span class="text">網站生成器</span></li>
 
             </ul>
             <button class="sidebar-collapse-btn" onclick="toggleDesktopSidebar()" title="收合選單">⟨</button>
@@ -388,6 +390,55 @@
                             </tr>
                         </tbody>
                     </table>
+                </div>
+            </div>
+
+            <!-- 網站生成器視圖 -->
+            <div id="siteGeneratorView" class="view-section" style="display: none;">
+                <div class="view-header">
+                    <h2>網站生成器</h2>
+                </div>
+                <p style="color:#666; margin-bottom: 1rem;">
+                    建立完全獨立的賣場網站。每個賣場有自己的後端資料庫 (GAS + Google Sheet)。
+                </p>
+
+                <div class="form-card"
+                    style="max-width: 600px; background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                    <div class="form-group">
+                        <label for="newSiteId">網站 ID (英文小寫，例如: store_alice)</label>
+                        <input type="text" id="newSiteId" placeholder="store_xxx" pattern="[a-z0-9_]+" required>
+                        <small style="color:#888;">將用於建立資料夾路徑，僅限英文小寫、數字、底線</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="newSiteName">網站名稱 (中文)</label>
+                        <input type="text" id="newSiteName" placeholder="例如: Alice 韓國代購" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="newSiteApiUrl">專屬 GAS API URL</label>
+                        <input type="text" id="newSiteApiUrl"
+                            placeholder="https://script.google.com/macros/s/...../exec" required>
+                        <small style="color:#888;">請先手動複製一份 GAS 專案並部署，將 URL 貼到這裡</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="newSiteDescription">網站描述 (選填，用於 SEO)</label>
+                        <textarea id="newSiteDescription" rows="2" placeholder="提供最新韓國熱門商品代購服務..."></textarea>
+                    </div>
+
+                    <button class="btn-primary" onclick="generateNewSite()"
+                        style="width: 100%; padding: 1rem; font-size: 1rem; margin-top: 1rem;">
+                        🚀 產生網站
+                    </button>
+
+                    <div id="siteGeneratorResult" style="margin-top: 1rem; display: none;">
+                        <p style="color: green; font-weight: bold;">✅ 網站產生成功！</p>
+                        <div style="background: #f8f9fa; padding: 1rem; border-radius: 4px; margin-top: 0.5rem;">
+                            <p><strong>前台網址:</strong> <a id="generatedStoreUrl" href="#" target="_blank"></a></p>
+                            <p><strong>後台網址:</strong> <a id="generatedAdminUrl" href="#" target="_blank"></a></p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
