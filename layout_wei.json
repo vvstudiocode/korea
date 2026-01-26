@@ -1,29 +1,36 @@
 {
-  "version": "1.0",
-  "lastUpdated": "2026-01-26T09:48:34.033Z",
   "sections": [
     {
+      "id": "hero_default",
+      "type": "hero",
+      "data": {
+        "title": "歡迎光臨 weiwei",
+        "subtitle": "韓國代購精選商品",
+        "buttonText": "立即選購",
+        "buttonLink": "#products",
+        "backgroundImage": "",
+        "backgroundColor": "#f8f9fa"
+      }
+    },
+    {
+      "id": "products_default",
       "type": "product_list",
-      "marginTop": 0,
-      "marginBottom": 0,
-      "title": "商品列表",
-      "category": "全部",
-      "limit": 8,
-      "itemsDesktop": 4,
-      "itemsMobile": 2
+      "data": {
+        "title": "熱門商品",
+        "columns": 4,
+        "limit": 8,
+        "showPrice": true,
+        "showButton": true
+      }
     }
   ],
   "footer": {
     "enabled": true,
     "content": {
-      "storeName": "鮪魚",
+      "storeName": "weiwei",
       "description": "韓國代購精選",
-      "copyright": "© 2025 鮪魚. All rights reserved."
+      "copyright": "© 2025 weiwei. All rights reserved."
     }
   },
-  "global": {
-    "backgroundColor": "#84f58c",
-    "fontFamily": "Noto Sans TC",
-    "fontSize": "16px"
-  }
+  "updatedAt": "2026-01-26T09:55:40.170Z"
 }
