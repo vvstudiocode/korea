@@ -138,6 +138,11 @@ const PageBuilder = {
     LAYOUT_URL: 'https://raw.githubusercontent.com/vvstudiocode/korea/main/layout.json',
 
     init: async function (storeIdOpt = null) {
+        // 自動檢測 SITE_CONFIG (新網站後台)
+        if (!storeIdOpt && typeof window !== 'undefined' && window.SITE_CONFIG?.siteId) {
+            storeIdOpt = window.SITE_CONFIG.siteId;
+        }
+
         console.log('🎨 Visual PageBuilder v2.0 Initialized', storeIdOpt ? `for Store: ${storeIdOpt}` : 'Global');
         this.storeId = storeIdOpt; // 設定賣場 ID
 
