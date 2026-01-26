@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>wei - 後台管理</title>
+    <link rel="stylesheet" href="/korea/src/admin/styles/admin.css">
+    <link rel="stylesheet" href="/korea/src/page-renderer/page-renderer.css">
+    <link rel="stylesheet" href="/korea/src/page-builder/page-builder.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* 覆寫標題 */
+        .sidebar-header h3::after { content: ' - wei'; font-size: 0.7em; opacity: 0.7; }
+    </style>
+</head>
+<body>
+    <script>
+        // 設定此網站專用的 API URL
+        window.SITE_CONFIG = {
+            siteId: 'wei',
+            siteName: 'wei',
+            apiUrl: 'https://script.google.com/macros/s/AKfycbwr6y8qXY79WeQTKaWr9tWNTF-mwjRgcdWEPb7dNoM0QXAJkJxLICPkYYHpztVTLamcGw/exec'
+        };
+        
+        // 在載入 admin.js 之前覆寫 API_URL
+        window.CUSTOM_API_URL = 'https://script.google.com/macros/s/AKfycbwr6y8qXY79WeQTKaWr9tWNTF-mwjRgcdWEPb7dNoM0QXAJkJxLICPkYYHpztVTLamcGw/exec';
+    </script>
+    
+    <!-- 載入總部的 admin.html 內容 -->
+    <script>
+        // 動態載入完整後台頁面
+        fetch('/korea/src/admin/admin.html')
+            .then(r => r.text())
+            .then(html => {
+                // 擷取 body 內容
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                
+                // 複製所有 body 子元素
+                document.body.innerHTML = '';
+                Array.from(doc.body.children).forEach(el => {
+                    document.body.appendChild(el.cloneNode(true));
+                });
+                
+                // 載入腳本
+                const scripts = doc.querySelectorAll('script[src]');
+                scripts.forEach(script => {
+                    const newScript = document.createElement('script');
+                    newScript.src = script.src;
+                    document.body.appendChild(newScript);
+                });
+                
+                // 載入 admin.js
+                const adminScript = document.createElement('script');
+                adminScript.src = '/korea/src/admin/admin.js';
+                adminScript.onload = function() {
+                    // 覆寫 API URL
+                    if (typeof API_URL !== 'undefined') {
+                        API_URL = window.CUSTOM_API_URL;
+                    }
+                    
+                    // 隱藏網站生成器 tab (子網站不需要此功能)
+                    const siteGenTab = document.getElementById('tab-sitegenerator');
+                    if (siteGenTab) {
+                        siteGenTab.style.display = 'none';
+                    }
+                };
+                document.body.appendChild(adminScript);
+            })
+            .catch(err => {
+                document.body.innerHTML = '<div style="padding:2rem;text-align:center;"><h2>載入失敗</h2><p>' + err + '</p><a href="/korea/src/admin/admin.html">回到總部後台</a></div>';
+            });
+    </script>
+</body>
+</html>
