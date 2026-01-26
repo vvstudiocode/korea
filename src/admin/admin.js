@@ -3128,10 +3128,10 @@ async function generateNewSite() {
         hideLoadingOverlay();
 
         if (result.success) {
-            // 產生前後台 URL (前端產生，後端只儲存資料)
+            // 使用後端回傳的 URL (新版)，如果沒有則使用前端產生的 (向後兼容)
             const baseUrl = 'https://vvstudiocode.github.io/korea';
-            const storeUrl = `${baseUrl}/stores/${siteId}/`;
-            const adminUrl = `${baseUrl}/stores/${siteId}/admin.html`;
+            const storeUrl = result.data.storeUrl || `${baseUrl}/stores/${siteId}/`;
+            const adminUrl = result.data.adminUrl || `${baseUrl}/stores/${siteId}/admin.html`;
 
             // 顯示結果
             const resultDiv = document.getElementById('siteGeneratorResult');
@@ -3146,7 +3146,7 @@ async function generateNewSite() {
             adminUrlLink.href = adminUrl;
             adminUrlLink.textContent = adminUrl;
 
-            showToast('網站產生成功！', 'success');
+            showToast('網站產生成功！檔案已在 GitHub 建立，約 1-2 分鐘後生效', 'success');
 
             // 重新載入列表
             loadGeneratedSites();
