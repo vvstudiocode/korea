@@ -1,4 +1,6 @@
 {
+  "version": "1.0",
+  "lastUpdated": "2026-01-26T15:23:09.051Z",
   "sections": [
     {
       "id": "hero_default",
@@ -10,7 +12,8 @@
         "buttonLink": "#products",
         "backgroundImage": "",
         "backgroundColor": "#f8f9fa"
-      }
+      },
+      "image": "https://shoplineimg.com/690007e1a0df1400685f68e2/6972e2ea6ad59e7835289ec5/1080x.webp?source_format=jpg"
     },
     {
       "id": "products_default",
@@ -32,5 +35,9 @@
       "copyright": "© 2025 aaa. All rights reserved."
     }
   },
-  "updatedAt": "2026-01-26T14:19:08.325Z"
+  "global": {
+    "backgroundColor": "#ffffff",
+    "fontFamily": "Noto Sans TC",
+    "fontSize": "16px"
+  }
 }
