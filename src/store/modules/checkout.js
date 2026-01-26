@@ -217,9 +217,18 @@ const Checkout = {
                 Modal.close('checkoutModal');
 
                 // 顯示成功訊息
-                // 顯示成功訊息
                 // 使用我們送出的 orderId，因為後端可能只回傳 success
                 document.getElementById('orderNumber').textContent = orderId;
+
+                // 更新自定義成功訊息
+                const customMsgContainer = document.getElementById('successCustomMessage');
+                if (customMsgContainer && typeof App !== 'undefined' && App.siteSettings && App.siteSettings.checkoutSuccessInfo) {
+                    customMsgContainer.innerHTML = App.siteSettings.checkoutSuccessInfo.replace(/\n/g, '<br>');
+                    customMsgContainer.style.display = 'block';
+                } else if (customMsgContainer) {
+                    customMsgContainer.style.display = 'none';
+                }
+
                 Modal.show('successModal');
 
                 Toast.success('訂單提交成功！');

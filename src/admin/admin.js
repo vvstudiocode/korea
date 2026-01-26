@@ -2601,7 +2601,8 @@ function renderSettingsForm(settings) {
         'announcementTitle': '公告標題',
         'announcementContent': '公告內容',
         'heroImage': '首頁大圖 URL',
-        'footerInfo': '頁尾資訊 (HTML)' // Although user asked for "page management", this is a simple key-value store
+        'footerInfo': '頁尾資訊 (HTML)',
+        'checkoutSuccessInfo': '訂單成立後提示訊息 (支援 HTML)'
     };
 
     let html = '<div class="settings-grid" style="display: grid; gap: 15px;">';
@@ -2609,12 +2610,21 @@ function renderSettingsForm(settings) {
     // Render known keys first
     Object.keys(knownKeys).forEach(key => {
         const val = settings[key] || '';
-        html += `
+        if (key === 'checkoutSuccessInfo' || key === 'footerInfo' || key === 'announcementContent') {
+            html += `
+            <div class="form-group">
+                <label style="font-weight:bold; display:block; margin-bottom:5px;">${knownKeys[key]} <small style="color:#888">(${key})</small></label>
+                <textarea class="setting-input" data-key="${key}" rows="5" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">${val.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>
+            </div>
+            `;
+        } else {
+            html += `
             <div class="form-group">
                 <label style="font-weight:bold; display:block; margin-bottom:5px;">${knownKeys[key]} <small style="color:#888">(${key})</small></label>
                 <input type="text" class="setting-input" data-key="${key}" value="${val.replace(/"/g, '&quot;')}" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">
             </div>
-        `;
+            `;
+        }
     });
 
     // Render other keys

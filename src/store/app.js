@@ -46,6 +46,19 @@ const App = {
             await PageRenderer.init(AppStorage.getStoreId());
         }
 
+        // 5.5 獲取網站設定 (包含結帳成功訊息)
+        try {
+            // 如果是獨立商店，PageRenderer 可能已經獲取了，但這裡為了保險起見再檢查一次
+            // 或許可以優化為從 PageRenderer 或 Storage 獲取
+            if (typeof API !== 'undefined') {
+                const settingsResult = await API.call('getSiteSettings');
+                if (settingsResult.success && settingsResult.data && settingsResult.data.settings) {
+                    this.siteSettings = settingsResult.data.settings;
+                    console.log('✅ 網站設定獲取成功');
+                }
+            }
+        } catch (e) { console.warn('無法獲取網站設定', e); }
+
         // 6. 處理 URL 購物車參數（從 LINE Bot 傳入）
         // 重要：必須在 PageRenderer 完成後執行，確保 loading 已隱藏且商品已載入
         if (typeof UrlCart !== 'undefined') {
