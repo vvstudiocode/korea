@@ -740,9 +740,10 @@ const PageRenderer = {
             let productSource = 'none';
 
             // 判斷是否為獨立網站 (有 SITE_CONFIG 且有 apiUrl)
+            // 判斷是否為獨立網站 (有 SITE_CONFIG 或 STORE_CONFIG 且有 apiUrl)
             const isIndependentStore = typeof window !== 'undefined' &&
-                window.SITE_CONFIG &&
-                window.SITE_CONFIG.apiUrl;
+                ((window.SITE_CONFIG && window.SITE_CONFIG.apiUrl) ||
+                    (window.STORE_CONFIG && window.STORE_CONFIG.apiUrl));
 
             // 優先順序:根據模式決定
             // KOL Mode: ONLY kolProducts (絕對不使用總部商品)
