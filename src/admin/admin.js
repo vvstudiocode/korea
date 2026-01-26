@@ -2264,7 +2264,14 @@ function addProductToOrderItems() {
         return;
     }
 
-    const product = currentProducts.find(p => p.name === productName);
+    // 查找商品
+    let product = currentProducts.find(p => p.name === productName);
+
+    // 如果找不到，嘗試 ID 匹配
+    if (!product) {
+        product = currentProducts.find(p => String(p.id) === productName);
+    }
+
     if (!product) {
         alert('找不到此商品');
         return;
