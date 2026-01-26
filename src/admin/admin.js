@@ -12,6 +12,21 @@ const DEFAULT_GAS_API_URL = 'https://script.google.com/macros/s/AKfycby7V5VwHfn_
  * 動態 API URL - 優先使用 SITE_CONFIG (由生成器注入)
  */
 const GAS_API_URL = (typeof window !== 'undefined' && window.SITE_CONFIG?.apiUrl) || DEFAULT_GAS_API_URL;
+
+// Debug: Check which API is being used
+if (typeof window !== 'undefined') {
+    console.group('🔧 Admin Config Status');
+    if (window.SITE_CONFIG) {
+        console.log('✅ Using SITE_CONFIG API');
+        console.log('Site ID:', window.SITE_CONFIG.siteId || window.SITE_CONFIG.id);
+        console.log('API URL:', window.SITE_CONFIG.apiUrl);
+    } else {
+        console.warn('⚠️ No SITE_CONFIG found - Using DEFAULT/HEADQUARTERS API');
+        console.log('Default API:', DEFAULT_GAS_API_URL);
+    }
+    console.log('Start Password:', currentPassword ? 'Loaded' : 'Empty');
+    console.groupEnd();
+}
 let currentPassword = '';
 let currentOrders = [];
 let currentProducts = [];
