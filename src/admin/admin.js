@@ -47,6 +47,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // 綁定自動計算事件
     document.getElementById('prodPriceKrw').addEventListener('input', calculateInlineCost);
     document.getElementById('prodExchangeRate').addEventListener('input', calculateInlineCost);
+
+    // Update Sidebar Title to Site ID
+    if (window.SITE_CONFIG && (window.SITE_CONFIG.siteId || window.SITE_CONFIG.id)) {
+        const sidebarHeader = document.querySelector('.sidebar-header h3');
+        if (sidebarHeader) {
+            sidebarHeader.textContent = (window.SITE_CONFIG.siteId || window.SITE_CONFIG.id).toUpperCase();
+        }
+    }
 });
 
 // Toast 通知系統
@@ -2031,7 +2039,12 @@ function onProductSelected() {
     }
 
     // 查找商品
-    const product = currentProducts.find(p => p.name === productName);
+    let product = currentProducts.find(p => p.name === productName);
+
+    // 如果找不到，嘗試 ID 匹配
+    if (!product) {
+        product = currentProducts.find(p => String(p.id) === productName);
+    }
 
     if (!product) {
         console.log('找不到對應商品資料:', productName);
@@ -2269,6 +2282,27 @@ function addProductToOrderItems() {
             price = matchedVariant.price;
             console.log('找到對應變體，價格:', price);
         }
+    }
+
+    // 檢查庫存 (庫存 <= 0 不能加入)
+    let currentStock = product.stock;
+    if (spec && product.variants) {
+        const matchedVariant = product.variants.find(v => v.spec === spec);
+        if (matchedVariant) {
+            currentStock = matchedVariant.stock;
+        }
+    }
+
+    // 如果沒有變體，且沒有 spec，使用產品總庫存
+    if (currentStock === undefined || currentStock === null || currentStock === '') {
+        // 極端情況回退
+        console.warn('無法判斷庫存，預設為可銷售');
+        currentStock = 999;
+    }
+
+    if (parseInt(currentStock) <= 0) {
+        alert('此商品/規格已售完 (庫存: 0)，無法加入訂單。');
+        return;
     }
 
     // 檢查是否已存在 (同名稱且同規格)
