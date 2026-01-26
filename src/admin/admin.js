@@ -3128,6 +3128,11 @@ async function generateNewSite() {
         hideLoadingOverlay();
 
         if (result.success) {
+            // 產生前後台 URL (前端產生，後端只儲存資料)
+            const baseUrl = 'https://vvstudiocode.github.io/korea';
+            const storeUrl = `${baseUrl}/stores/${siteId}/`;
+            const adminUrl = `${baseUrl}/stores/${siteId}/admin.html`;
+
             // 顯示結果
             const resultDiv = document.getElementById('siteGeneratorResult');
             resultDiv.style.display = 'block';
@@ -3135,16 +3140,16 @@ async function generateNewSite() {
             const storeUrlLink = document.getElementById('generatedStoreUrl');
             const adminUrlLink = document.getElementById('generatedAdminUrl');
 
-            storeUrlLink.href = result.data.storeUrl;
-            storeUrlLink.textContent = result.data.storeUrl;
+            storeUrlLink.href = storeUrl;
+            storeUrlLink.textContent = storeUrl;
 
-            adminUrlLink.href = result.data.adminUrl;
-            adminUrlLink.textContent = result.data.adminUrl;
+            adminUrlLink.href = adminUrl;
+            adminUrlLink.textContent = adminUrl;
 
             showToast('網站產生成功！', 'success');
 
-            // 清空表單
-            resetSiteGeneratorForm();
+            // 重新載入列表
+            loadGeneratedSites();
         } else {
             alert('產生失敗：' + (result.error || result.message || '未知錯誤'));
         }
@@ -3182,21 +3187,37 @@ function renderGeneratedSites(sites) {
         return;
     }
 
+    // 產生前後台 URL
+    const baseUrl = 'https://vvstudiocode.github.io/korea';
+
     tbody.innerHTML = sites.map(site => {
         const createdDate = site.createdAt ? new Date(site.createdAt).toLocaleDateString('zh-TW') : '-';
-        // 使用 encodeURIComponent 避免引號問題
-        const editData = encodeURIComponent(JSON.stringify(site));
+        // 取得正確的欄位 (後端用 id/name，前端需轉換)
+        const siteId = site.id || site.siteId;
+        const siteName = site.name || site.siteName;
+        const storeUrl = site.storeUrl || `${baseUrl}/stores/${siteId}/`;
+        const adminUrl = site.adminUrl || `${baseUrl}/stores/${siteId}/admin.html`;
+
+        // 準備傳給編輯函數的資料，統一格式
+        const siteData = {
+            siteId: siteId,
+            siteName: siteName,
+            apiUrl: site.apiUrl,
+            storeUrl: storeUrl,
+            adminUrl: adminUrl
+        };
+        const editData = encodeURIComponent(JSON.stringify(siteData));
 
         return `
             <tr>
-                <td>${site.siteId}</td>
-                <td>${site.siteName}</td>
+                <td>${siteId}</td>
+                <td>${siteName}</td>
                 <td>${createdDate}</td>
                 <td>
-                    <a href="${site.storeUrl}" target="_blank" class="btn-small">前台</a>
-                    <a href="${site.adminUrl}" target="_blank" class="btn-small">後台</a>
+                    <a href="${storeUrl}" target="_blank" class="btn-small">前台</a>
+                    <a href="${adminUrl}" target="_blank" class="btn-small">後台</a>
                     <button class="btn-small" onclick="editGeneratedSiteUI('${editData}')">編輯</button>
-                    <button class="btn-small" style="background:#dc3545;color:white;border:none;" onclick="deleteGeneratedSiteUI('${site.siteId}')">刪除</button>
+                    <button class="btn-small" style="background:#dc3545;color:white;border:none;" onclick="deleteGeneratedSiteUI('${siteId}')">刪除</button>
                 </td>
             </tr>
         `;
