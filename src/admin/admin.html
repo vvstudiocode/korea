@@ -60,6 +60,8 @@
 
                 <li id="tab-sitegenerator" onclick="switchTab('sitegenerator')" data-tooltip="網站生成器"><span
                         class="icon">⚙</span><span class="text">網站生成器</span></li>
+                <li id="tab-settings" onclick="switchTab('settings')" data-tooltip="網站設定"><span
+                        class="icon">⚙</span><span class="text">網站設定</span></li>
 
             </ul>
             <button class="sidebar-collapse-btn" onclick="toggleDesktopSidebar()" title="收合選單">⟨</button>
@@ -363,7 +365,34 @@
             </div>
 
 
-            <!-- 4. 網站設定視圖 (已移除) -->
+            <!-- 4. 網站設定視圖 -->
+            <div id="settingsView" class="view-section" style="display: none;">
+                <div class="view-header">
+                    <h2>網站設定</h2>
+                </div>
+                <div class="card">
+                    <h3>結帳資訊設定</h3>
+                    <div class="form-group">
+                        <label>銀行名稱</label>
+                        <input type="text" id="settingBankName" placeholder="例如：國泰世華銀行">
+                    </div>
+                    <div class="form-group">
+                        <label>銀行代碼</label>
+                        <input type="text" id="settingBankCode" placeholder="例如：013">
+                    </div>
+                    <div class="form-group">
+                        <label>銀行帳號</label>
+                        <input type="text" id="settingBankAccount" placeholder="例如：123456789012">
+                    </div>
+                    <div class="form-group">
+                        <label>匯款備註說明</label>
+                        <textarea id="settingBankNote" rows="4" placeholder="例如：請於下單後 3 天內匯款..."></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button class="accent-btn" onclick="saveSettings()">儲存設定</button>
+                    </div>
+                </div>
+            </div>
 
 
             <!-- 首頁排版編輯器 (升級版) -->
