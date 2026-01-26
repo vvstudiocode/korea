@@ -4,7 +4,7 @@
       "id": "hero_default",
       "type": "hero",
       "data": {
-        "title": "歡迎光臨 weiwei",
+        "title": "歡迎光臨 weiweiwei",
         "subtitle": "韓國代購精選商品",
         "buttonText": "立即選購",
         "buttonLink": "#products",
@@ -27,10 +27,10 @@
   "footer": {
     "enabled": true,
     "content": {
-      "storeName": "weiwei",
+      "storeName": "weiweiwei",
       "description": "韓國代購精選",
-      "copyright": "© 2025 weiwei. All rights reserved."
+      "copyright": "© 2025 weiweiwei. All rights reserved."
     }
   },
-  "updatedAt": "2026-01-26T09:55:40.170Z"
+  "updatedAt": "2026-01-26T11:42:26.126Z"
 }
