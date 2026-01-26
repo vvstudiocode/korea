@@ -967,6 +967,9 @@ const PageRenderer = {
             // 如果是 KOL 商店模式且是 KOL 自建商品 (ID 開頭為 K 或 type 為 own)
             if (this.currentStoreId && (String(p.id).startsWith('K') || p.type === 'own')) {
                 url = `/korea/stores/${this.currentStoreId}/products/${p.id}/`;
+            } else if (this.currentStoreId) {
+                // 一般商品在 KOL 商店中查看，加上 storeId 參數以保持上下文
+                url += `?storeId=${this.currentStoreId}`;
             }
 
             window.open(url, '_blank');
