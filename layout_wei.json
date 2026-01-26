@@ -1,19 +1,7 @@
 {
   "version": "1.0",
-  "lastUpdated": "2026-01-26T09:32:03.645Z",
+  "lastUpdated": "2026-01-26T09:41:16.524Z",
   "sections": [
-    {
-      "id": "hero_default",
-      "type": "hero",
-      "data": {
-        "title": "歡迎光臨 鮪魚",
-        "subtitle": "韓國代購精選商品",
-        "buttonText": "立即選購",
-        "buttonLink": "#products",
-        "backgroundImage": "",
-        "backgroundColor": "#f8f9fa"
-      }
-    },
     {
       "id": "products_default",
       "type": "product_list",
