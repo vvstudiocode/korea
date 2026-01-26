@@ -34,7 +34,7 @@ const Products = {
             let products;
             // 判斷是否為獨立網站 (有自訂 API URL)
             // 如果是獨立網站，即使有 storeId，也應該視為該站點的"總部"，使用 getProducts
-            const isStandaloneSite = typeof window !== 'undefined' && (window.CUSTOM_API_URL || window.SITE_CONFIG?.apiUrl);
+            const isStandaloneSite = typeof window !== 'undefined' && (window.CUSTOM_API_URL || window.SITE_CONFIG?.apiUrl || window.STORE_CONFIG?.apiUrl);
 
             if (storeId && !isStandaloneSite) {
                 // 真正的 KOL 子商店模式 (依附於總部)
