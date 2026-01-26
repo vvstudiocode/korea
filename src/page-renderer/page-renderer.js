@@ -739,10 +739,16 @@ const PageRenderer = {
             let allProducts = [];
             let productSource = 'none';
 
+            // 判斷是否為獨立網站 (有 SITE_CONFIG 且有 apiUrl)
+            const isIndependentStore = typeof window !== 'undefined' &&
+                window.SITE_CONFIG &&
+                window.SITE_CONFIG.apiUrl;
+
             // 優先順序:根據模式決定
             // KOL Mode: ONLY kolProducts (絕對不使用總部商品)
-            if (this.currentStoreId) {
-                console.log(`🏪 KOL模式: storeId=${this.currentStoreId}`);
+            // 只有在非獨立網站的情況下，才啟用舊版 KOL 邏輯 (依賴總部資料)
+            if (this.currentStoreId && !isIndependentStore) {
+                console.log(`🏪 KOL模式 (舊版): storeId=${this.currentStoreId}`);
 
                 if (typeof kolProducts !== 'undefined' && kolProducts.length > 0) {
                     allProducts = kolProducts;
@@ -757,8 +763,9 @@ const PageRenderer = {
                     console.warn('   提示: 請先到「我的商品」頁面選擇要販售的商品');
                 }
             } else {
-                // Official Mode
-                console.log('🏢 總部模式');
+                // Official Mode (或是獨立網站模式)
+                console.log(isIndependentStore ? `🏢 獨立網站模式 (${this.currentStoreId})` : '🏢 總部模式');
+
                 // 優先讀取 Products.items (新版模組化架構)
                 if (typeof Products !== 'undefined' && Products.items && Products.items.length > 0) {
                     allProducts = Products.items;
@@ -777,7 +784,16 @@ const PageRenderer = {
                     allProducts = currentProducts;
                     productSource = 'currentProducts';
                 }
-                console.log(`✅ 使用總部商品: ${allProducts.length} 項`);
+
+                // 如果是獨立網站且透過 Module 載入為空，嘗試重新載入
+                if (isIndependentStore && allProducts.length === 0 && typeof Products !== 'undefined') {
+                    console.log('🔄 獨立網站: 嘗試載入商品...');
+                    // 注意: 這裡透過 Products 模組載入，它會自動使用正確的 API URL
+                    // 但我們需要確保 await，但因為這裡是同步渲染，可能只能依賴外部先載入好
+                    // 暫時這裡只能顯示日誌，實際載入依賴外部 init
+                }
+
+                console.log(`✅ 使用${isIndependentStore ? '獨立網站' : '總部'}商品: ${allProducts.length} 項`);
             }
 
             console.log(`📦 商品來源: ${productSource}, 數量: ${allProducts.length}`);
