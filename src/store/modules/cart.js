@@ -178,21 +178,39 @@ const Cart = {
     },
 
     /**
+     * 開啟購物車
+     */
+    open() {
+        const cartSidebar = document.getElementById('cartSidebar');
+        const overlay = document.getElementById('overlay');
+        if (cartSidebar) cartSidebar.classList.add('open');
+        if (overlay) overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    },
+
+    /**
+     * 關閉購物車
+     */
+    close() {
+        const cartSidebar = document.getElementById('cartSidebar');
+        const overlay = document.getElementById('overlay');
+        if (cartSidebar) cartSidebar.classList.remove('open');
+        if (overlay) overlay.classList.remove('active');
+        document.body.style.overflow = '';
+    },
+
+    /**
      * 切換購物車顯示
      */
     toggle() {
         const cartSidebar = document.getElementById('cartSidebar');
-        const overlay = document.getElementById('overlay');
-        const isOpen = cartSidebar.classList.contains('open');
+        if (!cartSidebar) return;
 
+        const isOpen = cartSidebar.classList.contains('open');
         if (isOpen) {
-            cartSidebar.classList.remove('open');
-            overlay.classList.remove('active');
-            document.body.style.overflow = '';
+            this.close();
         } else {
-            cartSidebar.classList.add('open');
-            overlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
+            this.open();
         }
     },
 

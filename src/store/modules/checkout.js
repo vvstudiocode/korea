@@ -85,7 +85,11 @@ const Checkout = {
         }
 
         // 關閉購物車側邊欄
-        Cart.toggle();
+        if (typeof Cart.close === 'function') {
+            Cart.close();
+        } else {
+            Cart.toggle(); // Fallback for safety
+        }
 
         // 更新結帳摘要
         this.updateSummary();
