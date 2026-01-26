@@ -1,65 +1,44 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>weiweiwei | 韓國代購</title>
     <meta name="description" content="weiweiwei - 韓國代購精選">
-
+    
     <!-- Open Graph -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://vvstudiocode.github.io/korea/stores/wei/">
     <meta property="og:title" content="weiweiwei | 韓國代購">
     <meta property="og:description" content="提供最新韓國熱門商品代購服務">
     <meta property="og:image" content="https://vvstudiocode.github.io/korea/logo.png">
-
+    
     <style>
-        :root {
-            --primary-color: #D68C94;
-            --accent-color: #D68C94;
-        }
+        :root { --primary-color: #D68C94; --accent-color: #D68C94; }
     </style>
-
+    
     <!-- 樣式表 -->
     <link rel="stylesheet" href="/korea/src/store/styles/styles.css">
     <link rel="stylesheet" href="/korea/src/page-renderer/page-renderer.css">
-
+    
     <style>
         #loadingOverlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #fcfbfb;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #fcfbfb; z-index: 9999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
             transition: opacity 0.5s ease;
         }
-
-        #loadingOverlay.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-
+        #loadingOverlay.hidden { opacity: 0; pointer-events: none; }
         .loading-text {
-            color: var(--primary-color);
-            font-size: 1.2rem;
-            letter-spacing: 2px;
-            font-weight: 600;
+            color: var(--primary-color); font-size: 1.2rem;
+            letter-spacing: 2px; font-weight: 600;
         }
     </style>
-
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
 </head>
-
 <body data-store-id="wei">
     <!-- Loading Overlay -->
     <div id="loadingOverlay">
@@ -121,13 +100,11 @@
                 <label>運送方式：</label>
                 <div class="shipping-options">
                     <label class="shipping-option">
-                        <input type="radio" name="shippingMethod" value="pickup"
-                            onchange="Checkout.setShippingMethod('pickup')">
+                        <input type="radio" name="shippingMethod" value="pickup" onchange="Checkout.setShippingMethod('pickup')">
                         <span>限台中市面交 <strong>免運</strong></span>
                     </label>
                     <label class="shipping-option">
-                        <input type="radio" name="shippingMethod" value="711" checked
-                            onchange="Checkout.setShippingMethod('711')">
+                        <input type="radio" name="shippingMethod" value="711" checked onchange="Checkout.setShippingMethod('711')">
                         <span>7-11 店到店 <strong>NT$ 60</strong></span>
                     </label>
                 </div>
@@ -336,7 +313,7 @@
             logoUrl: 'https://vvstudiocode.github.io/korea/logo.png',
             apiUrl: 'https://script.google.com/macros/s/AKfycbxLz-FCgZ-sTYeOilhD80dCvyZ_1qPavDt-O0vjWmKvuk7F_AAxlin5DFkFk4zH70D_Mg/exec'
         };
-
+        
         // 覆寫 API URL
         if (typeof API_URL !== 'undefined') {
             API_URL = 'https://script.google.com/macros/s/AKfycbxLz-FCgZ-sTYeOilhD80dCvyZ_1qPavDt-O0vjWmKvuk7F_AAxlin5DFkFk4zH70D_Mg/exec';
@@ -344,5 +321,4 @@
         window.CUSTOM_API_URL = 'https://script.google.com/macros/s/AKfycbxLz-FCgZ-sTYeOilhD80dCvyZ_1qPavDt-O0vjWmKvuk7F_AAxlin5DFkFk4zH70D_Mg/exec';
     </script>
 </body>
-
 </html>
