@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>weiweiwei | 韓國代購</title>
+    <meta name="description" content="weiweiwei - 韓國代購精選">
+    
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://vvstudiocode.github.io/korea/stores/wei/">
+    <meta property="og:title" content="weiweiwei | 韓國代購">
+    <meta property="og:description" content="提供最新韓國熱門商品代購服務">
+    <meta property="og:image" content="https://vvstudiocode.github.io/korea/logo.png">
+    
+    <style>
+        :root { --primary-color: #D68C94; --accent-color: #D68C94; }
+    </style>
+    
+    <!-- 樣式表 -->
+    <link rel="stylesheet" href="/korea/src/store/styles/styles.css">
+    <link rel="stylesheet" href="/korea/src/page-renderer/page-renderer.css">
+    
+    <style>
+        #loadingOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #fcfbfb; z-index: 9999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: opacity 0.5s ease;
+        }
+        #loadingOverlay.hidden { opacity: 0; pointer-events: none; }
+        .loading-text {
+            color: var(--primary-color); font-size: 1.2rem;
+            letter-spacing: 2px; font-weight: 600;
+        }
+    </style>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body data-store-id="wei">
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay">
+        <video autoplay loop muted playsinline style="width: 150px; height: 150px; object-fit: contain;">
+            <source src="https://vvstudiocode.github.io/korea/omoloading.mp4" type="video/mp4">
+        </video>
+        <div class="loading-text">weiweiwei</div>
+    </div>
+
+    <!-- 導航列 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <img src="https://vvstudiocode.github.io/korea/logo.png" alt="weiweiwei" class="logo-img">
+                <span class="logo-text">weiweiwei</span>
+            </div>
+            <div class="nav-actions">
+                <button class="search-btn" id="searchBtn" onclick="openSearchModal()">🔍 訂單查詢</button>
+                <button class="cart-btn" id="cartBtn">
+                    🛒 購物車
+                    <span class="cart-badge" id="cartBadge">0</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要內容區 -->
+    <main class="main-container">
+        <div id="pageBuilderRoot"></div>
+    </main>
+
+    <!-- 頁尾 -->
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h4>weiweiwei</h4>
+                <p>韓國代購精選商品</p>
+            </div>
+        </div>
+        <div class="footer-copyright">
+            © 2025 weiweiwei. All rights reserved.
+        </div>
+    </footer>
+
+    <!-- 購物車側邊欄 -->
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h3>購物車</h3>
+            <button class="close-cart" id="closeCart">✕</button>
+        </div>
+        <div class="cart-items" id="cartItems">
+            <div class="empty-cart">
+                <p>購物車是空的</p>
+                <p class="empty-cart-hint">快去挑選喜歡的商品吧！</p>
+            </div>
+        </div>
+        <div class="cart-footer">
+            <div class="shipping-method-selector">
+                <label>運送方式：</label>
+                <div class="shipping-options">
+                    <label class="shipping-option">
+                        <input type="radio" name="shippingMethod" value="pickup" onchange="Checkout.setShippingMethod('pickup')">
+                        <span>限台中市面交 <strong>免運</strong></span>
+                    </label>
+                    <label class="shipping-option">
+                        <input type="radio" name="shippingMethod" value="711" checked onchange="Checkout.setShippingMethod('711')">
+                        <span>7-11 店到店 <strong>NT$ 60</strong></span>
+                    </label>
+                </div>
+            </div>
+            <div class="cart-total">
+                <span>總計：</span>
+                <span class="total-amount" id="totalAmount">NT$ 0</span>
+            </div>
+            <button class="checkout-btn" id="checkoutBtn">前往結帳</button>
+        </div>
+    </div>
+
+    <!-- 遮罩層 -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- JavaScript 模組載入 -->
+    <script src="/korea/src/core/api.js"></script>
+    <script src="/korea/src/core/storage.js"></script>
+    <script src="/korea/src/core/toast.js"></script>
+    <script src="/korea/src/core/utils.js"></script>
+    <script src="/korea/src/store/modules/products.js"></script>
+    <script src="/korea/src/store/modules/cart.js"></script>
+    <script src="/korea/src/store/modules/modal.js"></script>
+    <script src="/korea/src/store/modules/product-detail.js"></script>
+    <script src="/korea/src/store/modules/checkout.js"></script>
+    <script src="/korea/src/page-renderer/page-renderer.js"></script>
+    <script src="/korea/src/store/app.js"></script>
+
+    <script>
+        // 商店設定 - 使用獨立 API
+        window.STORE_CONFIG = {
+            storeId: 'wei',
+            storeName: 'weiweiwei',
+            themeColor: '#D68C94',
+            logoUrl: 'https://vvstudiocode.github.io/korea/logo.png',
+            apiUrl: 'https://script.google.com/macros/s/AKfycbxLz-FCgZ-sTYeOilhD80dCvyZ_1qPavDt-O0vjWmKvuk7F_AAxlin5DFkFk4zH70D_Mg/exec'
+        };
+        
+        // 覆寫 API URL
+        if (typeof API_URL !== 'undefined') {
+            API_URL = 'https://script.google.com/macros/s/AKfycbxLz-FCgZ-sTYeOilhD80dCvyZ_1qPavDt-O0vjWmKvuk7F_AAxlin5DFkFk4zH70D_Mg/exec';
+        }
+        window.CUSTOM_API_URL = 'https://script.google.com/macros/s/AKfycbxLz-FCgZ-sTYeOilhD80dCvyZ_1qPavDt-O0vjWmKvuk7F_AAxlin5DFkFk4zH70D_Mg/exec';
+    </script>
+</body>
+</html>
