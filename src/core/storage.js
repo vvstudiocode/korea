@@ -12,13 +12,26 @@ const Storage = {
     // ===== 商店前綴 (核心隔離機制) =====
     /**
      * 取得當前商店的 localStorage key 前綴
-     * @returns {string} 前綴字串 (如 'omo_' 或 'sharon_')
+     * @returns {string} 前綴字串 (如 'omo_' 或 'store_xxx_')
+     * 
+     * 支援多種設定來源：
+     * - SITE_CONFIG.siteId (新版生成器注入)
+     * - SITE_CONFIG.id (舊版兼容)
+     * - STORE_CONFIG.storeId (前台頁面)
      */
     get STORE_PREFIX() {
         if (typeof window !== 'undefined') {
-            // 優先使用新的 SITE_CONFIG (由 site-generator 產生的網站)
-            if (window.SITE_CONFIG && window.SITE_CONFIG.id) {
+            // 優先使用 SITE_CONFIG.siteId (新版生成器)
+            if (window.SITE_CONFIG?.siteId) {
+                return window.SITE_CONFIG.siteId + '_';
+            }
+            // 兼容舊版 SITE_CONFIG.id
+            if (window.SITE_CONFIG?.id) {
                 return window.SITE_CONFIG.id + '_';
+            }
+            // 支援前台頁面的 STORE_CONFIG
+            if (window.STORE_CONFIG?.storeId) {
+                return window.STORE_CONFIG.storeId + '_';
             }
         }
         // 總部預設使用 'omo_' 前綴
@@ -190,8 +203,13 @@ const Storage = {
      * @returns {string|null} 商店 ID 或 null (總部)
      */
     getStoreId() {
-        if (typeof window !== 'undefined' && window.SITE_CONFIG && window.SITE_CONFIG.id) {
-            return window.SITE_CONFIG.id;
+        if (typeof window !== 'undefined') {
+            // 優先使用 SITE_CONFIG.siteId (新版生成器)
+            if (window.SITE_CONFIG?.siteId) return window.SITE_CONFIG.siteId;
+            // 兼容舊版 SITE_CONFIG.id
+            if (window.SITE_CONFIG?.id) return window.SITE_CONFIG.id;
+            // 支援前台頁面的 STORE_CONFIG
+            if (window.STORE_CONFIG?.storeId) return window.STORE_CONFIG.storeId;
         }
         return null;
     },

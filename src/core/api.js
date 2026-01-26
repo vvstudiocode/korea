@@ -11,8 +11,19 @@
 const DEFAULT_API_URL = 'https://script.google.com/macros/s/AKfycby7V5VwHfn_Tb-wpg_SSrme2c2P5bin6qjhxEkr80RDLg6p5TPn2EXySkpG9qnyvfNF/exec';
 
 const API = {
-    // GAS API 基礎 URL - 支援動態設定 (window.SITE_CONFIG.apiUrl)
-    BASE_URL: (typeof window !== 'undefined' && window.SITE_CONFIG?.apiUrl) || DEFAULT_API_URL,
+    // GAS API 基礎 URL - 支援動態設定
+    // 使用 getter 確保每次呼叫時都能取得正確的 URL（支援 SITE_CONFIG 和 STORE_CONFIG）
+    get BASE_URL() {
+        if (typeof window !== 'undefined') {
+            // 優先使用 SITE_CONFIG（新版生成器）
+            if (window.SITE_CONFIG?.apiUrl) return window.SITE_CONFIG.apiUrl;
+            // 其次使用 STORE_CONFIG（前台頁面）
+            if (window.STORE_CONFIG?.apiUrl) return window.STORE_CONFIG.apiUrl;
+            // 最後使用 CUSTOM_API_URL（後台頁面動態載入）
+            if (window.CUSTOM_API_URL) return window.CUSTOM_API_URL;
+        }
+        return DEFAULT_API_URL;
+    },
 
     /**
      * 發送 API 請求
