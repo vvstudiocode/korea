@@ -1882,7 +1882,7 @@ function openCreateOrderModal() {
     document.getElementById('detailPhone').value = '';
     document.getElementById('detailEmail').value = '';
     document.getElementById('detailLine').value = '';
-    document.getElementById('detailShipping').value = '7-11店到店';
+    document.getElementById('detailShipping').value = ''; // Default to empty
     document.getElementById('detailStoreName').value = '';
     document.getElementById('detailStoreCode').value = '';
     document.getElementById('detailStoreAddress').value = '';
@@ -2551,8 +2551,12 @@ function submitManualOrder() {
         .then(data => {
             if (data.success) {
                 alert('訂單建立成功！訂單編號：' + data.data.orderId);
-                closeModal('orderDetailModal');
-                refreshData();
+                // closeModal('orderDetailModal'); // Don't close
+                refreshData(); // 重新載入訂單列表
+
+                // Reset modal for next order
+                // The easiest way is to re-call openCreateOrderModal() which clears inputs
+                openCreateOrderModal();
             } else {
                 alert('建立失敗：' + data.error);
                 btn.disabled = false;

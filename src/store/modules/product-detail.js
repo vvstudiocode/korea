@@ -178,7 +178,9 @@ const ProductDetail = {
         if (hasOptions && variants.length > 0) {
             isAllSoldOut = variants.every(v => v.stock <= 0);
         } else {
-            isAllSoldOut = typeof product.stock !== 'undefined' && Number(product.stock) <= 0;
+            // 嚴格檢查：如果 stock 未定義，視為 999 (有貨)，但如果明確 <= 0 則為售完
+            const stock = (product.stock !== undefined && product.stock !== '') ? Number(product.stock) : 999;
+            isAllSoldOut = stock <= 0;
         }
 
         this.updateAddToCartButton(isAllSoldOut);
@@ -190,6 +192,9 @@ const ProductDetail = {
      */
     updateAddToCartButton(isSoldOut) {
         const addToCartBtn = document.querySelector('.add-to-cart-btn');
+        const quantityInput = document.getElementById('modalQuantity');
+        const qtyBtns = document.querySelectorAll('.qty-btn');
+
         if (!addToCartBtn) return;
 
         if (isSoldOut) {
@@ -197,11 +202,19 @@ const ProductDetail = {
             addToCartBtn.textContent = '已售完';
             addToCartBtn.style.backgroundColor = '#ccc';
             addToCartBtn.style.cursor = 'not-allowed';
+
+            // 禁用數量選擇
+            if (quantityInput) quantityInput.disabled = true;
+            qtyBtns.forEach(btn => btn.disabled = true);
         } else {
             addToCartBtn.disabled = false;
             addToCartBtn.textContent = '加入購物車';
             addToCartBtn.style.backgroundColor = '';
             addToCartBtn.style.cursor = '';
+
+            // 啟用數量選擇
+            if (quantityInput) quantityInput.disabled = false;
+            qtyBtns.forEach(btn => btn.disabled = false);
         }
     },
 
@@ -210,6 +223,7 @@ const ProductDetail = {
      */
     increaseQuantity() {
         const input = document.getElementById('modalQuantity');
+        if (input.disabled) return;
         input.value = parseInt(input.value) + 1;
     },
 
@@ -218,6 +232,7 @@ const ProductDetail = {
      */
     decreaseQuantity() {
         const input = document.getElementById('modalQuantity');
+        if (input.disabled) return;
         if (parseInt(input.value) > 1) {
             input.value = parseInt(input.value) - 1;
         }
@@ -238,6 +253,29 @@ const ProductDetail = {
                 selectedOptions[key] = selected.dataset.value;
             }
         });
+
+        // 二次檢查庫存狀態 (防止 UI 狀態不同步)
+        const product = this.currentProduct;
+        const hasOptions = product.options && Object.keys(product.options).length > 0;
+
+        if (hasOptions) {
+            const specString = Object.values(selectedOptions).join('/');
+            const variant = product.variants ? product.variants.find(v => v.spec === specString) : null;
+            if (variant && variant.stock <= 0) {
+                alert('此規格已售完');
+                // 強制更新狀態
+                this.updateAddToCartButton(true);
+                return;
+            }
+        } else {
+            const stock = (product.stock !== undefined && product.stock !== '') ? Number(product.stock) : 999;
+            if (stock <= 0) {
+                alert('此商品已售完');
+                // 強制更新狀態
+                this.updateAddToCartButton(true);
+                return;
+            }
+        }
 
         Cart.add(this.currentProduct, quantity, selectedOptions);
         this.close();
