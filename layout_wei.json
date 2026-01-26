@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastUpdated": "2026-01-26T09:41:16.524Z",
+  "lastUpdated": "2026-01-26T09:43:58.794Z",
   "sections": [
     {
       "id": "products_default",
@@ -11,7 +11,8 @@
         "limit": 8,
         "showPrice": true,
         "showButton": true
-      }
+      },
+      "category": "全部"
     }
   ],
   "footer": {
