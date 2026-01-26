@@ -3464,50 +3464,56 @@ function resetSiteGeneratorForm() {
         btn.textContent = '🚀 產生網站';
         btn.onclick = generateNewSite;
     }
-    // ----------------------
-    // 網站設定
-    // ----------------------
-    function loadSettings() {
-        showLoadingOverlay();
-        callApi('getSiteSettings')
-            .then(data => {
-                if (data.success && data.data.settings) {
-                    const s = data.data.settings;
-                    document.getElementById('settingBankName').value = s.bankName || '';
-                    document.getElementById('settingBankCode').value = s.bankCode || '';
-                    document.getElementById('settingBankAccount').value = s.bankAccount || '';
-                    document.getElementById('settingBankNote').value = s.bankNote || '';
-                }
-            })
-            .finally(() => hideLoadingOverlay());
-    }
 
-    function saveSettings() {
-        const settings = {
-            bankName: document.getElementById('settingBankName').value.trim(),
-            bankCode: document.getElementById('settingBankCode').value.trim(),
-            bankAccount: document.getElementById('settingBankAccount').value.trim(),
-            bankNote: document.getElementById('settingBankNote').value.trim()
-        };
-
-        const btn = document.querySelector('#settingsView button');
-        btn.disabled = true;
-        btn.textContent = '儲存中...';
-
-        callApi('saveSiteSettings', { settings })
-            .then(data => {
-                if (data.success) {
-                    showToast('設定已儲存', 'success');
-                } else {
-                    showToast('儲存失敗: ' + data.error, 'error');
-                }
-            })
-            .finally(() => {
-                btn.disabled = false;
-                btn.textContent = '儲存設定';
-            });
-    }
     // 隱藏結果區
     const resultDiv = document.getElementById('siteGeneratorResult');
     if (resultDiv) resultDiv.style.display = 'none';
+}
+
+// ----------------------
+// 網站設定
+// ----------------------
+function loadSettings() {
+    showLoadingOverlay();
+    callApi('getSiteSettings')
+        .then(data => {
+            if (data.success && data.data.settings) {
+                const s = data.data.settings;
+                document.getElementById('settingBankName').value = s.bankName || '';
+                document.getElementById('settingBankCode').value = s.bankCode || '';
+                document.getElementById('settingBankAccount').value = s.bankAccount || '';
+                document.getElementById('settingBankNote').value = s.bankNote || '';
+            }
+        })
+        .finally(() => hideLoadingOverlay());
+}
+
+function saveSettings() {
+    const settings = {
+        bankName: document.getElementById('settingBankName').value.trim(),
+        bankCode: document.getElementById('settingBankCode').value.trim(),
+        bankAccount: document.getElementById('settingBankAccount').value.trim(),
+        bankNote: document.getElementById('settingBankNote').value.trim()
+    };
+
+    const btn = document.querySelector('#settingsView button');
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = '儲存中...';
+    }
+
+    callApi('saveSiteSettings', { settings })
+        .then(data => {
+            if (data.success) {
+                showToast('設定已儲存', 'success');
+            } else {
+                showToast('儲存失敗: ' + data.error, 'error');
+            }
+        })
+        .finally(() => {
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = '儲存設定';
+            }
+        });
 }
