@@ -84,6 +84,31 @@ const Checkout = {
             return;
         }
 
+        // 如果有網站設定，更新匯款資訊
+        if (typeof App !== 'undefined' && App.siteSettings) {
+            const s = App.siteSettings;
+            const paymentInfoDiv = document.querySelector('.payment-info');
+            if (paymentInfoDiv) {
+                // 建構匯款資訊 HTML
+                let bankHtml = '';
+                if (s.bankName) bankHtml += `<div class="payment-item"><span class="payment-label">銀行名稱：</span><span class="payment-value">${s.bankName} ${s.bankCode ? `(${s.bankCode})` : ''}</span></div>`;
+                if (s.bankAccount) bankHtml += `<div class="payment-item"><span class="payment-label">帳號：</span><span class="payment-value account-number">${s.bankAccount}</span></div>`;
+
+                // 保留固定提示
+                bankHtml += `<div class="payment-item"><span class="payment-label">任何問題可洽網頁最下方LINE | IG</span></div>`;
+                bankHtml += `<div class="payment-item"><span class="payment-value">匯款完成後請聯繫我們匯款後五碼</span></div>`;
+
+                const detailsDiv = paymentInfoDiv.querySelector('.payment-details');
+                if (detailsDiv) detailsDiv.innerHTML = bankHtml;
+
+                // 更新備註提示
+                if (s.bankNote) {
+                    const noteP = paymentInfoDiv.querySelector('.payment-note');
+                    if (noteP) noteP.textContent = s.bankNote;
+                }
+            }
+        }
+
         // 關閉購物車側邊欄
         if (typeof Cart.close === 'function') {
             Cart.close();
