@@ -197,8 +197,8 @@ const Checkout = {
                 }),
                 subtotal: Cart.getSubtotal(),
                 total: Cart.getSubtotal() + this.getShippingFee(),
-                storeId: (typeof Storage !== 'undefined' ? Storage.getStoreId() : null),
-                orderType: (typeof Storage !== 'undefined' && Storage.getStoreId()) ? 'store' : 'direct',
+                storeId: (typeof AppStorage !== 'undefined' ? AppStorage.getStoreId() : null),
+                orderType: (typeof AppStorage !== 'undefined' && AppStorage.getStoreId()) ? 'store' : 'direct',
                 // 為了相容 GAS 接收端，加入個別欄位
                 storeName: formData.get('storeName') || '',
                 storeCode: formData.get('storeCode') || '',
@@ -206,7 +206,7 @@ const Checkout = {
             };
 
             // 第二個參數為 isStore，如果是獨立商店則為 true
-            const isStore = typeof Storage !== 'undefined' && !!Storage.getStoreId();
+            const isStore = typeof AppStorage !== 'undefined' && !!AppStorage.getStoreId();
             const result = await API.submitOrder(orderData, isStore);
 
             if (result.success) {

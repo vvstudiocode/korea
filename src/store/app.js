@@ -26,14 +26,14 @@ const App = {
         window.scrollTo(0, 0);
 
         // 1. 處理快取排版 (使用 Storage 模組，自動處理商店前綴)
-        const cachedLayout = Storage.getCachedLayout();
+        const cachedLayout = AppStorage.getCachedLayout();
         if (cachedLayout) {
             const defaultSection = document.querySelector('.products-section');
             if (defaultSection) defaultSection.style.display = 'none';
         }
 
         // 2. 載入商品 (使用 Storage 模組取得商店 ID)
-        await Products.load(Storage.getStoreId());
+        await Products.load(AppStorage.getStoreId());
 
         // 3. 初始化購物車
         Cart.init();
@@ -43,7 +43,7 @@ const App = {
 
         // 5. 初始化頁面渲染器
         if (typeof PageRenderer !== 'undefined') {
-            await PageRenderer.init(Storage.getStoreId());
+            await PageRenderer.init(AppStorage.getStoreId());
         }
 
         // 6. 處理 URL 購物車參數（從 LINE Bot 傳入）

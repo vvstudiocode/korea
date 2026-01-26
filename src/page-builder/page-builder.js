@@ -363,7 +363,8 @@ const PageBuilder = {
         list.innerHTML = '';
 
         // 判斷是否為 KOL 模式 (有 storeId)
-        const isKolMode = !!this.storeId;
+        // 修正: 用戶希望所有子網站都能完整編輯排版，因此強制關閉唯讀限制
+        const isKolMode = false; // !!this.storeId;
 
         // 1. 全域設定區塊
         const globalDiv = document.createElement('div');
@@ -1360,8 +1361,8 @@ const PageBuilder = {
             if (data.success) {
                 showToast('首頁排版儲存成功！', 'success');
                 // 同時更新 localStorage 快取 - 使用 Storage 模組
-                if (typeof Storage !== 'undefined') {
-                    Storage.cacheLayout(layoutData);
+                if (typeof AppStorage !== 'undefined') {
+                    AppStorage.cacheLayout(layoutData);
                 }
             } else {
                 // Fallback: 儲存到 GAS 網站設定

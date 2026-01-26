@@ -12,14 +12,14 @@ const Cart = {
      * 初始化購物車（從 LocalStorage 載入）
      */
     init() {
-        this.items = Storage.getCart();
+        this.items = AppStorage.getCart();
         this.updateUI();
 
         // 監聽跨分頁購物車更新
         window.addEventListener('storage', (e) => {
-            if (e.key === Storage.CART_KEY) {
+            if (e.key === AppStorage.CART_KEY) {
                 console.log('[Cart] 同步更新購物車');
-                this.items = Storage.getCart();
+                this.items = AppStorage.getCart();
                 this.updateUI();
             }
         });
@@ -158,7 +158,7 @@ const Cart = {
      * 儲存購物車到 LocalStorage
      */
     save() {
-        Storage.saveCart(this.items);
+        AppStorage.saveCart(this.items);
     },
 
     /**

@@ -8,7 +8,7 @@
  *    - 獨立網站 (有 SITE_CONFIG): 使用 '{siteId}_' 前綴
  */
 
-const Storage = {
+const AppStorage = {
     // ===== 商店前綴 (核心隔離機制) =====
     /**
      * 取得當前商店的 localStorage key 前綴
@@ -47,7 +47,7 @@ const Storage = {
         try {
             localStorage.setItem(key, JSON.stringify(value));
         } catch (error) {
-            console.error(`[Storage] 儲存 ${key} 失敗:`, error);
+            console.error(`[AppStorage] 儲存 ${key} 失敗:`, error);
         }
     },
 
@@ -62,7 +62,7 @@ const Storage = {
             const item = localStorage.getItem(key);
             return item ? JSON.parse(item) : defaultValue;
         } catch (error) {
-            console.error(`[Storage] 讀取 ${key} 失敗:`, error);
+            console.error(`[AppStorage] 讀取 ${key} 失敗:`, error);
             return defaultValue;
         }
     },
@@ -75,7 +75,7 @@ const Storage = {
         try {
             localStorage.removeItem(key);
         } catch (error) {
-            console.error(`[Storage] 移除 ${key} 失敗:`, error);
+            console.error(`[AppStorage] 移除 ${key} 失敗:`, error);
         }
     },
 
@@ -86,7 +86,7 @@ const Storage = {
         try {
             localStorage.clear();
         } catch (error) {
-            console.error('[Storage] 清除失敗:', error);
+            console.error('[AppStorage] 清除失敗:', error);
         }
     },
 
@@ -204,7 +204,7 @@ const Storage = {
      */
     getStoreId() {
         if (typeof window !== 'undefined') {
-            // 優先使用 SITE_CONFIG.siteId (新版生成器)
+            // 優先使用 SITE_CONFIG.siteId (新版生成器注入)
             if (window.SITE_CONFIG?.siteId) return window.SITE_CONFIG.siteId;
             // 兼容舊版 SITE_CONFIG.id
             if (window.SITE_CONFIG?.id) return window.SITE_CONFIG.id;
@@ -229,10 +229,10 @@ const Storage = {
 
 // 如果在瀏覽器環境，掛載到 window
 if (typeof window !== 'undefined') {
-    window.Storage = Storage;
+    window.AppStorage = AppStorage;
 }
 
 // 如果支援 ES 模組匯出
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = Storage;
+    module.exports = AppStorage;
 }

@@ -137,7 +137,7 @@ const PageRenderer = {
         if (!container) return;
 
         // 1. 立即從快取讀取並渲染 (防止閃爍) - 使用 Storage 模組
-        const cachedLayout = typeof Storage !== 'undefined' ? Storage.getCachedLayout() : null;
+        const cachedLayout = typeof AppStorage !== 'undefined' ? AppStorage.getCachedLayout() : null;
         if (cachedLayout) {
             try {
                 const parsed = typeof cachedLayout === 'string' ? JSON.parse(cachedLayout) : cachedLayout;
@@ -154,8 +154,8 @@ const PageRenderer = {
         const layout = await this.fetchLayout();
         if (layout) {
             // 更新快取 - 使用 Storage 模組
-            if (typeof Storage !== 'undefined') {
-                Storage.cacheLayout(layout);
+            if (typeof AppStorage !== 'undefined') {
+                AppStorage.cacheLayout(layout);
             }
             // 重新渲染最新內容
             this.render(container, layout.sections || layout);

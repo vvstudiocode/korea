@@ -19,7 +19,7 @@ const Products = {
         const grid = document.getElementById('productsGrid');
 
         // 1. 先嘗試從快取載入
-        const cached = Storage.getCachedProducts();
+        const cached = AppStorage.getCachedProducts();
         if (cached) {
             console.log('📦 從快取載入商品');
             this.items = cached;
@@ -51,11 +51,11 @@ const Products = {
                 if (JSON.stringify(products) !== JSON.stringify(this.items)) {
                     console.log('🔄 更新商品資料');
                     this.items = products;
-                    Storage.cacheProducts(products);
+                    AppStorage.cacheProducts(products);
                     this.displayProgressive();
                 } else {
                     console.log('✅ 商品資料無變化');
-                    Storage.cacheProducts(this.items);
+                    AppStorage.cacheProducts(this.items);
                 }
                 // 暴露給 page-renderer.js 使用
                 window.products = this.items;
