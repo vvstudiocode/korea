@@ -13,6 +13,11 @@ const DEFAULT_GAS_API_URL = 'https://script.google.com/macros/s/AKfycby7V5VwHfn_
  */
 const GAS_API_URL = (typeof window !== 'undefined' && window.SITE_CONFIG?.apiUrl) || DEFAULT_GAS_API_URL;
 
+// Global State Variables
+let currentPassword = '';
+let currentOrders = [];
+let currentProducts = [];
+
 // Debug: Check which API is being used
 if (typeof window !== 'undefined') {
     console.group('🔧 Admin Config Status');
@@ -27,9 +32,6 @@ if (typeof window !== 'undefined') {
     console.log('Start Password:', currentPassword ? 'Loaded' : 'Empty');
     console.groupEnd();
 }
-let currentPassword = '';
-let currentOrders = [];
-let currentProducts = [];
 
 
 // 批次更新暫存
