@@ -1,4 +1,6 @@
 {
+  "version": "1.0",
+  "lastUpdated": "2026-01-26T09:14:37.327Z",
   "sections": [
     {
       "id": "hero_default",
@@ -32,5 +34,9 @@
       "copyright": "© 2025 鮪魚. All rights reserved."
     }
   },
-  "updatedAt": "2026-01-26T08:59:07.809Z"
+  "global": {
+    "backgroundColor": "#84f58c",
+    "fontFamily": "Noto Sans TC",
+    "fontSize": "16px"
+  }
 }
