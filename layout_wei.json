@@ -4,7 +4,7 @@
       "id": "hero_default",
       "type": "hero",
       "data": {
-        "title": "歡迎光臨 鮪魚",
+        "title": "歡迎光臨 wei",
         "subtitle": "韓國代購精選商品",
         "buttonText": "立即選購",
         "buttonLink": "#products",
@@ -27,10 +27,10 @@
   "footer": {
     "enabled": true,
     "content": {
-      "storeName": "鮪魚",
+      "storeName": "wei",
       "description": "韓國代購精選",
-      "copyright": "© 2025 鮪魚. All rights reserved."
+      "copyright": "© 2025 wei. All rights reserved."
     }
   },
-  "updatedAt": "2026-01-26T08:14:55.076Z"
+  "updatedAt": "2026-01-26T08:38:57.850Z"
 }
