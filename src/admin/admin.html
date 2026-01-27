@@ -371,6 +371,27 @@
                     <h2>網站設定</h2>
                 </div>
                 <div class="card">
+                    <h3>網站 Logo 設定</h3>
+                    <div class="form-group">
+                        <label>目前 Logo</label>
+                        <div id="logoPreviewContainer" class="logo-preview-container" style="margin-bottom: 10px;">
+                            <img id="currentLogoPreview" src="" alt="Current Logo"
+                                style="max-height: 100px; display: none;">
+                            <div id="noLogoText" style="color: #888; display: none;">尚未上傳 Logo</div>
+                        </div>
+                        <input type="file" id="logoFileInput" accept="image/*" style="display: none;"
+                            onchange="handleLogoSelect(this)">
+                        <div class="button-group">
+                            <button class="btn-secondary" onclick="document.getElementById('logoFileInput').click()">上傳新
+                                Logo</button>
+                            <button class="btn-danger" id="deleteLogoBtn" onclick="deleteLogo()"
+                                style="display: none;">刪除 Logo</button>
+                        </div>
+                        <div id="logoUploadStatus" style="margin-top: 5px; font-size: 0.9em;"></div>
+                    </div>
+                </div>
+
+                <div class="card">
                     <h3>結帳資訊設定</h3>
                     <div class="form-group">
                         <label>銀行名稱</label>

@@ -57,7 +57,17 @@ const App = {
                     console.log('✅ 網站設定獲取成功');
                 }
             }
-        } catch (e) { console.warn('無法獲取網站設定', e); }
+        } catch (e) {
+            console.warn('無法獲取網站設定', e);
+        }
+
+        // Apply Logo from settings if available (Override static default)
+        if (this.siteSettings && this.siteSettings.logoUrl) {
+            const logoImgs = document.querySelectorAll('.logo-img, .footer-logo');
+            logoImgs.forEach(img => {
+                img.src = this.siteSettings.logoUrl;
+            });
+        }
 
         // 6. 處理 URL 購物車參數（從 LINE Bot 傳入）
         // 重要：必須在 PageRenderer 完成後執行，確保 loading 已隱藏且商品已載入

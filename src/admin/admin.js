@@ -3488,13 +3488,178 @@ function loadSettings() {
         .finally(() => hideLoadingOverlay());
 }
 
+// 載入網站設定 (對應新版 UI)
+function loadSettings() {
+    const btn = document.querySelector('#settingsView button');
+    if (btn) btn.disabled = true;
+
+    callApi('getSiteSettings')
+        .then(data => {
+            if (data.success) {
+                const s = data.data.settings || {};
+
+                // 填入銀行資訊
+                const bankNameInput = document.getElementById('settingBankName');
+                const bankCodeInput = document.getElementById('settingBankCode');
+                const bankAccountInput = document.getElementById('settingBankAccount');
+                const bankNoteInput = document.getElementById('settingBankNote');
+
+                if (bankNameInput) bankNameInput.value = s.bankName || '';
+                if (bankCodeInput) bankCodeInput.value = s.bankCode || '';
+                if (bankAccountInput) bankAccountInput.value = s.bankAccount || '';
+                if (bankNoteInput) bankNoteInput.value = s.bankNote || '';
+
+                // 處理 Logo 顯示
+                const logoPreview = document.getElementById('currentLogoPreview');
+                const noLogoText = document.getElementById('noLogoText');
+                const deleteBtn = document.getElementById('deleteLogoBtn');
+
+                if (logoPreview && noLogoText && deleteBtn) {
+                    if (s.logoUrl) {
+                        logoPreview.src = s.logoUrl;
+                        logoPreview.style.display = 'block';
+                        // 清除 pending 狀態，確保儲存時不會誤判
+                        logoPreview.removeAttribute('data-pending-url');
+
+                        noLogoText.style.display = 'none';
+                        deleteBtn.style.display = 'inline-block';
+                    } else {
+                        logoPreview.src = '';
+                        logoPreview.style.display = 'none';
+                        logoPreview.removeAttribute('data-pending-url');
+
+                        noLogoText.style.display = 'block';
+                        deleteBtn.style.display = 'none';
+                    }
+                }
+            } else {
+                showToast('載入設定失敗: ' + data.error, 'error');
+            }
+        })
+        .catch(err => {
+            showToast('載入設定錯誤: ' + err, 'error');
+        })
+        .finally(() => {
+            if (btn) btn.disabled = false;
+        });
+}
+
+// 處理 Logo 選擇與上傳
+function handleLogoSelect(input) {
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        // 限制檔案大小 (例如 2MB)
+        if (file.size > 2 * 1024 * 1024) {
+            alert('檔案太大，請選擇小於 2MB 的圖片');
+            input.value = '';
+            return;
+        }
+
+        const reader = new FileReader();
+        const statusDiv = document.getElementById('logoUploadStatus');
+        if (statusDiv) {
+            statusDiv.textContent = '正在上傳 Logo...';
+            statusDiv.style.color = 'blue';
+        }
+
+        reader.onload = function (e) {
+            const base64Content = e.target.result.split(',')[1];
+            const mimeType = file.type;
+            const fileName = 'logo_' + Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9\._-]/g, '');
+
+            callApi('uploadImageToGitHub', {
+                fileName: fileName,
+                content: base64Content,
+                mimeType: mimeType,
+                brand: 'logos'
+            }).then(resp => {
+                if (resp.success) {
+                    const logoUrl = resp.data.url;
+
+                    const logoPreview = document.getElementById('currentLogoPreview');
+                    const noLogoText = document.getElementById('noLogoText');
+                    const deleteBtn = document.getElementById('deleteLogoBtn');
+
+                    if (logoPreview) {
+                        logoPreview.src = logoUrl;
+                        logoPreview.style.display = 'block';
+                        // 標記為待儲存的新 URL
+                        logoPreview.dataset.pendingUrl = logoUrl;
+                    }
+                    if (noLogoText) noLogoText.style.display = 'none';
+                    if (deleteBtn) deleteBtn.style.display = 'inline-block';
+
+                    if (statusDiv) {
+                        statusDiv.textContent = 'Logo 上傳成功！請記得點擊下方「儲存設定」按鈕以套用變更。';
+                        statusDiv.style.color = 'green';
+                    }
+                } else {
+                    if (statusDiv) {
+                        statusDiv.textContent = 'Logo 上傳失敗: ' + resp.error;
+                        statusDiv.style.color = 'red';
+                    }
+                    input.value = ''; // 清除選擇
+                }
+            }).catch(err => {
+                if (statusDiv) {
+                    statusDiv.textContent = '上傳錯誤: ' + err;
+                    statusDiv.style.color = 'red';
+                }
+            });
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+// 刪除 Logo
+function deleteLogo() {
+    if (confirm('確定要移除網站 Logo 嗎？(需按下儲存設定才會生效)')) {
+        const logoPreview = document.getElementById('currentLogoPreview');
+        const noLogoText = document.getElementById('noLogoText');
+        const deleteBtn = document.getElementById('deleteLogoBtn');
+        const fileInput = document.getElementById('logoFileInput');
+        const statusDiv = document.getElementById('logoUploadStatus');
+
+        if (logoPreview) {
+            logoPreview.style.display = 'none';
+            logoPreview.src = '';
+            // 標記為刪除
+            logoPreview.dataset.pendingUrl = 'DELETE';
+        }
+        if (noLogoText) noLogoText.style.display = 'block';
+        if (deleteBtn) deleteBtn.style.display = 'none';
+        if (fileInput) fileInput.value = '';
+        if (statusDiv) statusDiv.textContent = 'Logo 已移除，請點擊「儲存設定」以確認。';
+    }
+}
+
 function saveSettings() {
+    // 準備設定物件
     const settings = {
         bankName: document.getElementById('settingBankName').value.trim(),
         bankCode: document.getElementById('settingBankCode').value.trim(),
         bankAccount: document.getElementById('settingBankAccount').value.trim(),
         bankNote: document.getElementById('settingBankNote').value.trim()
     };
+
+    // 處理 Logo URL
+    const logoPreview = document.getElementById('currentLogoPreview');
+    if (logoPreview) {
+        const pendingUrl = logoPreview.dataset.pendingUrl;
+        if (pendingUrl === 'DELETE') {
+            settings.logoUrl = '';
+        } else if (pendingUrl) {
+            settings.logoUrl = pendingUrl;
+        } else {
+            // 如果沒有變更，使用目前的 src (如果有的話)
+            // 注意：需排除 empty src 或 placeholder
+            if (logoPreview.style.display !== 'none' && logoPreview.src) {
+                settings.logoUrl = logoPreview.src;
+            } else {
+                settings.logoUrl = '';
+            }
+        }
+    }
 
     const btn = document.querySelector('#settingsView button');
     if (btn) {
@@ -3506,6 +3671,10 @@ function saveSettings() {
         .then(data => {
             if (data.success) {
                 showToast('設定已儲存', 'success');
+                // 成功後，清除 pending 狀態並重新載入確保一致性 (或手動更新狀態)
+                if (logoPreview) logoPreview.removeAttribute('data-pending-url');
+                const statusDiv = document.getElementById('logoUploadStatus');
+                if (statusDiv) statusDiv.textContent = '';
             } else {
                 showToast('儲存失敗: ' + data.error, 'error');
             }
