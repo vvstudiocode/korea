@@ -35,25 +35,51 @@ const App = {
         // 0. 優先載入網站設定 (Logo, Payment Note)
         try {
             if (typeof API !== 'undefined') {
-                const settingsResult = await API.call('getSiteSettings');
-                if (settingsResult.success && settingsResult.data && settingsResult.data.settings) {
-                    this.siteSettings = settingsResult.data.settings;
-                    console.log('✅ 網站設定獲取成功');
-
-                    // Apply Logo immediately
-                    if (this.siteSettings.logoUrl) {
-                        const logoImgs = document.querySelectorAll('.logo-img, .footer-logo');
-                        logoImgs.forEach(img => {
-                            img.src = this.siteSettings.logoUrl;
-                        });
+                // Dynamic API URL Discovery for New Sites
+                // If we have a Store ID but no specific API URL (empty or default), fetch it from HQ.
+                if (window.STORE_CONFIG && window.STORE_CONFIG.storeId && !window.STORE_CONFIG.apiUrl) {
+                    try {
+                        console.log(`[App] Resolving API URL for store: ${window.STORE_CONFIG.storeId}...`);
+                        const storeInfo = await API.getStoreInfo(window.STORE_CONFIG.storeId);
+                        if (storeInfo && storeInfo.apiUrl) {
+                            console.log(`[App] API URL resolved: ${storeInfo.apiUrl}`);
+                            // Update Global Configs to point to the correct backend
+                            window.STORE_CONFIG.apiUrl = storeInfo.apiUrl;
+                            window.CUSTOM_API_URL = storeInfo.apiUrl; // Force override for API module
+                        } else {
+                            console.warn('[App] Failed to resolve API URL. Using default.');
+                        }
+                    } catch (err) {
+                        console.error('[App] Error resolving API URL:', err);
                     }
+                }
 
-                    // Apply Custom Payment Note immediately
-                    if (this.siteSettings.paymentNote) {
-                        const successMsg = document.getElementById('successCustomMessage');
-                        if (successMsg) {
-                            successMsg.innerHTML = this.siteSettings.paymentNote;
-                            successMsg.style.display = 'block';
+                const settingsResult = await API.call('getSiteSettings');
+                console.log('[App] Settings API Result:', settingsResult);
+
+                if (settingsResult.success) {
+                    // 兼容兩種回傳格式: { data: { settings: ... } } 或 { settings: ... }
+                    const settings = settingsResult.data ? settingsResult.data.settings : settingsResult.settings;
+
+                    if (settings) {
+                        this.siteSettings = settings;
+                        console.log('✅ 網站設定獲取成功:', this.siteSettings);
+
+                        // Apply Logo immediately
+                        if (this.siteSettings.logoUrl) {
+                            const logoImgs = document.querySelectorAll('.logo-img, .footer-logo');
+                            logoImgs.forEach(img => {
+                                img.src = this.siteSettings.logoUrl;
+                            });
+                        }
+
+                        // Apply Custom Payment Note immediately
+                        if (this.siteSettings.paymentNote) {
+                            const successMsg = document.getElementById('successCustomMessage');
+                            if (successMsg) {
+                                successMsg.innerHTML = this.siteSettings.paymentNote;
+                                successMsg.style.display = 'block';
+                            }
                         }
                     }
                 }
