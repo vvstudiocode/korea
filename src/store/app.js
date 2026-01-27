@@ -69,6 +69,15 @@ const App = {
             });
         }
 
+        // Apply Custom Payment Note
+        if (this.siteSettings && this.siteSettings.paymentNote) {
+            const successMsg = document.getElementById('successCustomMessage');
+            if (successMsg) {
+                successMsg.innerHTML = this.siteSettings.paymentNote;
+                successMsg.style.display = 'block';
+            }
+        }
+
         // 6. 處理 URL 購物車參數（從 LINE Bot 傳入）
         // 重要：必須在 PageRenderer 完成後執行，確保 loading 已隱藏且商品已載入
         if (typeof UrlCart !== 'undefined') {

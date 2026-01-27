@@ -3498,16 +3498,18 @@ function loadSettings() {
             if (data.success) {
                 const s = data.data.settings || {};
 
-                // 填入銀行資訊
+                // 填入銀行資訊 & 匯款完成提示
                 const bankNameInput = document.getElementById('settingBankName');
                 const bankCodeInput = document.getElementById('settingBankCode');
                 const bankAccountInput = document.getElementById('settingBankAccount');
                 const bankNoteInput = document.getElementById('settingBankNote');
+                const paymentNoteInput = document.getElementById('settingPaymentNote');
 
                 if (bankNameInput) bankNameInput.value = s.bankName || '';
                 if (bankCodeInput) bankCodeInput.value = s.bankCode || '';
                 if (bankAccountInput) bankAccountInput.value = s.bankAccount || '';
                 if (bankNoteInput) bankNoteInput.value = s.bankNote || '';
+                if (paymentNoteInput) paymentNoteInput.value = s.paymentNote || '';
 
                 // 處理 Logo 顯示
                 const logoPreview = document.getElementById('currentLogoPreview');
@@ -3639,7 +3641,8 @@ function saveSettings() {
         bankName: document.getElementById('settingBankName').value.trim(),
         bankCode: document.getElementById('settingBankCode').value.trim(),
         bankAccount: document.getElementById('settingBankAccount').value.trim(),
-        bankNote: document.getElementById('settingBankNote').value.trim()
+        bankNote: document.getElementById('settingBankNote').value.trim(),
+        paymentNote: document.getElementById('settingPaymentNote').value.trim()
     };
 
     // 處理 Logo URL

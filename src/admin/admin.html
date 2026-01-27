@@ -409,6 +409,12 @@
                         <label>匯款備註說明</label>
                         <textarea id="settingBankNote" rows="4" placeholder="例如：請於下單後 3 天內匯款..."></textarea>
                     </div>
+                    <div class="form-group">
+                        <label>匯款完成提示 (支援 HTML)</label>
+                        <textarea id="settingPaymentNote" rows="4"
+                            placeholder="例如：匯款完成後請一定要至官方 Line 回覆：@yourid..."></textarea>
+                        <small style="color: #666;">此訊息將顯示在訂單成功頁面。</small>
+                    </div>
                     <div class="form-actions">
                         <button class="accent-btn" onclick="saveSettings()">儲存設定</button>
                     </div>
