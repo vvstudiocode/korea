@@ -84,14 +84,16 @@ const Checkout = {
             return;
         }
 
-        // 如果有網站設定，更新匯款資訊
+        // 如果有網站設定，更新匯款資訊和匯款完成提示
         if (typeof App !== 'undefined' && App.siteSettings) {
             const s = App.siteSettings;
+
+            // 1. 更新匯款資訊區塊
             const paymentInfoDiv = document.querySelector('.payment-info');
             if (paymentInfoDiv) {
                 // 建構匯款資訊 HTML
                 let bankHtml = '';
-                if (s.bankName) bankHtml += `<div class="payment-item"><span class="payment-label">銀行名稱：</span><span class="payment-value">${s.bankName} ${s.bankCode ? `(${s.bankCode})` : ''}</span></div>`;
+                if (s.bankName) bankHtml += `<div class="payment-item"><span class="payment-label">銀行名稱：</span><span class="payment-value">${s.bankName} ${s.bankCode ? `(代碼 ${s.bankCode})` : ''}</span></div>`;
                 if (s.bankAccount) bankHtml += `<div class="payment-item"><span class="payment-label">帳號：</span><span class="payment-value account-number">${s.bankAccount}</span></div>`;
 
                 // 保留固定提示
@@ -105,6 +107,14 @@ const Checkout = {
                 if (s.bankNote) {
                     const noteP = paymentInfoDiv.querySelector('.payment-note');
                     if (noteP) noteP.textContent = s.bankNote;
+                }
+            }
+
+            // 2. 更新匯款完成提示欄位 (paymentNote)
+            if (s.paymentNote) {
+                const hintElement = document.querySelector('.form-hint');
+                if (hintElement) {
+                    hintElement.innerHTML = s.paymentNote;
                 }
             }
         }
@@ -249,10 +259,10 @@ const Checkout = {
                 // 使用我們送出的 orderId，因為後端可能只回傳 success
                 document.getElementById('orderNumber').textContent = orderId;
 
-                // 更新自定義成功訊息
+                // 更新自定義成功訊息 (使用 paymentNote 欄位)
                 const customMsgContainer = document.getElementById('successCustomMessage');
-                if (customMsgContainer && typeof App !== 'undefined' && App.siteSettings && App.siteSettings.checkoutSuccessInfo) {
-                    customMsgContainer.innerHTML = App.siteSettings.checkoutSuccessInfo.replace(/\n/g, '<br>');
+                if (customMsgContainer && typeof App !== 'undefined' && App.siteSettings && App.siteSettings.paymentNote) {
+                    customMsgContainer.innerHTML = App.siteSettings.paymentNote.replace(/\n/g, '<br>');
                     customMsgContainer.style.display = 'block';
                 } else if (customMsgContainer) {
                     customMsgContainer.style.display = 'none';
