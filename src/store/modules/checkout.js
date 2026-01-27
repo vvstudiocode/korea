@@ -15,6 +15,44 @@ const Checkout = {
     selectedMethod: '711',
 
     /**
+     * 將網站設定套用到結帳表單（匯款資訊、提示）
+     * 獨立函數方便延遲呼叫
+     */
+    _applySettings() {
+        if (typeof App === 'undefined' || !App.siteSettings) return;
+        const s = App.siteSettings;
+
+        // 1. 更新匯款資訊區塊
+        const paymentInfoDiv = document.querySelector('.payment-info');
+        if (paymentInfoDiv && (s.bankName || s.bankAccount)) {
+            let bankHtml = '';
+            if (s.bankName) bankHtml += `<div class="payment-item"><span class="payment-label">銀行名稱：</span><span class="payment-value">${s.bankName} ${s.bankCode ? `(代碼 ${s.bankCode})` : ''}</span></div>`;
+            if (s.bankAccount) bankHtml += `<div class="payment-item"><span class="payment-label">帳號：</span><span class="payment-value account-number">${s.bankAccount}</span></div>`;
+
+            // 保留固定提示
+            bankHtml += `<div class="payment-item"><span class="payment-label">任何問題可洽網頁最下方LINE | IG</span></div>`;
+            bankHtml += `<div class="payment-item"><span class="payment-value">匯款完成後請聯繫我們匯款後五碼</span></div>`;
+
+            const detailsDiv = paymentInfoDiv.querySelector('.payment-details');
+            if (detailsDiv) detailsDiv.innerHTML = bankHtml;
+
+            // 更新備註提示
+            if (s.bankNote) {
+                const noteP = paymentInfoDiv.querySelector('.payment-note');
+                if (noteP) noteP.textContent = s.bankNote;
+            }
+        }
+
+        // 2. 更新匯款完成提示欄位 (paymentNote)
+        if (s.paymentNote) {
+            const hintElement = document.querySelector('.form-hint');
+            if (hintElement) {
+                hintElement.innerHTML = s.paymentNote;
+            }
+        }
+    },
+
+    /**
      * 更新運送方式
      * @param {string} method - 運送方式 ID
      */
@@ -84,39 +122,12 @@ const Checkout = {
             return;
         }
 
-        // 如果有網站設定，更新匯款資訊和匯款完成提示
-        if (typeof App !== 'undefined' && App.siteSettings) {
-            const s = App.siteSettings;
+        // 更新結帳表單的設定（匯款資訊、提示）
+        this._applySettings();
 
-            // 1. 更新匯款資訊區塊
-            const paymentInfoDiv = document.querySelector('.payment-info');
-            if (paymentInfoDiv) {
-                // 建構匯款資訊 HTML
-                let bankHtml = '';
-                if (s.bankName) bankHtml += `<div class="payment-item"><span class="payment-label">銀行名稱：</span><span class="payment-value">${s.bankName} ${s.bankCode ? `(代碼 ${s.bankCode})` : ''}</span></div>`;
-                if (s.bankAccount) bankHtml += `<div class="payment-item"><span class="payment-label">帳號：</span><span class="payment-value account-number">${s.bankAccount}</span></div>`;
-
-                // 保留固定提示
-                bankHtml += `<div class="payment-item"><span class="payment-label">任何問題可洽網頁最下方LINE | IG</span></div>`;
-                bankHtml += `<div class="payment-item"><span class="payment-value">匯款完成後請聯繫我們匯款後五碼</span></div>`;
-
-                const detailsDiv = paymentInfoDiv.querySelector('.payment-details');
-                if (detailsDiv) detailsDiv.innerHTML = bankHtml;
-
-                // 更新備註提示
-                if (s.bankNote) {
-                    const noteP = paymentInfoDiv.querySelector('.payment-note');
-                    if (noteP) noteP.textContent = s.bankNote;
-                }
-            }
-
-            // 2. 更新匯款完成提示欄位 (paymentNote)
-            if (s.paymentNote) {
-                const hintElement = document.querySelector('.form-hint');
-                if (hintElement) {
-                    hintElement.innerHTML = s.paymentNote;
-                }
-            }
+        // 若 App.siteSettings 尚未載入（商品頁可能有延遲），延遲更新
+        if (typeof App !== 'undefined' && !App.siteSettings) {
+            setTimeout(() => this._applySettings(), 600);
         }
 
         // 關閉購物車側邊欄

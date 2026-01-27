@@ -367,59 +367,101 @@
 
             <!-- 4. 網站設定視圖 -->
             <div id="settingsView" class="view-section" style="display: none;">
-                <div class="view-header">
+                <div class="view-header" style="display: flex; justify-content: space-between; align-items: center;">
                     <h2>網站設定</h2>
+                    <a href="#" id="viewStoreLink" target="_blank" class="btn-outline" style="display: none;">
+                        前往官網 →
+                    </a>
                 </div>
-                <div class="card">
-                    <h3>網站 Logo 設定</h3>
-                    <div class="form-group">
-                        <label>目前 Logo</label>
-                        <div id="logoPreviewContainer" class="logo-preview-container" style="margin-bottom: 10px;">
+
+                <!-- Logo 設定卡片 -->
+                <div class="card" style="margin-bottom: 1.5rem;">
+                    <h3 style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 1.2em;">🖼️</span> 網站 Logo
+                    </h3>
+                    <div class="form-group" style="margin-top: 1rem;">
+                        <div id="logoPreviewContainer" class="logo-preview-container"
+                            style="padding: 1.5rem; background: #f8f9fa; border-radius: 8px; text-align: center; margin-bottom: 1rem; border: 1px dashed #ddd;">
                             <img id="currentLogoPreview" src="" alt="Current Logo"
-                                style="max-height: 100px; display: none;">
-                            <div id="noLogoText" style="color: #888; display: none;">尚未上傳 Logo</div>
+                                style="max-height: 100px; display: none; margin: 0 auto;">
+                            <div id="noLogoText" style="color: #888; display: none; padding: 1rem;">
+                                <span style="font-size: 2rem;">📷</span><br>
+                                尚未上傳 Logo
+                            </div>
                         </div>
                         <input type="file" id="logoFileInput" accept="image/*" style="display: none;"
                             onchange="handleLogoSelect(this)">
-                        <div class="button-group">
-                            <button class="btn-secondary" onclick="document.getElementById('logoFileInput').click()">上傳新
-                                Logo</button>
+                        <div class="button-group" style="display: flex; gap: 10px;">
+                            <button class="btn-secondary" onclick="document.getElementById('logoFileInput').click()">
+                                上傳新 Logo
+                            </button>
                             <button class="btn-danger" id="deleteLogoBtn" onclick="deleteLogo()"
                                 style="display: none;">刪除 Logo</button>
                         </div>
-                        <div id="logoUploadStatus" style="margin-top: 5px; font-size: 0.9em;"></div>
+                        <div id="logoUploadStatus" style="margin-top: 10px; font-size: 0.9em;"></div>
                     </div>
                 </div>
 
+                <!-- 結帳資訊設定卡片 -->
                 <div class="card">
-                    <h3>結帳資訊設定</h3>
-                    <div class="form-group">
-                        <label>銀行名稱</label>
-                        <input type="text" id="settingBankName" placeholder="例如：國泰世華銀行">
+                    <h3 style="display: flex; align-items: center; gap: 8px; margin-bottom: 1.5rem;">
+                        <span style="font-size: 1.2em;">💳</span> 結帳資訊設定
+                    </h3>
+
+                    <!-- 銀行資訊 - 雙欄排版 -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label style="font-weight: 500; margin-bottom: 6px; display: block;">銀行名稱</label>
+                            <input type="text" id="settingBankName" placeholder="例如：國泰世華銀行" style="width: 100%;">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label style="font-weight: 500; margin-bottom: 6px; display: block;">銀行代碼</label>
+                            <input type="text" id="settingBankCode" placeholder="例如：013" style="width: 100%;">
+                        </div>
                     </div>
+
                     <div class="form-group">
-                        <label>銀行代碼</label>
-                        <input type="text" id="settingBankCode" placeholder="例如：013">
+                        <label style="font-weight: 500; margin-bottom: 6px; display: block;">銀行帳號</label>
+                        <input type="text" id="settingBankAccount" placeholder="例如：123456789012"
+                            style="font-family: monospace; letter-spacing: 1px;">
                     </div>
+
+                    <hr style="border: none; border-top: 1px solid #eee; margin: 1.5rem 0;">
+
                     <div class="form-group">
-                        <label>銀行帳號</label>
-                        <input type="text" id="settingBankAccount" placeholder="例如：123456789012">
+                        <label style="font-weight: 500; margin-bottom: 6px; display: block;">
+                            匯款備註說明
+                            <small style="font-weight: normal; color: #888;">（顯示於結帳頁面匯款資訊下方）</small>
+                        </label>
+                        <textarea id="settingBankNote" rows="3" placeholder="例如：請於下單後 3 天內完成匯款，並保留匯款收據供查詢"></textarea>
                     </div>
+
                     <div class="form-group">
-                        <label>匯款備註說明</label>
-                        <textarea id="settingBankNote" rows="4" placeholder="例如：請於下單後 3 天內匯款..."></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>匯款完成提示 (支援 HTML)</label>
+                        <label
+                            style="font-weight: 500; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+                            匯款完成提示
+                            <span
+                                style="background: #e8f4fd; color: #0969da; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">
+                                支援 HTML
+                            </span>
+                        </label>
                         <textarea id="settingPaymentNote" rows="4"
-                            placeholder="例如：匯款完成後請一定要至官方 Line 回覆：@yourid..."></textarea>
-                        <small style="color: #666;">此訊息將顯示在訂單成功頁面。</small>
+                            placeholder="例如：匯款完成後請一定要至官方 Line 回覆：&#60;a href='...'&#62;@yourid&#60;/a&#62;"></textarea>
+                        <small style="color: #666; display: block; margin-top: 6px;">
+                            💡 此訊息將顯示在結帳頁面紅色提示區與訂單成功頁面。
+                        </small>
                     </div>
-                    <div class="form-actions">
-                        <button class="accent-btn" onclick="saveSettings()">儲存設定</button>
+
+                    <div class="form-actions"
+                        style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #eee;">
+                        <button class="accent-btn" onclick="saveSettings()"
+                            style="padding: 12px 28px; font-size: 1rem;">
+                            💾 儲存設定
+                        </button>
                     </div>
                 </div>
             </div>
+
 
 
             <!-- 首頁排版編輯器 (升級版) -->
