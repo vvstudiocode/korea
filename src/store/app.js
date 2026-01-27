@@ -32,8 +32,43 @@ const App = {
             if (defaultSection) defaultSection.style.display = 'none';
         }
 
+        // 0. 優先載入網站設定 (Logo, Payment Note)
+        try {
+            if (typeof API !== 'undefined') {
+                const settingsResult = await API.call('getSiteSettings');
+                if (settingsResult.success && settingsResult.data && settingsResult.data.settings) {
+                    this.siteSettings = settingsResult.data.settings;
+                    console.log('✅ 網站設定獲取成功');
+
+                    // Apply Logo immediately
+                    if (this.siteSettings.logoUrl) {
+                        const logoImgs = document.querySelectorAll('.logo-img, .footer-logo');
+                        logoImgs.forEach(img => {
+                            img.src = this.siteSettings.logoUrl;
+                        });
+                    }
+
+                    // Apply Custom Payment Note immediately
+                    if (this.siteSettings.paymentNote) {
+                        const successMsg = document.getElementById('successCustomMessage');
+                        if (successMsg) {
+                            successMsg.innerHTML = this.siteSettings.paymentNote;
+                            successMsg.style.display = 'block';
+                        }
+                    }
+                }
+            }
+        } catch (e) {
+            console.warn('無法獲取網站設定', e);
+        }
+
         // 2. 載入商品 (使用 Storage 模組取得商店 ID)
-        await Products.load(AppStorage.getStoreId());
+        // 使用 try-catch 避免商品載入失敗導致整個 app 停止
+        try {
+            await Products.load(AppStorage.getStoreId());
+        } catch (e) {
+            console.error('商品載入失敗', e);
+        }
 
         // 3. 初始化購物車
         Cart.init();
@@ -44,38 +79,6 @@ const App = {
         // 5. 初始化頁面渲染器
         if (typeof PageRenderer !== 'undefined') {
             await PageRenderer.init(AppStorage.getStoreId());
-        }
-
-        // 5.5 獲取網站設定 (包含結帳成功訊息)
-        try {
-            // 如果是獨立商店，PageRenderer 可能已經獲取了，但這裡為了保險起見再檢查一次
-            // 或許可以優化為從 PageRenderer 或 Storage 獲取
-            if (typeof API !== 'undefined') {
-                const settingsResult = await API.call('getSiteSettings');
-                if (settingsResult.success && settingsResult.data && settingsResult.data.settings) {
-                    this.siteSettings = settingsResult.data.settings;
-                    console.log('✅ 網站設定獲取成功');
-                }
-            }
-        } catch (e) {
-            console.warn('無法獲取網站設定', e);
-        }
-
-        // Apply Logo from settings if available (Override static default)
-        if (this.siteSettings && this.siteSettings.logoUrl) {
-            const logoImgs = document.querySelectorAll('.logo-img, .footer-logo');
-            logoImgs.forEach(img => {
-                img.src = this.siteSettings.logoUrl;
-            });
-        }
-
-        // Apply Custom Payment Note
-        if (this.siteSettings && this.siteSettings.paymentNote) {
-            const successMsg = document.getElementById('successCustomMessage');
-            if (successMsg) {
-                successMsg.innerHTML = this.siteSettings.paymentNote;
-                successMsg.style.display = 'block';
-            }
         }
 
         // 6. 處理 URL 購物車參數（從 LINE Bot 傳入）
