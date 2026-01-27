@@ -1,0 +1,36 @@
+{
+  "sections": [
+    {
+      "id": "hero_default",
+      "type": "hero",
+      "data": {
+        "title": "歡迎光臨 ssssss",
+        "subtitle": "韓國代購精選商品",
+        "buttonText": "立即選購",
+        "buttonLink": "#products",
+        "backgroundImage": "",
+        "backgroundColor": "#f8f9fa"
+      }
+    },
+    {
+      "id": "products_default",
+      "type": "product_list",
+      "data": {
+        "title": "熱門商品",
+        "columns": 4,
+        "limit": 8,
+        "showPrice": true,
+        "showButton": true
+      }
+    }
+  ],
+  "footer": {
+    "enabled": true,
+    "content": {
+      "storeName": "ssssss",
+      "description": "韓國代購精選",
+      "copyright": "© 2025 ssssss. All rights reserved."
+    }
+  },
+  "updatedAt": "2026-01-27T07:34:39.494Z"
+}
