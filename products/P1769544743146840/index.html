@@ -241,7 +241,9 @@
                 <div class="form-group">
                     <label for="customerNote">備注（選填）</label>
                     <textarea id="customerNote" name="note" rows="3" placeholder="請在此填寫匯款後五碼。"></textarea>
+                    <p class="form-hint" style="color: red; font-size: 40px; font-weight: bold; margin-top: 15px; line-height: 1.2;"></p>
                 </div>
+
                 <!-- Dynamic Payment Info -->
                 <div class="payment-info">
                    <h3>匯款資訊</h3>
@@ -308,7 +310,7 @@
                 </button>
 
                 <div class="stock-info">
-                    庫存：<span id="stockDisplay">10</span> 件
+                    庫存：<span id="stockDisplay">9</span> 件
                 </div>
 
                 <div class="product-description">
@@ -331,7 +333,7 @@
     <script src="/korea/src/store/app.js"></script>
 
     <script>
-        const PRODUCT = {"id":"P1769544743146840","name":"1r12313","price":131,"image":"https://via.placeholder.com/600x600?text=No+Image","stock":10,"variants":[]};
+        const PRODUCT = {"id":"P1769544743146840","name":"1r12313","price":131,"image":"https://via.placeholder.com/600x600?text=No+Image","stock":9,"variants":[]};
         
         let selectedSpec = null;
         let currentPrice = PRODUCT.price;
