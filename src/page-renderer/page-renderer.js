@@ -651,15 +651,15 @@ const PageRenderer = {
             --faq-button-text: ${buttonTextColor};
         ` : '';
 
-        // 生成 FAQ 項目 HTML
+        // 生成 FAQ 項目 HTML - 讓整個問題區域都可以點擊
         const itemsHtml = faqItems.map((item, idx) => `
             <div class="faq-item">
                 <div class="faq-question" onclick="window.toggleFaq('${uuid}-${idx}')">
-                    <span>${item.question || 'Question'}</span>
+                    <span class="faq-question-text">${item.question || 'Question'}</span>
                     <span class="faq-icon">+</span>
                 </div>
                 <div class="faq-answer" id="${uuid}-${idx}">
-                    ${item.answer || 'Answer to the question.'}
+                    <div>${item.answer || 'Answer to the question.'}</div>
                 </div>
             </div>
         `).join('');
@@ -678,11 +678,16 @@ const PageRenderer = {
                         const question = answer.previousElementSibling;
                         const icon = question.querySelector('.faq-icon');
                         
-                        if (answer.style.maxHeight) {
+                        // 檢查是否已展開
+                        const isExpanded = answer.style.maxHeight && answer.style.maxHeight !== '0px';
+                        
+                        if (isExpanded) {
+                            // 收合
                             answer.style.maxHeight = null;
                             icon.textContent = '+';
                             question.classList.remove('active');
                         } else {
+                            // 展開
                             answer.style.maxHeight = answer.scrollHeight + 'px';
                             icon.textContent = '×';
                             question.classList.add('active');

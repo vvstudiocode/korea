@@ -912,13 +912,14 @@ const PageBuilder = {
             };
             container.appendChild(colorToggleWrapper);
 
-            // 如果啟用自訂顏色，顯示顏色選擇器
+            // 如果啟用自訂顏色，顯示顏色選擇器（改進樣式）
             if (customColor) {
-                this.addInnerField(container, '背景顏色', 'bgColor', comp.bgColor || '#ffffff', 'color');
-                this.addInnerField(container, '文字顏色', 'textColor', comp.textColor || '#333333', 'color');
-                this.addInnerField(container, '超連結顏色', 'linkColor', comp.linkColor || '#2196f3', 'color');
-                this.addInnerField(container, '按鈕顏色', 'buttonColor', comp.buttonColor || '#AF2424', 'color');
-                this.addInnerField(container, '按鈕文字顏色', 'buttonTextColor', comp.buttonTextColor || '#ffffff', 'color');
+                // 使用自訂樣式的顏色選擇器
+                this.addColorFieldEnhanced(container, '背景顏色', 'bgColor', comp.bgColor || '#ffffff', index);
+                this.addColorFieldEnhanced(container, '文字顏色', 'textColor', comp.textColor || '#333333', index);
+                this.addColorFieldEnhanced(container, '超連結顏色', 'linkColor', comp.linkColor || '#2196f3', index);
+                this.addColorFieldEnhanced(container, '按鈕顏色', 'buttonColor', comp.buttonColor || '#AF2424', index);
+                this.addColorFieldEnhanced(container, '按鈕文字顏色', 'buttonTextColor', comp.buttonTextColor || '#ffffff', index);
             }
 
             // 分隔線
@@ -939,32 +940,43 @@ const PageBuilder = {
 
             comp.faqItems.forEach((item, idx) => {
                 const faqItem = document.createElement('div');
-                faqItem.style.cssText = 'background:white; padding:10px; border:1px solid #ddd; border-radius:4px; margin-bottom:10px;';
+                faqItem.style.cssText = 'background:white; padding:12px; border:1px solid #e0e0e0; border-radius:6px; margin-bottom:12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);';
                 faqItem.innerHTML = `
-                    <div style="margin-bottom:8px;">
-                        <label style="font-size:11px; color:#666; display:block; margin-bottom:3px;">問題</label>
+                    <div style="margin-bottom:10px;">
+                        <label style="font-size:12px; color:#555; display:block; margin-bottom:4px; font-weight:500;">問題</label>
                         <input type="text" placeholder="輸入問題" value="${item.question || ''}" 
-                               style="width:100%; padding:8px; font-size:13px; border:1px solid #eee; border-radius:4px;">
+                               style="width:100%; padding:10px 12px; font-size:14px; border:1px solid #ddd; border-radius:4px; transition: border-color 0.2s;">
                     </div>
-                    <div style="margin-bottom:8px;">
-                        <label style="font-size:11px; color:#666; display:block; margin-bottom:3px;">答案</label>
+                    <div style="margin-bottom:10px;">
+                        <label style="font-size:12px; color:#555; display:block; margin-bottom:4px; font-weight:500;">答案</label>
                         <textarea placeholder="輸入答案" rows="3"
-                                  style="width:100%; padding:8px; font-size:13px; border:1px solid #eee; border-radius:4px; resize:vertical;">${item.answer || ''}</textarea>
+                                  style="width:100%; padding:10px 12px; font-size:14px; border:1px solid #ddd; border-radius:4px; resize:vertical; transition: border-color 0.2s;">${item.answer || ''}</textarea>
                     </div>
-                    <button style="background:#dc3545; color:white; border:none; border-radius:4px; padding:6px 12px; font-size:12px; cursor:pointer; width:100%;">刪除此項</button>
+                    <button style="background:#dc3545; color:white; border:none; border-radius:4px; padding:8px 14px; font-size:13px; cursor:pointer; width:100%; transition: background 0.2s;">刪除此項</button>
                 `;
 
-                // 綁定問題輸入事件
+                // 綁定問題輸入事件 - 只更新數據，不更新預覽
                 faqItem.querySelector('input').oninput = (e) => {
                     this.layout[index].faqItems[idx].question = e.target.value;
-                    this.renderPreview();
+                    // 不要即時更新預覽：this.renderPreview();
                 };
 
-                // 綁定答案輸入事件
+                // 綁定答案輸入事件 - 只更新數據，不更新預覽
                 faqItem.querySelector('textarea').oninput = (e) => {
                     this.layout[index].faqItems[idx].answer = e.target.value;
-                    this.renderPreview();
+                    // 不要即時更新預覽：this.renderPreview();
                 };
+
+                // 添加 focus 樣式
+                const inputs = faqItem.querySelectorAll('input, textarea');
+                inputs.forEach(input => {
+                    input.addEventListener('focus', (e) => {
+                        e.target.style.borderColor = '#AF2424';
+                    });
+                    input.addEventListener('blur', (e) => {
+                        e.target.style.borderColor = '#ddd';
+                    });
+                });
 
                 // 綁定刪除按鈕
                 faqItem.querySelector('button').onclick = () => {
@@ -979,7 +991,9 @@ const PageBuilder = {
             // 新增 FAQ 項目按鈕
             const addBtn = document.createElement('button');
             addBtn.textContent = '+ 新增問答';
-            addBtn.style.cssText = 'width:100%; padding:10px; background:white; border:1px dashed #999; border-radius:4px; margin-top:5px; cursor:pointer; font-size:13px;';
+            addBtn.style.cssText = 'width:100%; padding:12px; background:#f8f9fa; border:2px dashed #999; border-radius:6px; margin-top:8px; cursor:pointer; font-size:14px; font-weight:500; color:#555; transition: all 0.2s;';
+            addBtn.onmouseover = () => { addBtn.style.background = '#e9ecef'; addBtn.style.borderColor = '#AF2424'; };
+            addBtn.onmouseout = () => { addBtn.style.background = '#f8f9fa'; addBtn.style.borderColor = '#999'; };
             addBtn.onclick = () => {
                 if (!this.layout[index].faqItems) this.layout[index].faqItems = [];
                 this.layout[index].faqItems.push({ question: '', answer: '' });
@@ -1317,7 +1331,7 @@ const PageBuilder = {
         this.renderPreview();
     },
 
-    addInnerField: function (container, label, key, value, type = 'text', options = []) {
+    addInnerField: function (container, label, field, value, type = 'text', options = []) {
         const div = document.createElement('div');
         div.className = 'form-group';
         div.style.marginBottom = '8px';
@@ -1327,87 +1341,143 @@ const PageBuilder = {
         if (type === 'textarea') {
             input = document.createElement('textarea');
             input.rows = 3;
+            input.value = value || '';
             input.style.cssText = 'width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; resize:vertical;';
         } else if (type === 'select') {
             input = document.createElement('select');
             input.style.cssText = 'width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;';
-            options.forEach(opt => {
-                const o = document.createElement('option');
-                o.value = opt;
-                o.textContent = opt;
-                if (opt === value) o.selected = true;
-                input.appendChild(o);
-            });
+            input.innerHTML = options.map(opt => `<option value="${opt}" ${value === opt ? 'selected' : ''}>${opt}</option>`).join('');
+        } else if (type === 'checkbox') {
+            const wrapper = document.createElement('div');
+            wrapper.style.cssText = 'display:flex; align-items:center; gap:8px; margin-top:5px;';
+            input = document.createElement('input');
+            input.type = 'checkbox';
+            input.checked = value === true;
+            const labelText = document.createElement('span');
+            labelText.textContent = label;
+            labelText.style.fontSize = '13px';
+            wrapper.appendChild(input);
+            wrapper.appendChild(labelText);
+            container.appendChild(wrapper);
+            input.onchange = () => { this.updateInlineField(field, input.checked); };
+            return; // Early return for checkbox
         } else if (type === 'range') {
-            // 間距滑桿
-            const rangeWrapper = document.createElement('div');
-            rangeWrapper.style.cssText = 'display:flex; align-items:center; gap:10px;';
-
+            const wrapper = document.createElement('div');
+            wrapper.style.cssText = 'display:flex; align-items:center; gap:8px;';
             input = document.createElement('input');
             input.type = 'range';
             input.min = 0;
-            input.max = 100;
+            input.max = 200;
             input.value = value || 0;
             input.style.cssText = 'flex:1;';
-
-            const valueDisplay = document.createElement('span');
-            valueDisplay.textContent = (value || 0) + 'px';
-            valueDisplay.style.cssText = 'min-width:45px; text-align:right; font-size:12px; color:#666;';
-
+            const valueLabel = document.createElement('span');
+            valueLabel.textContent = value || 0;
+            valueLabel.style.cssText = 'min-width:40px; text-align:right; font-size:12px; color:#666;';
             input.oninput = (e) => {
-                const val = parseInt(e.target.value);
-                valueDisplay.textContent = val + 'px';
-                this.layout[this.editingIndex][key] = val;
-                this.debouncedPreviewUpdate();
+                valueLabel.textContent = e.target.value;
+                this.updateInlineField(field, parseInt(e.target.value));
             };
-
-            rangeWrapper.appendChild(input);
-            rangeWrapper.appendChild(valueDisplay);
-            div.appendChild(rangeWrapper);
-            container.appendChild(div);
-            div.appendChild(rangeWrapper);
-            container.appendChild(div);
-            return; // 提前返回，不需要後續處理
-        } else if (type === 'checkbox') {
-            const wrapper = document.createElement('div');
-            wrapper.style.cssText = 'display:flex; align-items:center; gap:10px;';
-
-            input = document.createElement('input');
-            input.type = 'checkbox';
-            input.checked = !!value;
-            input.style.cssText = 'width:20px; height:20px;';
-
-            input.onchange = (e) => {
-                this.layout[this.editingIndex][key] = e.target.checked;
-            };
-
             wrapper.appendChild(input);
-            const labelSpan = document.createElement('span');
-            labelSpan.textContent = '啟用';
-            wrapper.appendChild(labelSpan);
-
+            wrapper.appendChild(valueLabel);
             div.appendChild(wrapper);
             container.appendChild(div);
-            return;
+            return; // Early return for range
+        } else if (type === 'number') {
+            input = document.createElement('input');
+            input.type = 'number';
+            input.value = value || 0;
+            input.min = 0;
+            input.style.cssText = 'width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;';
+        } else if (type === 'color') {
+            input = document.createElement('input');
+            input.type = 'color';
+            input.value = value || '#000000';
+            input.style.cssText = 'width:100%; height:40px; border:1px solid #ddd; border-radius:4px; cursor:pointer;';
         } else {
             input = document.createElement('input');
-            input.type = type;
+            input.type = 'text';
+            input.value = value || '';
             input.style.cssText = 'width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;';
         }
 
-        input.value = value || '';
-        input.dataset.key = key;
+        input.oninput = () => { this.updateInlineField(field, input.value); };
+        div.appendChild(input);
+        container.appendChild(div);
+    },
 
-        // 取消自動預覽更新，改為手動
-        input.oninput = (e) => {
-            // 確保 editingIndex 有效才更新
-            if (this.editingIndex !== null && this.layout[this.editingIndex]) {
-                this.layout[this.editingIndex][key] = type === 'number' ? parseInt(e.target.value) || 0 : e.target.value;
-            }
-            // this.debouncedPreviewUpdate(); // Disabled
+    // 新增: 改進的顏色選擇器，顯示完整色塊
+    addColorFieldEnhanced: function (container, label, field, value, compIndex) {
+        const div = document.createElement('div');
+        div.className = 'form-group';
+        div.style.marginBottom = '12px';
+
+        // 標籤
+        const labelElement = document.createElement('label');
+        labelElement.textContent = label;
+        labelElement.style.cssText = 'font-size:12px; color:#555; margin-bottom:6px; display:block; font-weight:500;';
+        div.appendChild(labelElement);
+
+        // 顏色選擇器容器
+        const colorWrapper = document.createElement('div');
+        colorWrapper.style.cssText = 'display:flex; align-items:stretch; gap:10px; background:#f8f9fa; padding:8px; border-radius:6px; border:1px solid #e0e0e0;';
+
+        // 顏色預覽區塊（大的色塊）
+        const colorPreview = document.createElement('div');
+        colorPreview.style.cssText = `
+            flex:1; 
+            background:${value || '#000000'}; 
+            border-radius:4px; 
+            min-height:40px; 
+            border:2px solid #fff;
+            box-shadow: 0 0 0 1px #ddd;
+            cursor:pointer;
+            transition: transform 0.1s;
+        `;
+        colorPreview.onmouseover = () => { colorPreview.style.transform = 'scale(1.02)'; };
+        colorPreview.onmouseout = () => { colorPreview.style.transform = 'scale(1)'; };
+
+        // 顏色選擇器 input (隱藏)
+        const colorInput = document.createElement('input');
+        colorInput.type = 'color';
+        colorInput.value = value || '#000000';
+        colorInput.style.cssText = 'opacity:0; position:absolute; pointer-events:none;';
+
+        // 顏色代碼文字輸入框
+        const textInput = document.createElement('input');
+        textInput.type = 'text';
+        textInput.value = value || '#000000';
+        textInput.style.cssText = 'width:90px; padding:6px 8px; border:1px solid #ddd; border-radius:4px; font-size:13px; font-family:monospace; text-align:center;';
+
+        // 點擊預覽區塊時打開顏色選擇器
+        colorPreview.onclick = () => {
+            colorInput.click();
         };
 
-        div.appendChild(input);
+        // 顏色選擇器變更事件
+        colorInput.oninput = (e) => {
+            const newColor = e.target.value;
+            colorPreview.style.background = newColor;
+            textInput.value = newColor;
+            this.layout[compIndex][field] = newColor;
+            // 不要即時更新預覽
+        };
+
+        // 文字輸入框變更事件
+        textInput.oninput = (e) => {
+            const newColor = e.target.value;
+            if (/^#[0-9A-Fa-f]{6}$/.test(newColor)) {
+                colorPreview.style.background = newColor;
+                colorInput.value = newColor;
+                this.layout[compIndex][field] = newColor;
+                // 不要即時更新預覽
+            }
+        };
+
+        colorWrapper.appendChild(colorPreview);
+        colorWrapper.appendChild(textInput);
+        colorWrapper.appendChild(colorInput);
+
+        div.appendChild(colorWrapper);
         container.appendChild(div);
     },
 
