@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (window.SITE_CONFIG && (window.SITE_CONFIG.siteId || window.SITE_CONFIG.id)) {
         const sidebarHeader = document.querySelector('.sidebar-header h3');
         if (sidebarHeader) {
-            sidebarHeader.textContent = (window.SITE_CONFIG.siteId || window.SITE_CONFIG.id).toUpperCase();
+            sidebarHeader.textContent = (window.SITE_CONFIG.siteId || window.SITE_CONFIG.id).toUpperCase() + ' ADMIN';
         }
     }
 });

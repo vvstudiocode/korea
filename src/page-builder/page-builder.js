@@ -505,7 +505,7 @@ const PageBuilder = {
             this.editingIndex = index;
             setTimeout(() => {
                 const el = document.querySelector(`.comp-item[data-index="${index}"]`);
-                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }, 300);
         }
         this.renderComponentsList();
@@ -1021,7 +1021,7 @@ const PageBuilder = {
         const sections = previewRoot.querySelectorAll('.page-section');
         if (sections[index]) {
             sections[index].classList.add('preview-highlight');
-            sections[index].scrollIntoView({ behavior: 'smooth', block: 'center' });
+            sections[index].scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     },
 
@@ -1137,7 +1137,7 @@ const PageBuilder = {
             newComp.widthMobile = '100%';
             newComp.alt = '圖片說明';
         } else if (type === 'products') {
-            newComp.title = '精選商品';
+            newComp.title = '商品輪播';
             newComp.category = '全部';
             newComp.limit = 4;
         } else if (type === 'product_list') {
@@ -1511,6 +1511,7 @@ const PageBuilder = {
 
         if (availableWidth < targetWidth) {
             const scale = availableWidth / targetWidth;
+            container.style.transformOrigin = 'top center';
             container.style.transform = `scale(${scale})`;
             container.style.width = `${targetWidth}px`;
         } else {
