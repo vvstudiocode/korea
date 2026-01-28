@@ -963,19 +963,18 @@ const PageRenderer = {
             console.log('🖱️ Card Clicked - Opening in new tab:', p.id);
 
             // 判斷連結路徑
-            let url = '/korea/products/' + p.id + '/';
-
             // 取得 Store ID (優先從 STORE_CONFIG，然後是 currentStoreId)
             const storeId = (typeof window !== 'undefined' && window.STORE_CONFIG && window.STORE_CONFIG.storeId)
                 ? window.STORE_CONFIG.storeId
                 : this.currentStoreId;
 
-            // 如果是 KOL 商店模式且是 KOL 自建商品 (ID 開頭為 K 或 type 為 own)
-            if (storeId && (String(p.id).startsWith('K') || p.type === 'own')) {
+            let url;
+            if (storeId) {
+                // 獨立網站或 KOL 商店：商品頁在 stores/${storeId}/products/ 目錄
                 url = `/korea/stores/${storeId}/products/${p.id}/`;
-            } else if (storeId) {
-                // 一般商品在獨立網站或 KOL 商店中查看，加上 storeId 參數以保持上下文
-                url += `?storeId=${storeId}`;
+            } else {
+                // 總部：商品頁在 products/ 目錄
+                url = '/korea/products/' + p.id + '/';
             }
 
             window.open(url, '_blank');
