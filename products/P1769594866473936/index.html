@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>好好好吃吃吃 | OMO Select 韓國代購</title>
+    <title>好好好吃吃吃 | 㪋㪋㪋玩 wefwregrewkgmepwrgkm</title>
     <meta name="description" content="">
     
     <!-- Open Graph -->
     <meta property="og:type" content="product">
     <meta property="og:url" content="https://vvstudiocode.github.io/korea/p/P1769594866473936/">
-    <meta property="og:title" content="好好好吃吃吃 | OMO Select">
+    <meta property="og:title" content="好好好吃吃吃 | 㪋㪋㪋玩">
     <meta property="og:description" content="">
     <meta property="og:image" content="https://via.placeholder.com/600x600?text=No+Image">
     <meta property="product:price:amount" content="123">
@@ -146,14 +146,14 @@
 <body data-product-id="P1769594866473936">
     <nav class="navbar">
         <div class="nav-container">
-            <a href="/korea/" class="back-btn" id="navBackBtn">
+            <a href="/korea/stores/xxx/" class="back-btn" id="navBackBtn">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M15 18l-6-6 6-6"/>
                 </svg>
             </a>
             <div class="logo">
-                <a href="/korea/" id="navHomeLink">
-                    <img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/logo.png" alt="OMO Select" class="logo-img">
+                <a href="/korea/stores/xxx/" id="navHomeLink">
+                    <img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/stores/xxx/images/products/logos/logo_1769594498030_2026-01-2816.51.33.png" alt="㪋㪋㪋玩" class="logo-img" id="navLogoImg" style="display:none;">
                 </a>
             </div>
             <div class="nav-actions">
@@ -365,6 +365,12 @@
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             // App.init() is called by app.js logic, but we need to ensure local logic works too
+            
+            // 顯示 Logo (已預載入，避免閃爍)
+            const logoImg = document.getElementById('navLogoImg');
+            if (logoImg) {
+                logoImg.style.display = 'block';
+            }
             
             if (PRODUCT.variants.length > 0) {
                 const firstAvailable = document.querySelector('.variant-btn:not(.out-of-stock)');
