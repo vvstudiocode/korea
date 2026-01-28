@@ -3479,10 +3479,18 @@ function loadSettings() {
         .then(data => {
             if (data.success && data.data.settings) {
                 const s = data.data.settings;
-                document.getElementById('settingBankName').value = s.bankName || '';
                 document.getElementById('settingBankCode').value = s.bankCode || '';
                 document.getElementById('settingBankAccount').value = s.bankAccount || '';
                 document.getElementById('settingBankNote').value = s.bankNote || '';
+
+                const siteNameInput = document.getElementById('settingSiteName');
+                if (siteNameInput) siteNameInput.value = s.siteName || '';
+
+                const siteDescInput = document.getElementById('settingSiteDescription');
+                if (siteDescInput) siteDescInput.value = s.siteDescription || '';
+
+                const paymentNoteInput = document.getElementById('settingPaymentNote');
+                if (paymentNoteInput) paymentNoteInput.value = s.paymentNote || '';
             }
         })
         .finally(() => hideLoadingOverlay());
@@ -3638,6 +3646,8 @@ function deleteLogo() {
 function saveSettings() {
     // 準備設定物件
     const settings = {
+        siteName: document.getElementById('settingSiteName').value.trim(),
+        siteDescription: document.getElementById('settingSiteDescription').value.trim(),
         bankName: document.getElementById('settingBankName').value.trim(),
         bankCode: document.getElementById('settingBankCode').value.trim(),
         bankAccount: document.getElementById('settingBankAccount').value.trim(),
