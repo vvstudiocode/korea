@@ -104,6 +104,9 @@ h4 {
 .logo-img {
     height: 40px;
     width: auto;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
 .logo-text {

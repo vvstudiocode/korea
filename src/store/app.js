@@ -33,6 +33,17 @@ const App = {
         }
 
         // 0. 優先載入網站設定 (Logo, Payment Note)
+        // 如果 STORE_CONFIG 已有 logoUrl（新網站內嵌設定），先立即顯示
+        if (window.STORE_CONFIG && window.STORE_CONFIG.logoUrl) {
+            const logoImgs = document.querySelectorAll('.logo-img, .footer-logo');
+            logoImgs.forEach(img => {
+                img.src = window.STORE_CONFIG.logoUrl;
+                img.style.visibility = 'visible';
+                img.style.opacity = '1';
+            });
+            console.log('✅ Logo 從 STORE_CONFIG 載入');
+        }
+
         try {
             if (typeof API !== 'undefined') {
                 // Dynamic API URL Discovery for New Sites
@@ -70,6 +81,15 @@ const App = {
                             const logoImgs = document.querySelectorAll('.logo-img, .footer-logo');
                             logoImgs.forEach(img => {
                                 img.src = this.siteSettings.logoUrl;
+                                img.style.visibility = 'visible';
+                                img.style.opacity = '1';
+                            });
+                        } else {
+                            // 如果沒有 logoUrl 設定，仍然顯示 Logo（使用預設）
+                            const logoImgs = document.querySelectorAll('.logo-img, .footer-logo');
+                            logoImgs.forEach(img => {
+                                img.style.visibility = 'visible';
+                                img.style.opacity = '1';
                             });
                         }
 
@@ -86,6 +106,12 @@ const App = {
             }
         } catch (e) {
             console.warn('無法獲取網站設定', e);
+            // API 失敗時仍然顯示 Logo（使用頁面預設的 src）
+            const logoImgs = document.querySelectorAll('.logo-img, .footer-logo');
+            logoImgs.forEach(img => {
+                img.style.visibility = 'visible';
+                img.style.opacity = '1';
+            });
         }
 
         // 2. 載入商品 (使用 Storage 模組取得商店 ID)

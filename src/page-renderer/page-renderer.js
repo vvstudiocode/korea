@@ -964,12 +964,18 @@ const PageRenderer = {
 
             // 判斷連結路徑
             let url = '/korea/products/' + p.id + '/';
+
+            // 取得 Store ID (優先從 STORE_CONFIG，然後是 currentStoreId)
+            const storeId = (typeof window !== 'undefined' && window.STORE_CONFIG && window.STORE_CONFIG.storeId)
+                ? window.STORE_CONFIG.storeId
+                : this.currentStoreId;
+
             // 如果是 KOL 商店模式且是 KOL 自建商品 (ID 開頭為 K 或 type 為 own)
-            if (this.currentStoreId && (String(p.id).startsWith('K') || p.type === 'own')) {
-                url = `/korea/stores/${this.currentStoreId}/products/${p.id}/`;
-            } else if (this.currentStoreId) {
-                // 一般商品在 KOL 商店中查看，加上 storeId 參數以保持上下文
-                url += `?storeId=${this.currentStoreId}`;
+            if (storeId && (String(p.id).startsWith('K') || p.type === 'own')) {
+                url = `/korea/stores/${storeId}/products/${p.id}/`;
+            } else if (storeId) {
+                // 一般商品在獨立網站或 KOL 商店中查看，加上 storeId 參數以保持上下文
+                url += `?storeId=${storeId}`;
             }
 
             window.open(url, '_blank');
