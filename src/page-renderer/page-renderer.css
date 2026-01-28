@@ -12,6 +12,11 @@
     overflow: hidden;
 }
 
+/* 首頁大圖區塊不需要額外的 padding */
+.page-section.section-hero {
+    padding: 0;
+}
+
 /* 移除第一個區塊如果是大圖時的上間距 */
 .page-section:first-child .hero-banner {
     margin-top: -3rem;
@@ -340,8 +345,8 @@
     justify-content: center;
     color: white;
     text-align: center;
-    margin-bottom: 2rem;
-    /* Reduced bottom spacing */
+    margin-bottom: 0;
+    /* 間距由元件設定控制 */
 }
 
 /* Animations */

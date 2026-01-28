@@ -2734,7 +2734,7 @@ function renderPurchasingStats(stats) {
 
     stats.forEach((item, index) => {
         totalQty += item.totalQty;
-        const detailRows = item.details.map(d => `
+        const detailRows = (item.details || []).map(d => `
             <div style="font-size: 0.85em; padding: 4px 0; border-bottom: 1px dashed #eee; display: flex; justify-content: space-between;">
                 <span>• <strong>${d.customerName}</strong> (${d.orderId})：${d.qty} 件</span>
                 <span style="color: #666;">[${d.status}] ${d.date}</span>
