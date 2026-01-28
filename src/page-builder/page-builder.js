@@ -874,6 +874,121 @@ const PageBuilder = {
             }
 
 
+        } else if (comp.type === 'faq_accordion') {
+            // 標題設定
+            this.addInnerField(container, '區塊標題', 'title', comp.title || 'FAQ');
+
+            // 標題標籤選擇
+            this.addInnerField(container, '標題標籤', 'titleTag', comp.titleTag || 'h3', 'select', ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']);
+
+            // 標題對齊
+            this.addInnerField(container, '標題對齊', 'titleAlign', comp.titleAlign || 'center', 'select', ['left', 'center', 'right']);
+
+            // 文字對齊
+            this.addInnerField(container, '文字對齊', 'textAlign', comp.textAlign || 'left', 'select', ['left', 'center', 'right']);
+
+            // 分隔線
+            const hr1 = document.createElement('hr');
+            hr1.style.cssText = 'margin: 15px 0; border: none; border-top: 1px solid #eee;';
+            container.appendChild(hr1);
+
+            // 自訂顏色開關
+            const colorToggleWrapper = document.createElement('div');
+            colorToggleWrapper.className = 'form-group';
+            colorToggleWrapper.style.marginBottom = '12px';
+            const customColor = comp.customColor === true;
+
+            colorToggleWrapper.innerHTML = `
+                <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;">
+                    <input type="checkbox" ${customColor ? 'checked' : ''}>
+                    自訂元件顏色
+                </label>
+            `;
+
+            colorToggleWrapper.querySelector('input').onchange = (e) => {
+                this.layout[index].customColor = e.target.checked;
+                this.renderInlineForm(container, this.layout[index], index);
+                this.renderPreview();
+            };
+            container.appendChild(colorToggleWrapper);
+
+            // 如果啟用自訂顏色，顯示顏色選擇器
+            if (customColor) {
+                this.addInnerField(container, '背景顏色', 'bgColor', comp.bgColor || '#ffffff', 'color');
+                this.addInnerField(container, '文字顏色', 'textColor', comp.textColor || '#333333', 'color');
+                this.addInnerField(container, '超連結顏色', 'linkColor', comp.linkColor || '#2196f3', 'color');
+                this.addInnerField(container, '按鈕顏色', 'buttonColor', comp.buttonColor || '#AF2424', 'color');
+                this.addInnerField(container, '按鈕文字顏色', 'buttonTextColor', comp.buttonTextColor || '#ffffff', 'color');
+            }
+
+            // 分隔線
+            const hr2 = document.createElement('hr');
+            hr2.style.cssText = 'margin: 15px 0; border: none; border-top: 1px solid #eee;';
+            container.appendChild(hr2);
+
+            // FAQ 項目管理
+            const faqLabel = document.createElement('div');
+            faqLabel.innerHTML = '<strong style="font-size:14px; color:#555;">問答項目</strong>';
+            faqLabel.style.marginBottom = '10px';
+            container.appendChild(faqLabel);
+
+            const faqList = document.createElement('div');
+            faqList.style.cssText = 'background:#f9f9f9; padding:10px; border-radius:8px; border:1px solid #eee;';
+
+            if (!comp.faqItems) comp.faqItems = [];
+
+            comp.faqItems.forEach((item, idx) => {
+                const faqItem = document.createElement('div');
+                faqItem.style.cssText = 'background:white; padding:10px; border:1px solid #ddd; border-radius:4px; margin-bottom:10px;';
+                faqItem.innerHTML = `
+                    <div style="margin-bottom:8px;">
+                        <label style="font-size:11px; color:#666; display:block; margin-bottom:3px;">問題</label>
+                        <input type="text" placeholder="輸入問題" value="${item.question || ''}" 
+                               style="width:100%; padding:8px; font-size:13px; border:1px solid #eee; border-radius:4px;">
+                    </div>
+                    <div style="margin-bottom:8px;">
+                        <label style="font-size:11px; color:#666; display:block; margin-bottom:3px;">答案</label>
+                        <textarea placeholder="輸入答案" rows="3"
+                                  style="width:100%; padding:8px; font-size:13px; border:1px solid #eee; border-radius:4px; resize:vertical;">${item.answer || ''}</textarea>
+                    </div>
+                    <button style="background:#dc3545; color:white; border:none; border-radius:4px; padding:6px 12px; font-size:12px; cursor:pointer; width:100%;">刪除此項</button>
+                `;
+
+                // 綁定問題輸入事件
+                faqItem.querySelector('input').oninput = (e) => {
+                    this.layout[index].faqItems[idx].question = e.target.value;
+                    this.renderPreview();
+                };
+
+                // 綁定答案輸入事件
+                faqItem.querySelector('textarea').oninput = (e) => {
+                    this.layout[index].faqItems[idx].answer = e.target.value;
+                    this.renderPreview();
+                };
+
+                // 綁定刪除按鈕
+                faqItem.querySelector('button').onclick = () => {
+                    this.layout[index].faqItems.splice(idx, 1);
+                    this.renderInlineForm(container, this.layout[index], index);
+                    this.renderPreview();
+                };
+
+                faqList.appendChild(faqItem);
+            });
+
+            // 新增 FAQ 項目按鈕
+            const addBtn = document.createElement('button');
+            addBtn.textContent = '+ 新增問答';
+            addBtn.style.cssText = 'width:100%; padding:10px; background:white; border:1px dashed #999; border-radius:4px; margin-top:5px; cursor:pointer; font-size:13px;';
+            addBtn.onclick = () => {
+                if (!this.layout[index].faqItems) this.layout[index].faqItems = [];
+                this.layout[index].faqItems.push({ question: '', answer: '' });
+                this.renderInlineForm(container, this.layout[index], index);
+                this.renderPreview();
+            };
+            faqList.appendChild(addBtn);
+            container.appendChild(faqList);
+
         } else if (comp.type === 'categories') {
             this.addInnerField(container, '區塊標題', 'title', comp.title);
             // 分類導覽目前是自動抓取的，不需要編輯具體分類
@@ -1036,7 +1151,8 @@ const PageBuilder = {
             'product_list': { name: '商品列表', icon: '' },
             'info_section': { name: '圖文介紹', icon: '' },
             'announcement': { name: '公告欄', icon: '' },
-            'single_image': { name: '單張圖片', icon: '' }
+            'single_image': { name: '單張圖片', icon: '' },
+            'faq_accordion': { name: '折疊段落', icon: '' }
         };
         return types[type] || { name: '未定類別', icon: '' };
     },

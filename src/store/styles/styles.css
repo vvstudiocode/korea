@@ -1874,3 +1874,108 @@ body.no-scroll {
         margin-top: 10px !important;
     }
 }
+
+/* ===== FAQ 折疊段落樣式 ===== */
+.faq-accordion-section {
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 var(--spacing-md);
+}
+
+.faq-title {
+    font-family: var(--font-heading);
+    margin-bottom: 2rem;
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+.faq-content {
+    background: var(--faq-bg, #ffffff);
+    color: var(--faq-text, #333333);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.faq-item {
+    border-bottom: 1px solid #eee;
+}
+
+.faq-item:last-child {
+    border-bottom: none;
+}
+
+.faq-question {
+    padding: 1.2rem 0;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    user-select: none;
+    font-size: 1.1rem;
+}
+
+.faq-question:hover {
+    color: var(--faq-link, #2196f3);
+    opacity: 0.8;
+}
+
+.faq-question.active {
+    color: var(--faq-button, #AF2424);
+}
+
+.faq-icon {
+    font-size: 1.5rem;
+    font-weight: normal;
+    color: var(--faq-button, #AF2424);
+    transition: transform 0.3s ease;
+    min-width: 30px;
+    text-align: right;
+}
+
+.faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    line-height: 1.6;
+    color: #666;
+}
+
+
+
+/* FAQ 答案內容 padding */
+.faq-answer>div {
+    padding-bottom: 1.5rem;
+}
+
+.faq-answer a {
+    color: var(--faq-link, #2196f3);
+    text-decoration: underline;
+}
+
+/* 手機版樣式調整 */
+@media (max-width: 768px) {
+    .faq-accordion-section {
+        padding: 0 20px;
+    }
+
+    .faq-title {
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .faq-question {
+        padding: 1rem 0;
+        font-size: 1rem;
+    }
+
+    .faq-icon {
+        font-size: 1.2rem;
+    }
+
+    .faq-answer {
+        font-size: 0.95rem;
+    }
+}

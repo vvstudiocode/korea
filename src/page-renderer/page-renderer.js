@@ -299,6 +299,9 @@ const PageRenderer = {
                 case 'text_combination':
                     section.innerHTML = this.templateTextCombination(comp);
                     break;
+                case 'faq_accordion':
+                    section.innerHTML = this.templateFaqAccordion(comp);
+                    break;
                 case 'custom_code':
                     const content = comp.htmlContent || '';
 
@@ -619,6 +622,74 @@ const PageRenderer = {
                     ` : ''}
                 </div>
             </div>
+        `;
+    },
+
+    templateFaqAccordion: function (comp) {
+        const {
+            title = 'FAQ',
+            titleTag = 'h3',
+            titleAlign = 'center',
+            textAlign = 'left',
+            faqItems = [],
+            customColor = false,
+            bgColor = '#ffffff',
+            textColor = '#333333',
+            linkColor = '#2196f3',
+            buttonColor = '#AF2424',
+            buttonTextColor = '#ffffff'
+        } = comp;
+
+        const uuid = 'faq-' + Math.random().toString(36).substr(2, 9);
+
+        // 生成樣式變數
+        const styleVars = customColor ? `
+            --faq-bg: ${bgColor};
+            --faq-text: ${textColor};
+            --faq-link: ${linkColor};
+            --faq-button: ${buttonColor};
+            --faq-button-text: ${buttonTextColor};
+        ` : '';
+
+        // 生成 FAQ 項目 HTML
+        const itemsHtml = faqItems.map((item, idx) => `
+            <div class="faq-item">
+                <div class="faq-question" onclick="window.toggleFaq('${uuid}-${idx}')">
+                    <span>${item.question || 'Question'}</span>
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer" id="${uuid}-${idx}">
+                    ${item.answer || 'Answer to the question.'}
+                </div>
+            </div>
+        `).join('');
+
+        return `
+            <div class="faq-accordion-section" style="text-align:${textAlign}; ${styleVars}">
+                <${titleTag} class="faq-title" style="text-align:${titleAlign};">${title}</${titleTag}>
+                <div class="faq-content">
+                    ${itemsHtml || '<div style="padding:20px; color:#999; text-align:center;">尚未新增問答項目</div>'}
+                </div>
+            </div>
+            <script>
+                if (!window.toggleFaq) {
+                    window.toggleFaq = function(id) {
+                        const answer = document.getElementById(id);
+                        const question = answer.previousElementSibling;
+                        const icon = question.querySelector('.faq-icon');
+                        
+                        if (answer.style.maxHeight) {
+                            answer.style.maxHeight = null;
+                            icon.textContent = '+';
+                            question.classList.remove('active');
+                        } else {
+                            answer.style.maxHeight = answer.scrollHeight + 'px';
+                            icon.textContent = '×';
+                            question.classList.add('active');
+                        }
+                    };
+                }
+            </script>
         `;
     },
 
