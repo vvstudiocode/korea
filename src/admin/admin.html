@@ -348,6 +348,33 @@
                             <label for="newSiteDescription">網站描述 (用於 SEO)</label>
                             <textarea id="newSiteDescription" rows="2" placeholder="提供最新韓國熱門商品代購服務..."></textarea>
                         </div>
+                        <div class="form-group">
+                            <label>網站 Logo (選填)</label>
+                            <div id="newSiteLogoPreview"
+                                style="padding: 1rem; background: #f8f9fa; border-radius: 8px; text-align: center; margin-bottom: 0.5rem; border: 1px dashed #ddd; min-height: 60px;">
+                                <div id="newSiteNoLogoText" style="color: #888; padding: 0.5rem;">
+                                    <span style="font-size: 1.5rem;">📷</span><br>
+                                    點擊下方按鈕上傳 Logo
+                                </div>
+                                <img id="newSiteLogoImg" src="" alt="Logo Preview"
+                                    style="max-height: 80px; display: none;">
+                            </div>
+                            <input type="file" id="newSiteLogoInput" accept="image/*" style="display: none;"
+                                onchange="handleNewSiteLogoSelect(this)">
+                            <input type="hidden" id="newSiteLogoUrl" value="">
+                            <div style="display: flex; gap: 10px;">
+                                <button type="button" class="btn-secondary"
+                                    onclick="document.getElementById('newSiteLogoInput').click()">
+                                    選擇 Logo 圖片
+                                </button>
+                                <button type="button" class="btn-outline" id="newSiteLogoRemoveBtn"
+                                    onclick="removeNewSiteLogo()" style="display: none;">
+                                    移除
+                                </button>
+                            </div>
+                            <div id="newSiteLogoStatus" style="margin-top: 8px; font-size: 0.85em;"></div>
+                            <small style="color:#888;">建議使用透明背景 PNG，尺寸約 200x60 像素</small>
+                        </div>
                         <div id="siteGeneratorResult" style="margin-top: 1rem; display: none;">
                             <p style="color: green; font-weight: bold;">✅ 網站產生成功！</p>
                             <div style="margin-top: 0.5rem;">

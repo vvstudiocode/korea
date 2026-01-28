@@ -3166,6 +3166,87 @@ function updateItemPrice(index, newPrice) {
 // ============================================================
 
 /**
+ * 新網站 Logo 選擇處理
+ */
+async function handleNewSiteLogoSelect(input) {
+    if (!input.files || !input.files[0]) return;
+
+    const file = input.files[0];
+    const statusEl = document.getElementById('newSiteLogoStatus');
+
+    // 驗證檔案大小 (最大 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+        statusEl.innerHTML = '<span style="color: red;">❌ 檔案過大，請選擇 2MB 以下的圖片</span>';
+        return;
+    }
+
+    // 驗證檔案類型
+    if (!file.type.startsWith('image/')) {
+        statusEl.innerHTML = '<span style="color: red;">❌ 請選擇圖片檔案</span>';
+        return;
+    }
+
+    statusEl.innerHTML = '<span style="color: #666;">⏳ 上傳中...</span>';
+
+    try {
+        // 讀取為 base64
+        const reader = new FileReader();
+        reader.onload = async function (e) {
+            const base64Data = e.target.result;
+
+            // 嘗試上傳到 GitHub
+            try {
+                const result = await callApi('uploadLogo', {
+                    imageData: base64Data,
+                    fileName: file.name
+                });
+
+                if (result.success && result.data && result.data.url) {
+                    // 使用上傳後的 URL
+                    document.getElementById('newSiteLogoUrl').value = result.data.url;
+                    document.getElementById('newSiteLogoImg').src = result.data.url;
+                    statusEl.innerHTML = '<span style="color: green;">✅ Logo 上傳成功</span>';
+                } else {
+                    // 備用：直接使用 base64 (較大但可用)
+                    document.getElementById('newSiteLogoUrl').value = base64Data;
+                    document.getElementById('newSiteLogoImg').src = base64Data;
+                    statusEl.innerHTML = '<span style="color: orange;">⚠️ 已使用內嵌圖片</span>';
+                }
+            } catch (e) {
+                // 備用方案：直接使用 base64
+                document.getElementById('newSiteLogoUrl').value = base64Data;
+                document.getElementById('newSiteLogoImg').src = base64Data;
+                statusEl.innerHTML = '<span style="color: orange;">⚠️ 已使用內嵌圖片</span>';
+            }
+
+            // 顯示預覽
+            document.getElementById('newSiteLogoImg').style.display = 'block';
+            document.getElementById('newSiteNoLogoText').style.display = 'none';
+            document.getElementById('newSiteLogoRemoveBtn').style.display = 'inline-block';
+        };
+        reader.onerror = function () {
+            statusEl.innerHTML = '<span style="color: red;">❌ 讀取圖片失敗</span>';
+        };
+        reader.readAsDataURL(file);
+    } catch (error) {
+        statusEl.innerHTML = `<span style="color: red;">❌ 上傳失敗: ${error.message}</span>`;
+    }
+}
+
+/**
+ * 移除新網站 Logo
+ */
+function removeNewSiteLogo() {
+    document.getElementById('newSiteLogoUrl').value = '';
+    document.getElementById('newSiteLogoImg').src = '';
+    document.getElementById('newSiteLogoImg').style.display = 'none';
+    document.getElementById('newSiteNoLogoText').style.display = 'block';
+    document.getElementById('newSiteLogoRemoveBtn').style.display = 'none';
+    document.getElementById('newSiteLogoStatus').textContent = '';
+    document.getElementById('newSiteLogoInput').value = '';
+}
+
+/**
  * 產生新的獨立網站
  */
 async function generateNewSite() {
@@ -3199,7 +3280,8 @@ async function generateNewSite() {
             siteId: siteId,
             siteName: siteName,
             apiUrl: apiUrl,
-            siteDescription: siteDescription
+            siteDescription: siteDescription,
+            logoUrl: document.getElementById('newSiteLogoUrl').value || ''
         });
 
         hideLoadingOverlay();
@@ -3384,6 +3466,15 @@ function resetSiteGeneratorForm() {
     document.getElementById('newSiteName').value = '';
     document.getElementById('newSiteApiUrl').value = '';
     document.getElementById('newSiteDescription').value = '';
+
+    // 清除 Logo 狀態
+    document.getElementById('newSiteLogoUrl').value = '';
+    document.getElementById('newSiteLogoImg').src = '';
+    document.getElementById('newSiteLogoImg').style.display = 'none';
+    document.getElementById('newSiteNoLogoText').style.display = 'block';
+    document.getElementById('newSiteLogoRemoveBtn').style.display = 'none';
+    document.getElementById('newSiteLogoStatus').textContent = '';
+    document.getElementById('newSiteLogoInput').value = '';
 
     // 隱藏結果區
     document.getElementById('siteGeneratorResult').style.display = 'none';
