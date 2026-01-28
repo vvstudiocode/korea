@@ -3610,6 +3610,14 @@ function loadSettings() {
                 if (bankNoteInput) bankNoteInput.value = s.bankNote || '';
                 if (paymentNoteInput) paymentNoteInput.value = s.paymentNote || '';
 
+                // 載入網站標題與描述
+                const siteNameInput = document.getElementById('settingSiteName');
+                const siteDescInput = document.getElementById('settingSiteDescription');
+                const siteSuffixInput = document.getElementById('settingSiteSuffix');
+                if (siteNameInput) siteNameInput.value = s.siteName || '';
+                if (siteDescInput) siteDescInput.value = s.siteDescription || '';
+                if (siteSuffixInput) siteSuffixInput.value = s.siteSuffix || '';
+
                 // 處理 Logo 顯示
                 const logoPreview = document.getElementById('currentLogoPreview');
                 const noLogoText = document.getElementById('noLogoText');
@@ -3742,6 +3750,7 @@ function saveSettings() {
     const settings = {
         siteName: document.getElementById('settingSiteName').value.trim(),
         siteDescription: document.getElementById('settingSiteDescription').value.trim(),
+        siteSuffix: document.getElementById('settingSiteSuffix').value.trim(),
         bankName: document.getElementById('settingBankName').value.trim(),
         bankCode: document.getElementById('settingBankCode').value.trim(),
         bankAccount: document.getElementById('settingBankAccount').value.trim(),
