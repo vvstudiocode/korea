@@ -580,13 +580,13 @@ const PageRenderer = {
 
         return `
             <div class="section-container ${uid}">
+                ${comp.title ? `<div style="text-align:center; margin-bottom: 20px;"><h3>${comp.title}</h3></div>` : ''}
                 <div class="info-grid-flex" style="display:flex; flex-direction: ${isRight ? 'row-reverse' : 'row'}; align-items:center; gap:4rem;">
                     <div class="info-image" style="flex:1;">
                         <div class="info-img-desktop" style="width:100%; aspect-ratio:${ratioStyle}; background:url('${imgDesktop}') center/cover no-repeat; border-radius:12px;"></div>
                         <div class="info-img-mobile" style="width:100%; aspect-ratio:${ratioStyle}; background:url('${imgMobile}') center/cover no-repeat; border-radius:12px;"></div>
                     </div>
                     <div class="info-text" style="flex:1; text-align: ${comp.textAlign || 'left'}; padding: 20px;">
-                        <h3>${comp.title || ''}</h3>
                         <p style="white-space: pre-wrap;">${comp.subtitle || ''}</p>
                         ${comp.buttonText ? `<a href="${comp.buttonLink || '#'}" class="text-link">${comp.buttonText}</a>` : ''}
                     </div>

@@ -545,8 +545,37 @@ const PageBuilder = {
             imgLabel.style.margin = '15px 0 10px 0';
             container.appendChild(imgLabel);
 
-            this.addInnerField(container, '電腦版圖片 URL', 'image', comp.image);
-            this.addInnerField(container, '手機版圖片 URL', 'imageMobile', comp.imageMobile);
+            // Custom Image Input for Immediate Preview (Desktop)
+            const imgDesktopDiv = document.createElement('div');
+            imgDesktopDiv.className = 'form-group';
+            imgDesktopDiv.style.marginBottom = '8px';
+            imgDesktopDiv.innerHTML = `<label style="font-size:11px; color:#555; margin-bottom:2px; display:block;">電腦版圖片 URL</label>`;
+            const imgDesktopInput = document.createElement('input');
+            imgDesktopInput.type = 'text';
+            imgDesktopInput.value = comp.image || '';
+            imgDesktopInput.style.cssText = 'width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;';
+            imgDesktopInput.oninput = (e) => {
+                this.layout[index].image = e.target.value;
+                this.renderPreview(); // Immediate update
+            };
+            imgDesktopDiv.appendChild(imgDesktopInput);
+            container.appendChild(imgDesktopDiv);
+
+            // Custom Image Input for Immediate Preview (Mobile)
+            const imgMobileDiv = document.createElement('div');
+            imgMobileDiv.className = 'form-group';
+            imgMobileDiv.style.marginBottom = '8px';
+            imgMobileDiv.innerHTML = `<label style="font-size:11px; color:#555; margin-bottom:2px; display:block;">手機版圖片 URL</label>`;
+            const imgMobileInput = document.createElement('input');
+            imgMobileInput.type = 'text';
+            imgMobileInput.value = comp.imageMobile || '';
+            imgMobileInput.style.cssText = 'width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;';
+            imgMobileInput.oninput = (e) => {
+                this.layout[index].imageMobile = e.target.value;
+                this.renderPreview(); // Immediate update
+            };
+            imgMobileDiv.appendChild(imgMobileInput);
+            container.appendChild(imgMobileDiv);
 
             this.addInnerField(container, '按鈕文字', 'buttonText', comp.buttonText);
             this.addInnerField(container, '跳轉連結', 'buttonLink', comp.buttonLink);
