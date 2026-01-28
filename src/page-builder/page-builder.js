@@ -849,39 +849,6 @@ const PageBuilder = {
         } else if (comp.type === 'announcement') {
             this.addInnerField(container, '公告內容', 'text', comp.text);
 
-            // Extra Product Settings (Ratio, Columns)
-            if (isProducts || comp.type === 'product_list') {
-                const settingsWrapper = document.createElement('div');
-                settingsWrapper.style.marginTop = '15px';
-                settingsWrapper.style.padding = '10px';
-                settingsWrapper.style.background = '#f8f8f8';
-                settingsWrapper.style.borderRadius = '6px';
-
-                settingsWrapper.innerHTML = '<div style="font-size:12px; font-weight:bold; color:#555; margin-bottom:10px;">外觀設定</div>';
-
-                // Ratio
-                const ratioDiv = document.createElement('div');
-                this.addInnerField(ratioDiv, '圖片比例', 'ratio', comp.ratio || '1:1', 'select', ['1:1', '3:4', '4:3']);
-                settingsWrapper.appendChild(ratioDiv);
-
-                // Columns (Desktop / Mobile)
-                const colWrapper = document.createElement('div');
-                colWrapper.style.cssText = 'display:flex; gap:10px; margin-top:10px;';
-
-                const dtCol = document.createElement('div');
-                dtCol.style.flex = 1;
-                this.addInnerField(dtCol, '桌面欄數', 'itemsDesktop', comp.itemsDesktop || 4, 'number');
-                colWrapper.appendChild(dtCol);
-
-                const mbCol = document.createElement('div');
-                mbCol.style.flex = 1;
-                this.addInnerField(mbCol, '手機欄數', 'itemsMobile', comp.itemsMobile || 2, 'number');
-                colWrapper.appendChild(mbCol);
-
-                settingsWrapper.appendChild(colWrapper);
-                container.appendChild(settingsWrapper);
-            }
-
             // 背景透明選項
             const bgWrapper = document.createElement('div');
             bgWrapper.className = 'form-group';
@@ -905,6 +872,7 @@ const PageBuilder = {
             if (!transparent) {
                 this.addInnerField(container, '背景顏色', 'bgColor', comp.bgColor || '#f3f4f6', 'color');
             }
+
 
         } else if (comp.type === 'categories') {
             this.addInnerField(container, '區塊標題', 'title', comp.title);

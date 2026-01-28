@@ -3735,6 +3735,9 @@ function deleteLogo() {
 }
 
 function saveSettings() {
+    // 顯示 Loading overlay
+    showLoadingOverlay();
+
     // 準備設定物件
     const settings = {
         siteName: document.getElementById('settingSiteName').value.trim(),
@@ -3784,9 +3787,11 @@ function saveSettings() {
             }
         })
         .finally(() => {
+            // 隱藏 Loading overlay
+            hideLoadingOverlay();
             if (btn) {
                 btn.disabled = false;
-                btn.textContent = '儲存設定';
+                btn.textContent = '💾 儲存設定';
             }
         });
 }
