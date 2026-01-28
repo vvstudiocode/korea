@@ -1,4 +1,6 @@
 {
+  "version": "1.0",
+  "lastUpdated": "2026-01-28T13:23:19.112Z",
   "sections": [
     {
       "id": "hero_default",
@@ -10,7 +12,8 @@
         "buttonLink": "#products",
         "backgroundImage": "",
         "backgroundColor": "#f8f9fa"
-      }
+      },
+      "image": "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800"
     },
     {
       "id": "products_default",
@@ -32,5 +35,9 @@
       "copyright": "© 2025 小沐屋. All rights reserved."
     }
   },
-  "updatedAt": "2026-01-28T13:17:47.558Z"
+  "global": {
+    "backgroundColor": "#ffffff",
+    "fontFamily": "Noto Sans TC",
+    "fontSize": "16px"
+  }
 }
