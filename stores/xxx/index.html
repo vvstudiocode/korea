@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>㪋㪋㪋玩 | 韓國代購</title>
-    <meta name="description" content="ㄕㄩㄝ  說燒耶耶耶">
+    <meta name="description" content="qrwgq3gegeqgqegqe">
     
     <!-- Open Graph -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://vvstudiocode.github.io/korea/stores/xxx/">
     <meta property="og:title" content="㪋㪋㪋玩 | 韓國代購">
-    <meta property="og:description" content="ㄕㄩㄝ  說燒耶耶耶">
+    <meta property="og:description" content="qrwgq3gegeqgqegqe">
     <meta property="og:image" content="https://vvstudiocode.github.io/korea/logo.png">
     
     <style>
@@ -22,7 +22,22 @@
     <link rel="stylesheet" href="/korea/src/page-renderer/page-renderer.css">
     
     <style>
-        
+        #loadingOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #fcfbfb; z-index: 9999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: opacity 0.5s ease;
+        }
+        #loadingOverlay.hidden { opacity: 0; pointer-events: none; }
+        .loading-text {
+            color: var(--primary-color); font-size: 1.2rem;
+            letter-spacing: 2px; font-weight: 600;
+            animation: breathe 1.5s ease-in-out infinite;
+        }
+        @keyframes breathe {
+            0%, 100% { opacity: 0.4; transform: scale(0.98); }
+            50% { opacity: 1; transform: scale(1); }
+        }
     </style>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -31,7 +46,9 @@
 </head>
 <body data-store-id="xxx">
     <!-- Loading Overlay -->
-    
+    <div id="loadingOverlay">
+        <div class="loading-text">㪋㪋㪋玩</div>
+    </div>
 
     <!-- 導航列 -->
     <nav class="navbar">
