@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastUpdated": "2026-01-29T08:12:11.709Z",
+  "lastUpdated": "2026-01-29T08:53:22.973Z",
   "sections": [
     {
       "id": "hero_default",
@@ -31,7 +31,7 @@
       "marginBottom": 20,
       "faqItems": [
         {
-          "question": "rsjr6jh46rh4w",
+          "question": "gwrsgwrgw rg wrg wrgwr",
           "answer": "12121cll3cl3c"
         }
       ],
@@ -99,7 +99,18 @@
       "storeName": "xxx",
       "description": "韓國代購精選",
       "copyright": "© 2025 xxx. All rights reserved."
-    }
+    },
+    "socialLinks": {
+      "line": "12",
+      "instagram": "213",
+      "threads": "123"
+    },
+    "notices": [
+      {
+        "title": "新區塊標題12312",
+        "content": "區塊內容...12312"
+      }
+    ]
   },
   "global": {
     "backgroundColor": "#ffffff",
