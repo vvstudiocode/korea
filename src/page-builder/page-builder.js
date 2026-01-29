@@ -91,14 +91,34 @@ const ProductSelectorModal = {
         }
         console.log('📋 商品選擇器商品來源:', allProducts.length, '項');
 
-        const filtered = allProducts.filter(p => p.name.toLowerCase().includes(filter.toLowerCase()));
+        // 只顯示上架中的商品（過濾掉下架商品）
+        const activeProducts = allProducts.filter(p => !p.status || p.status === 'active' || p.status === '上架');
+
+        // 搜尋過濾
+        const filtered = activeProducts.filter(p => p.name.toLowerCase().includes(filter.toLowerCase()));
 
         if (filtered.length === 0) {
             container.innerHTML = '<div style="padding:20px; text-align:center; color:#999;">找不到任何商品</div>';
             return;
         }
 
-        container.innerHTML = filtered.map(p => {
+        // 限制顯示數量，避免渲染過多項目導致卡頓
+        const MAX_DISPLAY = 50;
+        const displayProducts = filtered.slice(0, MAX_DISPLAY);
+        const hasMore = filtered.length > MAX_DISPLAY;
+
+        let html = '';
+
+        // 如果有超過限制的商品，顯示提示
+        if (hasMore) {
+            html += `
+                <div style="padding:12px 20px; background:#fff3cd; border-bottom:2px solid #ffc107; color:#856404; font-size:13px;">
+                    ⚠️ 找到 ${filtered.length} 個商品，目前顯示前 ${MAX_DISPLAY} 個。請使用搜尋功能縮小範圍。
+                </div>
+            `;
+        }
+
+        html += displayProducts.map(p => {
             const isSelected = this.selectedIds.includes(String(p.id));
             const img = (p.image || '').split(',')[0];
             return `
@@ -115,6 +135,8 @@ const ProductSelectorModal = {
                 </div>
             `;
         }).join('');
+
+        container.innerHTML = html;
     }
 };
 
@@ -1458,6 +1480,15 @@ const PageBuilder = {
         container.appendChild(div);
     },
 
+    // 更新當前編輯元件的欄位值
+    updateInlineField: function (field, value) {
+        if (this.editingIndex !== null && this.layout[this.editingIndex]) {
+            this.layout[this.editingIndex][field] = value;
+            console.log(`📝 Updated ${field} to:`, value);
+            // 不自動更新預覽，等待用戶點擊確認按鈕
+        }
+    },
+
     // 新增: 改進的顏色選擇器，顯示完整色塊
     addColorFieldEnhanced: function (container, label, field, value, compIndex) {
         const div = document.createElement('div');
@@ -1547,20 +1578,39 @@ const PageBuilder = {
         btn.onmouseover = () => { btn.style.background = '#000'; };
         btn.onmouseout = () => { btn.style.background = '#333'; };
 
-        btn.onclick = () => {
+        btn.onclick = async () => {
             console.log('🔄 Update button clicked');
-            this.renderPreview();
-            this.highlightPreview(this.editingIndex);
 
-            // Show toast
-            const toast = document.createElement('div');
-            toast.textContent = '✅ 預覽已更新';
-            toast.style.cssText = 'position:fixed; bottom:20px; right:20px; background:rgba(0,0,0,0.8); color:white; padding:10px 20px; border-radius:4px; z-index:9999; animation: fadeIn 0.3s;';
-            document.body.appendChild(toast);
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                setTimeout(() => toast.remove(), 300);
-            }, 1000);
+            // 禁用按鈕避免重複點擊
+            btn.disabled = true;
+            btn.textContent = '更新中...';
+
+            try {
+                // 等待預覽渲染完成
+                await this.renderPreview();
+                this.highlightPreview(this.editingIndex);
+
+                // Show toast
+                const toast = document.createElement('div');
+                toast.textContent = '✅ 預覽已更新';
+                toast.style.cssText = 'position:fixed; bottom:20px; right:20px; background:rgba(0,0,0,0.8); color:white; padding:10px 20px; border-radius:4px; z-index:9999; animation: fadeIn 0.3s;';
+                document.body.appendChild(toast);
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                }, 1000);
+            } catch (error) {
+                console.error('❌ Preview update failed:', error);
+                const toast = document.createElement('div');
+                toast.textContent = '❌ 預覽更新失敗';
+                toast.style.cssText = 'position:fixed; bottom:20px; right:20px; background:rgba(220,53,69,0.9); color:white; padding:10px 20px; border-radius:4px; z-index:9999;';
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 2000);
+            } finally {
+                // 恢復按鈕狀態
+                btn.disabled = false;
+                btn.textContent = '確認修改 ( 立即更新預覽 )';
+            }
         };
 
         btnDiv.appendChild(btn);
