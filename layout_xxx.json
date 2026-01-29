@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastUpdated": "2026-01-29T07:52:51.950Z",
+  "lastUpdated": "2026-01-29T08:12:11.709Z",
   "sections": [
     {
       "id": "hero_default",
@@ -36,8 +36,8 @@
         }
       ],
       "customColor": true,
-      "bgColor": "#e53838",
-      "buttonColor": "#63dd5a"
+      "bgColor": "#781212",
+      "buttonColor": "#97210c"
     },
     {
       "type": "image_carousel",
