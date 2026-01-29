@@ -892,18 +892,42 @@ const PageBuilder = {
             hr1.style.cssText = 'margin: 15px 0; border: none; border-top: 1px solid #eee;';
             container.appendChild(hr1);
 
-            // 自訂顏色開關
+            // 自訂顏色開關（Toggle Switch 樣式）
             const colorToggleWrapper = document.createElement('div');
             colorToggleWrapper.className = 'form-group';
-            colorToggleWrapper.style.marginBottom = '12px';
+            colorToggleWrapper.style.cssText = 'margin-bottom:16px; display:flex; align-items:center; justify-content:space-between; padding:12px; background:#f8f9fa; border-radius:6px;';
             const customColor = comp.customColor === true;
 
             colorToggleWrapper.innerHTML = `
-                <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;">
-                    <input type="checkbox" ${customColor ? 'checked' : ''}>
-                    自訂元件顏色
+                <label style="font-size:13px; font-weight:500; color:#333; margin:0;">啟用自訂顏色</label>
+                <label class="toggle-switch" style="position:relative; display:inline-block; width:48px; height:26px; margin:0;">
+                    <input type="checkbox" ${customColor ? 'checked' : ''} style="opacity:0; width:0; height:0;">
+                    <span class="toggle-slider" style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:#ccc; transition:0.3s; border-radius:26px;"></span>
                 </label>
             `;
+
+            // 內聯樣式定義 toggle switch 的選中狀態
+            const style = document.createElement('style');
+            style.textContent = `
+                .toggle-switch input:checked + .toggle-slider {
+                    background-color: #4CAF50;
+                }
+                .toggle-slider:before {
+                    position: absolute;
+                    content: "";
+                    height: 20px;
+                    width: 20px;
+                    left: 3px;
+                    bottom: 3px;
+                    background-color: white;
+                    transition: 0.3s;
+                    border-radius: 50%;
+                }
+                .toggle-switch input:checked + .toggle-slider:before {
+                    transform: translateX(22px);
+                }
+            `;
+            document.head.appendChild(style);
 
             colorToggleWrapper.querySelector('input').onchange = (e) => {
                 this.layout[index].customColor = e.target.checked;
