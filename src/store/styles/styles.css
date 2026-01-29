@@ -1964,7 +1964,7 @@ body.no-scroll {
     overflow: hidden;
     transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     line-height: 1.7;
-    color: #555;
+    color: var(--faq-text, #555);
     font-size: 0.95rem;
 }
 

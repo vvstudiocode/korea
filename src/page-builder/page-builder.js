@@ -138,6 +138,14 @@ const PageBuilder = {
     LAYOUT_URL: 'https://raw.githubusercontent.com/vvstudiocode/korea/main/layout.json',
 
     init: async function (storeIdOpt = null) {
+        // 確保 styles.css 載入以供預覽使用 (修復預覽顏色與樣式缺失問題)
+        if (!document.querySelector('link[href*="src/store/styles/styles.css"]')) {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = '/korea/src/store/styles/styles.css';
+            document.head.appendChild(link);
+        }
+
         // 自動檢測 SITE_CONFIG (新網站後台)
         if (!storeIdOpt && typeof window !== 'undefined' && window.SITE_CONFIG?.siteId) {
             storeIdOpt = window.SITE_CONFIG.siteId;
@@ -900,34 +908,57 @@ const PageBuilder = {
 
             colorToggleWrapper.innerHTML = `
                 <label style="font-size:13px; font-weight:500; color:#333; margin:0;">啟用自訂顏色</label>
-                <label class="toggle-switch" style="position:relative; display:inline-block; width:48px; height:26px; margin:0;">
-                    <input type="checkbox" ${customColor ? 'checked' : ''} style="opacity:0; width:0; height:0;">
-                    <span class="toggle-slider" style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:#ccc; transition:0.3s; border-radius:26px;"></span>
+                <label class="toggle-switch">
+                    <input type="checkbox" ${customColor ? 'checked' : ''}>
+                    <span class="toggle-slider"></span>
                 </label>
             `;
 
-            // 內聯樣式定義 toggle switch 的選中狀態
-            const style = document.createElement('style');
-            style.textContent = `
-                .toggle-switch input:checked + .toggle-slider {
-                    background-color: #4CAF50;
-                }
-                .toggle-slider:before {
-                    position: absolute;
-                    content: "";
-                    height: 20px;
-                    width: 20px;
-                    left: 3px;
-                    bottom: 3px;
-                    background-color: white;
-                    transition: 0.3s;
-                    border-radius: 50%;
-                }
-                .toggle-switch input:checked + .toggle-slider:before {
-                    transform: translateX(22px);
-                }
-            `;
-            document.head.appendChild(style);
+            // 確保 Toggle Switch 樣式存在 (全域注入一次)
+            if (!document.getElementById('pb-toggle-style')) {
+                const style = document.createElement('style');
+                style.id = 'pb-toggle-style';
+                style.textContent = `
+                    .toggle-switch {
+                        position: relative;
+                        display: inline-block;
+                        width: 48px;
+                        height: 26px;
+                        margin: 0;
+                    }
+                    .toggle-switch input {
+                        opacity: 0;
+                        width: 0;
+                        height: 0;
+                    }
+                    .toggle-slider {
+                        position: absolute;
+                        cursor: pointer;
+                        top: 0; left: 0; right: 0; bottom: 0;
+                        background-color: #ccc; /* 預設灰色 */
+                        transition: .4s;
+                        border-radius: 34px;
+                    }
+                    .toggle-slider:before {
+                        position: absolute;
+                        content: "";
+                        height: 20px;
+                        width: 20px;
+                        left: 3px;
+                        bottom: 3px;
+                        background-color: white;
+                        transition: .4s;
+                        border-radius: 50%;
+                    }
+                    .toggle-switch input:checked + .toggle-slider {
+                        background-color: #4CAF50 !important; /* 開啟綠色 */
+                    }
+                    .toggle-switch input:checked + .toggle-slider:before {
+                        transform: translateX(22px);
+                    }
+                `;
+                document.head.appendChild(style);
+            }
 
             colorToggleWrapper.querySelector('input').onchange = (e) => {
                 this.layout[index].customColor = e.target.checked;
@@ -1509,19 +1540,33 @@ const PageBuilder = {
         btnDiv.style.cssText = 'margin-top: 20px; text-align: right; border-top: 1px solid #eee; padding-top: 15px;';
 
         const btn = document.createElement('button');
-        btn.textContent = '確認修改 (重新預覽)';
+        btn.textContent = '確認修改 ( 立即更新預覽 )';
         btn.className = 'save-btn'; // 重用 save-btn 樣式
-        btn.style.cssText = 'padding: 8px 15px; font-size: 14px; background: #666; width: auto;';
+        btn.style.cssText = 'padding: 8px 15px; font-size: 14px; background: #333; color: white; border: none; border-radius: 4px; cursor: pointer; transition: 0.2s;';
+
+        btn.onmouseover = () => { btn.style.background = '#000'; };
+        btn.onmouseout = () => { btn.style.background = '#333'; };
 
         btn.onclick = () => {
+            console.log('🔄 Update button clicked');
             this.renderPreview();
             this.highlightPreview(this.editingIndex);
-            showToast('預覽已更新');
+
+            // Show toast
+            const toast = document.createElement('div');
+            toast.textContent = '✅ 預覽已更新';
+            toast.style.cssText = 'position:fixed; bottom:20px; right:20px; background:rgba(0,0,0,0.8); color:white; padding:10px 20px; border-radius:4px; z-index:9999; animation: fadeIn 0.3s;';
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 1000);
         };
 
         btnDiv.appendChild(btn);
         container.appendChild(btnDiv);
     },
+
 
     // 防閃爍：延遲更新預覽 (保留函數但現在主要由按鈕觸發)
     debouncedPreviewUpdate: function () {
@@ -1621,131 +1666,161 @@ const PageBuilder = {
         const container = document.getElementById('pageBuilderPreviewRoot');
         if (!container) return;
 
+        // Visual Feedback: Show updating state
+        container.style.opacity = '0.5';
+
+        // Short delay to allow UI to update (perceived performance)
+        await new Promise(r => setTimeout(r, 50));
+
+        // 確保容器有基礎樣式，避免被 styles.css 全域樣式影響
+        container.style.minHeight = '100px';
+        container.style.display = 'block';
+
+        // Visual Feedback: Show updating state
+        container.style.opacity = '0.5';
+
+        // Short delay to allow UI to update (perceived performance)
+        await new Promise(r => setTimeout(r, 50));
+
+        // 確保容器有基礎樣式，避免被 styles.css 全域樣式影響
+        container.style.minHeight = '100px';
+        container.style.display = 'block';
+
         if (typeof PageRenderer !== 'undefined') {
-            // 等待主要內容渲染完成
-            await PageRenderer.render(container, this.layout);
-
-            // 應用全域設定 (背景、字體等)
-            if (this.global) {
-                // PageRenderer.applyGlobalSettings 會修改 body 樣式
-                // 在 PageBuilder 預覽中，我們可能希望只影響預覽區塊
-                // 但 PageRenderer 預設是改 document.body (lines 448-451)
-                // 我們需要讓它支援只改預覽容器，或手動覆蓋
-
-                // 如果 PageRenderer 支援傳入 container 或有特殊模式最好
-                // 這裡我們先嘗試覆蓋預覽容器的樣式
-                if (this.global.backgroundColor) {
-                    container.style.backgroundColor = this.global.backgroundColor;
-                    // Also set preview viewport background to match
-                    const viewport = document.getElementById('previewViewport');
-                    if (viewport) viewport.style.backgroundColor = this.global.backgroundColor;
-                }
-                if (this.global.fontFamily) container.style.fontFamily = this.global.fontFamily;
-
-                // 也要呼叫 PageRenderer 的 apply 以防它有其他邏輯 (雖然它會改 body，但在 iframe 或獨立頁面沒差，但在 admin 後台可能會改到後台背景)
-                // ⚠️ 注意：在 Admin 後台直接呼叫 applyGlobalSettings 會改到後台的 body 背景！
-                // 所以我們應該手動只改 preview container，而不呼叫 PageRenderer.applyGlobalSettings (除非該函數有保護機制)
+            try {
+                // 等待主要內容渲染完成
+                await PageRenderer.render(container, this.layout);
+                console.log('✅ Preview Rendered');
+            } catch (e) {
+                console.error('❌ Preview Render Error:', e);
+                container.innerHTML = `<div style="padding:20px; color:red;">預覽渲染失敗: ${e.message}</div>`;
             }
-
-            // 渲染頁尾預覽區塊 (確保在最後)
-            if (this.footer) {
-                this.renderFooterPreview(container);
-            }
-
-            // 初始化 FAQ toggleFaq 函數（預覽環境中 script 標籤可能被過濾）
-            if (!window.toggleFaq) {
-                window.toggleFaq = function (id) {
-                    const answer = document.getElementById(id);
-                    if (!answer) return;
-                    const question = answer.previousElementSibling;
-                    const icon = question.querySelector('.faq-icon');
-
-                    // 檢查是否已展開
-                    const isExpanded = answer.style.maxHeight && answer.style.maxHeight !== '0px';
-
-                    if (isExpanded) {
-                        // 收合
-                        answer.style.maxHeight = null;
-                        icon.textContent = '+';
-                        question.classList.remove('active');
-                    } else {
-                        // 展開
-                        answer.style.maxHeight = answer.scrollHeight + 'px';
-                        icon.textContent = '×';
-                        question.classList.add('active');
-                    }
-                };
-            }
-
-            // 讓預覽渲染完後也跑一次縮放
-            setTimeout(() => this.updatePreviewScale(), 100);
         }
-    },
+
+        container.style.opacity = '1';
+
+        // 應用全域設定 (背景、字體等)
+        if (this.global) {
+            // PageRenderer.applyGlobalSettings 會修改 body 樣式
+            // 在 PageBuilder 預覽中，我們可能希望只影響預覽區塊
+            // 但 PageRenderer 預設是改 document.body (lines 448-451)
+            // 我們需要讓它支援只改預覽容器，或手動覆蓋
+
+            // 如果 PageRenderer 支援傳入 container 或有特殊模式最好
+            // 這裡我們先嘗試覆蓋預覽容器的樣式
+            if (this.global.backgroundColor) {
+                container.style.backgroundColor = this.global.backgroundColor;
+                // Also set preview viewport background to match
+                const viewport = document.getElementById('previewViewport');
+                if (viewport) viewport.style.backgroundColor = this.global.backgroundColor;
+            }
+            if (this.global.fontFamily) container.style.fontFamily = this.global.fontFamily;
+
+            // 也要呼叫 PageRenderer 的 apply 以防它有其他邏輯 (雖然它會改 body，但在 iframe 或獨立頁面沒差，但在 admin 後台可能會改到後台背景)
+            // ⚠️ 注意：在 Admin 後台直接呼叫 applyGlobalSettings 會改到後台的 body 背景！
+            // 所以我們應該手動只改 preview container，而不呼叫 PageRenderer.applyGlobalSettings (除非該函數有保護機制)
+        }
+
+        // 渲染頁尾預覽區塊 (確保在最後)
+        if (this.footer) {
+            this.renderFooterPreview(container);
+        }
+
+        // 初始化 FAQ toggleFaq 函數（預覽環境中 script 標籤可能被過濾）
+        if (!window.toggleFaq) {
+            window.toggleFaq = function (id) {
+                const answer = document.getElementById(id);
+                if (!answer) return;
+                const question = answer.previousElementSibling;
+                const icon = question.querySelector('.faq-icon');
+
+                // 檢查是否已展開
+                const isExpanded = answer.style.maxHeight && answer.style.maxHeight !== '0px';
+
+                if (isExpanded) {
+                    // 收合
+                    answer.style.maxHeight = null;
+                    icon.textContent = '+';
+                    question.classList.remove('active');
+                } else {
+                    // 展開
+                    answer.style.maxHeight = answer.scrollHeight + 'px';
+                    icon.textContent = '×';
+                    question.classList.add('active');
+                }
+            };
+        }
+
+        // 讓預覽渲染完後也跑一次縮放
+        setTimeout(() => this.updatePreviewScale(), 100);
+    }
+},
 
     // 在預覽區顯示頁尾
     renderFooterPreview: function (container) {
         // 移除舊的頁尾預覽
         const existingFooter = container.querySelector('.preview-footer');
-        if (existingFooter) existingFooter.remove();
+if (existingFooter) existingFooter.remove();
 
-        const footerSection = document.createElement('div');
-        footerSection.className = 'preview-footer';
-        footerSection.style.cssText = 'background:#f8f4f0; padding:30px 20px; margin-top:30px; border-top:1px solid #eee;';
+const footerSection = document.createElement('div');
+footerSection.className = 'preview-footer';
+footerSection.style.cssText = 'background:#f8f4f0; padding:30px 20px; margin-top:30px; border-top:1px solid #eee;';
 
-        // 渲染購買須知
-        let noticesHTML = '';
-        if (this.footer.notices && this.footer.notices.length > 0) {
-            noticesHTML = '<ul style="list-style:none; padding:0; margin:0 0 20px 0; font-size:13px; color:#555;">' +
-                this.footer.notices.map(n => `<li style="margin-bottom:8px;"><strong>${n.title}</strong><br>${(n.content || '').replace(/\n/g, '<br>')}</li>`).join('') +
-                '</ul>';
-        }
+// 渲染購買須知
+let noticesHTML = '';
+if (this.footer.notices && this.footer.notices.length > 0) {
+    noticesHTML = '<ul style="list-style:none; padding:0; margin:0 0 20px 0; font-size:13px; color:#555;">' +
+        this.footer.notices.map(n => `<li style="margin-bottom:8px;"><strong>${n.title}</strong><br>${(n.content || '').replace(/\n/g, '<br>')}</li>`).join('') +
+        '</ul>';
+}
 
-        // 渲染社群連結
-        let socialHTML = '';
-        if (this.footer.socialLinks) {
-            const links = this.footer.socialLinks;
-            socialHTML = '<div style="display:flex; justify-content:center; gap:15px; margin-bottom:10px;">' +
-                (links.line ? '<span style="font-size:20px;">📱</span>' : '') +
-                (links.instagram ? '<span style="font-size:20px;">📸</span>' : '') +
-                (links.threads ? '<span style="font-size:20px;">🧵</span>' : '') +
-                '</div>';
-        }
+// 渲染社群連結
+let socialHTML = '';
+if (this.footer.socialLinks) {
+    const links = this.footer.socialLinks;
+    socialHTML = '<div style="display:flex; justify-content:center; gap:15px; margin-bottom:10px;">' +
+        (links.line ? '<span style="font-size:20px;">📱</span>' : '') +
+        (links.instagram ? '<span style="font-size:20px;">📸</span>' : '') +
+        (links.threads ? '<span style="font-size:20px;">🧵</span>' : '') +
+        '</div>';
+}
 
-        // 渲染版權
-        const copyrightHTML = this.footer.copyright ?
-            `<div style="text-align:center; font-size:12px; color:#999;">${this.footer.copyright}</div>` : '';
+// 渲染版權
+const copyrightHTML = this.footer.copyright ?
+    `<div style="text-align:center; font-size:12px; color:#999;">${this.footer.copyright}</div>` : '';
 
-        footerSection.innerHTML = noticesHTML + socialHTML + copyrightHTML;
+footerSection.innerHTML = noticesHTML + socialHTML + copyrightHTML;
 
-        // 確保 footer 真的在最後面 (以防萬一)
-        container.appendChild(footerSection);
+// 確保 footer 真的在最後面 (以防萬一)
+// 確保 footer 真的在最後面 (以防萬一)
+container.appendChild(footerSection);
     },
 
-    updatePreviewScale: function () {
-        if (this.previewMode !== 'desktop') {
-            const container = document.getElementById('pageBuilderPreviewRoot');
-            if (container) {
-                container.style.transform = '';
-                container.style.width = '';
-            }
-            return;
-        }
-
-        const viewport = document.getElementById('previewViewport');
+updatePreviewScale: function () {
+    if (this.previewMode !== 'desktop') {
         const container = document.getElementById('pageBuilderPreviewRoot');
-        if (!viewport || !container) return;
-
-        const availableWidth = viewport.clientWidth - 40; // 減去 padding
-        const targetWidth = 1200;
-
-        if (availableWidth < targetWidth) {
-            const scale = availableWidth / targetWidth;
-            container.style.transformOrigin = 'top center';
-            container.style.transform = `scale(${scale})`;
-            container.style.width = `${targetWidth}px`;
-        } else {
+        if (container) {
             container.style.transform = '';
-            container.style.width = '100%';
+            container.style.width = '';
         }
+        return;
     }
+
+    const viewport = document.getElementById('previewViewport');
+    const container = document.getElementById('pageBuilderPreviewRoot');
+    if (!viewport || !container) return;
+
+    const availableWidth = viewport.clientWidth - 40; // 減去 padding
+    const targetWidth = 1200;
+
+    if (availableWidth < targetWidth) {
+        const scale = availableWidth / targetWidth;
+        container.style.transformOrigin = 'top center';
+        container.style.transform = `scale(${scale})`;
+        container.style.width = `${targetWidth}px`;
+    } else {
+        container.style.transform = '';
+        container.style.width = '100%';
+    }
+}
 };

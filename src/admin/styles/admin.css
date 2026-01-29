@@ -492,7 +492,7 @@ body {
     display: flex;
     gap: 1rem;
     align-items: flex-start;
-    border-left: 4px solid #e0e0e0;
+    /* border-left removed */
 }
 
 .stat-card:hover {
@@ -500,29 +500,18 @@ body {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
-.stat-card.revenue {
-    border-left-color: #4caf50;
-}
-
-.stat-card.cost {
-    border-left-color: #ff9800;
-}
-
-.stat-card.profit {
-    border-left-color: #2196f3;
-}
-
-.stat-card.orders {
-    border-left-color: #9c27b0;
-}
-
+/* 移除個別卡片的側邊顏色與 Highlight 樣式，統一為白色簡潔風格 */
+.stat-card.revenue,
+.stat-card.cost,
+.stat-card.profit,
+.stat-card.orders,
 .stat-card.highlight {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-left: none;
+    background: white;
 }
 
 .stat-card.highlight * {
-    color: white !important;
+    color: inherit !important;
 }
 
 .stat-icon {
