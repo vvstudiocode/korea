@@ -2382,6 +2382,9 @@ tr.dragging {
     margin-left: 8px;
     font-size: 0.8rem;
     font-weight: 500;
+    display: inline-block;
+    vertical-align: middle;
+    line-height: 20px;
 }
 
 .status-label.status-active {
@@ -2390,4 +2393,13 @@ tr.dragging {
 
 .status-label.status-inactive {
     color: #dc3545;
+}
+
+/* 商品狀態欄位對齊 */
+#productsTableBody td .toggle-switch {
+    vertical-align: middle;
+}
+
+#productsTableBody td:has(.toggle-switch) {
+    white-space: nowrap;
 }

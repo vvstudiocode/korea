@@ -397,6 +397,31 @@ const PageRenderer = {
             container.appendChild(section);
         }
 
+        // 初始化 FAQ toggleFaq 函數（innerHTML 不會執行 script 標籤）
+        if (!window.toggleFaq) {
+            window.toggleFaq = function (id) {
+                const answer = document.getElementById(id);
+                if (!answer) return;
+                const question = answer.previousElementSibling;
+                const icon = question.querySelector('.faq-icon');
+
+                // 檢查是否已展開
+                const isExpanded = answer.style.maxHeight && answer.style.maxHeight !== '0px';
+
+                if (isExpanded) {
+                    // 收合
+                    answer.style.maxHeight = null;
+                    icon.textContent = '+';
+                    question.classList.remove('active');
+                } else {
+                    // 展開
+                    answer.style.maxHeight = answer.scrollHeight + 'px';
+                    icon.textContent = '×';
+                    question.classList.add('active');
+                }
+            };
+        }
+
         // 重新觀察新加入的元素 (動畫)
         if (typeof observeElements === 'function') observeElements();
     },
