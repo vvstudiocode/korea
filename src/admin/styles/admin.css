@@ -1,12 +1,12 @@
 :root {
     /* 主要背景色 */
-    --bg-dark: #2c3e50;
+    --bg-dark: #000000;
     /* 更深沈的藍灰色 */
     --bg-light: #f8f9fa;
     --white: #ffffff;
 
     /* 品牌色 */
-    --primary: #34495e;
+    --primary: #000000;
     --accent: #e74c3c;
     /* 鮮明的紅色作為強調 */
     --accent-hover: #c0392b;

@@ -153,14 +153,31 @@ const PageRenderer = {
         // 2. 非同步從 GitHub 獲取最新排版
         const layout = await this.fetchLayout();
         if (layout) {
-            // 更新快取 - 使用 Storage 模組
-            if (typeof AppStorage !== 'undefined') {
-                AppStorage.cacheLayout(layout);
+            // 版本檢查：防止舊的 GitHub 快取 (CDN延遲) 覆蓋較新的本地快取
+            let shouldUpdate = true;
+            if (cachedLayout && cachedLayout.lastUpdated && layout.lastUpdated) {
+                const cachedTime = new Date(cachedLayout.lastUpdated).getTime();
+                const remoteTime = new Date(layout.lastUpdated).getTime();
+
+                // 如果遠端版本比較舊 (或是相同)，且本地快取存在，則不需更新
+                // 注意：如果是多人協作環境，這可能會有風險，但在單人操作場景下這能解決 CDN 延遲問題
+                if (remoteTime <= cachedTime) {
+                    console.log(`🔒 Keeping local cache (Newer/Same): Remote(${layout.lastUpdated}) <= Local(${cachedLayout.lastUpdated})`);
+                    shouldUpdate = false;
+                }
             }
-            // 重新渲染最新內容
-            this.render(container, layout.sections || layout);
-            this.renderFooter(layout.footer);
-            this.applyGlobalSettings(layout.global);
+
+            if (shouldUpdate) {
+                console.log('🔄 Updating layout from GitHub:', layout.lastUpdated);
+                // 更新快取 - 使用 Storage 模組
+                if (typeof AppStorage !== 'undefined') {
+                    AppStorage.cacheLayout(layout);
+                }
+                // 重新渲染最新內容
+                this.render(container, layout.sections || layout);
+                this.renderFooter(layout.footer);
+                this.applyGlobalSettings(layout.global);
+            }
         }
 
         // 3. 移除 Loading 動畫
