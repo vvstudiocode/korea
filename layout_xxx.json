@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastUpdated": "2026-01-29T07:34:22.538Z",
+  "lastUpdated": "2026-01-29T07:37:24.641Z",
   "sections": [
     {
       "id": "hero_default",
@@ -66,6 +66,28 @@
       "subtitle": "在這裡輸入介紹文字...",
       "image": "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=600",
       "imageMobile": "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=600"
+    },
+    {
+      "type": "image_carousel",
+      "marginTop": 0,
+      "marginBottom": 20,
+      "title": "新圖片輪播",
+      "images": [
+        {
+          "src": "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800",
+          "srcMobile": "",
+          "link": ""
+        },
+        {
+          "src": "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=800",
+          "srcMobile": "",
+          "link": ""
+        }
+      ],
+      "fullWidth": true,
+      "ratioDesktop": "21:9",
+      "ratioMobile": "16:9",
+      "speed": 3
     }
   ],
   "footer": {
