@@ -939,11 +939,9 @@ const PageBuilder = {
             // 如果啟用自訂顏色，顯示顏色選擇器（改進樣式）
             if (customColor) {
                 // 使用自訂樣式的顏色選擇器
-                this.addColorFieldEnhanced(container, '背景顏色', 'bgColor', comp.bgColor || '#ffffff', index);
-                this.addColorFieldEnhanced(container, '文字顏色', 'textColor', comp.textColor || '#333333', index);
-                this.addColorFieldEnhanced(container, '超連結顏色', 'linkColor', comp.linkColor || '#2196f3', index);
-                this.addColorFieldEnhanced(container, '按鈕顏色', 'buttonColor', comp.buttonColor || '#AF2424', index);
-                this.addColorFieldEnhanced(container, '按鈕文字顏色', 'buttonTextColor', comp.buttonTextColor || '#ffffff', index);
+                this.addColorFieldEnhanced(container, '背景顏色 (區塊背景)', 'bgColor', comp.bgColor || '#ffffff', index);
+                this.addColorFieldEnhanced(container, '文字顏色 (問題與答案)', 'textColor', comp.textColor || '#000000', index);
+                this.addColorFieldEnhanced(container, '按鈕顏色 (+ 號)', 'buttonColor', comp.buttonColor || '#000000', index);
             }
 
             // 分隔線

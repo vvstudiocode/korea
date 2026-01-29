@@ -1908,8 +1908,9 @@ body.no-scroll {
     border-bottom: none;
 }
 
+/* 移除 hover 背景變色 */
 .faq-item:hover {
-    background-color: rgba(0, 0, 0, 0.01);
+    background-color: transparent;
 }
 
 .faq-question {
@@ -1923,16 +1924,19 @@ body.no-scroll {
     user-select: none;
     font-size: 1.05rem;
     width: 100%;
+    color: var(--faq-text, #000000);
+    /* 預設黑色 */
 }
 
+/* 移除 hover 文字變色與位移 */
 .faq-question:hover {
-    color: var(--faq-link, #2196f3);
-    padding-left: 1.5rem;
+    color: var(--faq-text, #000000);
 }
 
 .faq-question.active {
-    color: var(--faq-button, #AF2424);
-    background-color: rgba(175, 36, 36, 0.03);
+    color: var(--faq-text, #000000);
+    background-color: transparent;
+    /* 移除 active 背景色 */
 }
 
 .faq-question-text {
@@ -1943,7 +1947,8 @@ body.no-scroll {
 .faq-icon {
     font-size: 1.8rem;
     font-weight: 300;
-    color: var(--faq-button, #AF2424);
+    color: var(--faq-button, #000000);
+    /* 預設黑色 */
     transition: transform 0.3s ease;
     min-width: 30px;
     text-align: center;

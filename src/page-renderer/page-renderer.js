@@ -659,10 +659,8 @@ const PageRenderer = {
             faqItems = [],
             customColor = false,
             bgColor = '#ffffff',
-            textColor = '#333333',
-            linkColor = '#2196f3',
-            buttonColor = '#AF2424',
-            buttonTextColor = '#ffffff'
+            textColor = '#000000',
+            buttonColor = '#000000'
         } = comp;
 
         const uuid = 'faq-' + Math.random().toString(36).substr(2, 9);
@@ -671,9 +669,7 @@ const PageRenderer = {
         const styleVars = customColor ? `
             --faq-bg: ${bgColor};
             --faq-text: ${textColor};
-            --faq-link: ${linkColor};
             --faq-button: ${buttonColor};
-            --faq-button-text: ${buttonTextColor};
         ` : '';
 
         // 生成 FAQ 項目 HTML - 讓整個問題區域都可以點擊
