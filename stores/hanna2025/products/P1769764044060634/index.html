@@ -305,12 +305,12 @@
                     </div>
                 </div>
 
-                <button class="add-to-cart-btn" id="addToCartBtn" onclick="addToCart()" disabled style="background:#ccc; cursor:not-allowed;">
-                    已售完
+                <button class="add-to-cart-btn" id="addToCartBtn" onclick="addToCart()"  style="">
+                    加入購物車
                 </button>
 
                 <div class="stock-info">
-                    庫存：<span id="stockDisplay">0</span> 件
+                    庫存：<span id="stockDisplay">1</span> 件
                 </div>
 
                 <div class="product-description">
@@ -333,7 +333,7 @@
     <script src="/korea/src/store/app.js"></script>
 
     <script>
-        const PRODUCT = {"id":"P1769764044060634","name":"qr323r23","price":32,"image":"https://via.placeholder.com/600x600?text=No+Image","stock":0,"variants":[]};
+        const PRODUCT = {"id":"P1769764044060634","name":"qr323r23","price":32,"image":"https://via.placeholder.com/600x600?text=No+Image","stock":1,"variants":[]};
         
         let selectedSpec = null;
         let currentPrice = PRODUCT.price;
