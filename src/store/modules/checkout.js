@@ -14,11 +14,64 @@ const Checkout = {
     // 目前選擇的運送方式
     selectedMethod: '711',
 
+    // 標記是否已配置
+    isConfigured: false,
+
     /**
-     * 初始化運送選項（從後端載入）
+     * 從網站設定中配置運費 (不需要再轉圈圈等 API)
+     * @param {Object} settings - 網站設定物件
+     */
+    configureFromSettings(settings) {
+        if (!settings) return;
+
+        // 預設值
+        const defaults = {
+            shippingOption1Name: '限台中市面交',
+            shippingOption1Fee: 0,
+            shippingOption2Name: '7-11 店到店',
+            shippingOption2Fee: 60
+        };
+
+        // 解析運費 (相容舊 Key 邏輯，同後端設定)
+        const fee1 = settings.shippingOption1Fee !== undefined ? settings.shippingOption1Fee :
+            (settings.shippingOption1 !== undefined && !isNaN(settings.shippingOption1) ? settings.shippingOption1 : defaults.shippingOption1Fee);
+
+        const fee2 = settings.shippingOption2Fee !== undefined ? settings.shippingOption2Fee :
+            (settings.shippingOption2 !== undefined ? settings.shippingOption2 : defaults.shippingOption2Fee);
+
+        this.SHIPPING_METHODS = {
+            'pickup': {
+                name: settings.shippingOption1Name || defaults.shippingOption1Name,
+                fee: parseInt(fee1)
+            },
+            '711': {
+                name: settings.shippingOption2Name || defaults.shippingOption2Name,
+                fee: parseInt(fee2)
+            }
+        };
+
+        this.isConfigured = true;
+        console.log('✅ Checkout 運費已從設定載入:', this.SHIPPING_METHODS);
+
+        // 立即更新 UI
+        this.updateShippingUI();
+        if (typeof Cart !== 'undefined') {
+            Cart.updateUI();
+        }
+    },
+
+    /**
+     * 初始化模組
      */
     async init() {
+        // 如果已經從 App.js 的 configureFromSettings 設定過了，就不用再 call API
+        if (this.isConfigured) {
+            console.log('Checkout 已經由設定檔初始化，跳過 API 請求');
+            return;
+        }
+
         try {
+            console.log('開始載入運送選項...');
             const result = await API.getShippingOptions();
             if (result.success && result.shippingOptions) {
                 // 更新運送方式設定

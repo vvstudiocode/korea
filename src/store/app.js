@@ -101,6 +101,11 @@ const App = {
                                 successMsg.style.display = 'block';
                             }
                         }
+
+                        // 立即設定運費 (避免之後 Checkout.init 再次請求 API)
+                        if (typeof Checkout !== 'undefined') {
+                            Checkout.configureFromSettings(this.siteSettings);
+                        }
                     }
                 }
             }
