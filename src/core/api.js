@@ -53,7 +53,8 @@ const API = {
             const data = await response.json();
 
             if (!data.success) {
-                throw new Error(data.message || 'API 請求失敗');
+                // 後端回傳的是 error 欄位，但也相容 message
+                throw new Error(data.error || data.message || 'API 請求失敗');
             }
 
             return data;
