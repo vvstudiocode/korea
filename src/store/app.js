@@ -122,13 +122,13 @@ const App = {
             console.error('商品載入失敗', e);
         }
 
-        // 3. 初始化購物車
-        Cart.init();
-
-        // 3.1 初始化結帳模組 (載入運送選項) - 使用 await 確保運費設定載入完成
+        // 3. 初始化結帳模組 (載入運送選項) - 必須在 Cart.init() 之前執行
         if (typeof Checkout !== 'undefined') {
             await Checkout.init();
         }
+
+        // 3.1 初始化購物車 - 在運費設定載入後執行，確保首次顯示正確運費
+        Cart.init();
 
         // 4. 設定事件監聯器
         this.setupEventListeners();

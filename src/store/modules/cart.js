@@ -230,6 +230,12 @@ const Cart = {
         cartBadge.textContent = totalCount;
 
         const subtotal = this.getSubtotal();
+
+        // 強制更新運費 UI 文字 (確保顯示正確的金額，例如 NT$ 30)
+        if (typeof Checkout !== 'undefined') {
+            Checkout.updateShippingUI();
+        }
+
         const shippingFee = Checkout.getShippingFee();
         const total = this.items.length > 0 ? subtotal + shippingFee : 0;
 

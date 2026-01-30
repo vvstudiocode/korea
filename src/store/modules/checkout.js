@@ -8,7 +8,7 @@ const Checkout = {
     // 運送方式設定 - 預設值（會被動態載入覆蓋）
     SHIPPING_METHODS: {
         'pickup': { name: '限台中市面交', fee: 0 },
-        '711': { name: '7-11 店到店', fee: 30 }
+        '711': { name: '7-11 店到店', fee: 60 }
     },
 
     // 目前選擇的運送方式
@@ -36,6 +36,11 @@ const Checkout = {
 
                 // 3. 強制更新介面上的運送選項文字 (即使是靜態 HTML)
                 this.updateShippingUI();
+
+                // 4. 更新購物車總金額 (使用新的運費設定)
+                if (typeof Cart !== 'undefined') {
+                    Cart.updateUI();
+                }
             }
         } catch (error) {
             console.error('載入運送選項失敗，使用預設值:', error);
@@ -67,8 +72,8 @@ const Checkout = {
                 }
             }
 
-            // 重新計算總金額顯示
-            Cart.updateUI();
+            // 注意：這裡不呼叫 Cart.updateUI() 避免無窮迴圈
+            // 運費文字更新後，總金額由 Cart.updateUI() 統一處理
         }
 
         // 2. 更新結帳彈窗中的摘要 (如果有打開)
