@@ -828,6 +828,9 @@ function renderProducts(products) {
         const rowStyle = hasVariants ? 'cursor:pointer;' : '';
         const clickEvent = hasVariants ? `onclick="toggleProductDetail('${p.id}')"` : '';
 
+        const profit = (p.price || 0) - (p.cost || 0);
+        const profitClass = profit > 0 ? 'text-success' : (profit < 0 ? 'text-danger' : '');
+
         // 主行 (Main Row)
         const mainRow = `
         <tr class="${p._isModified ? 'row-modified' : ''} product-main-row" data-id="${p.id}" ${clickEvent} style="${rowStyle}">
@@ -840,7 +843,9 @@ function renderProducts(products) {
             </td>
             <td><a href="https://vvstudiocode.github.io/korea/products/${p.id}/" target="_blank" style="color:#6366f1; text-decoration:none;" onclick="event.stopPropagation()">${p.name}</a> ${p._isNew ? '(新)' : ''}</td>
             <td>${p.price}</td>
+            <td style="font-weight:bold; color: ${profit > 0 ? '#28a745' : (profit < 0 ? '#dc3545' : '#666')}">${profit}</td>
             <td style="color: #aaa; font-size:0.9em;">₩${p.priceKrw || 0}</td>
+            <td>${p.cost || 0}</td>
             <td style="font-weight:bold;">${totalStock}</td>
             <td onclick="event.stopPropagation()">
                 <label class="toggle-switch">
@@ -1196,7 +1201,7 @@ function openProductModal(productId = null) {
             document.getElementById('prodBrand').value = p.brand || '';
             document.getElementById('prodPrice').value = p.price;
             document.getElementById('prodCost').value = p.cost;
-            document.getElementById('prodWholesalePrice').value = p.wholesalePrice || 0;
+            // 批發價已移除
             document.getElementById('prodPriceKrw').value = p.priceKrw || 0;
             document.getElementById('prodStock').value = p.stock;
             document.getElementById('prodStatus').value = p.status;
@@ -1283,7 +1288,7 @@ async function handleProductSubmit(e) {
             brand: document.getElementById('prodBrand').value.trim() || '',
             price: Number(document.getElementById('prodPrice').value),
             cost: Number(document.getElementById('prodCost').value),
-            wholesalePrice: Number(document.getElementById('prodWholesalePrice').value) || 0,
+            wholesalePrice: 0, // 預設 0 或移除
             priceKrw: Number(document.getElementById('prodPriceKrw').value),
             stock: Number(document.getElementById('prodStock').value),
             status: document.getElementById('prodStatus').value,
