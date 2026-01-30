@@ -3804,3 +3804,103 @@ function saveSettings() {
             }
         });
 }
+
+/**
+ * 變更管理員密碼
+ */
+function changePassword() {
+    const currentPwd = document.getElementById('currentPasswordInput').value;
+    const newPwd = document.getElementById('newPasswordInput').value;
+    const confirmPwd = document.getElementById('confirmPasswordInput').value;
+    const messageDiv = document.getElementById('passwordChangeMessage');
+    const btn = document.getElementById('changePasswordBtn');
+
+    // 清除訊息
+    messageDiv.style.display = 'none';
+    messageDiv.innerHTML = '';
+
+    // 前端驗證
+    if (!currentPwd) {
+        showPasswordMessage('請輸入目前密碼', 'error');
+        return;
+    }
+
+    if (!newPwd || newPwd.length < 4) {
+        showPasswordMessage('新密碼長度至少需要 4 個字元', 'error');
+        return;
+    }
+
+    if (newPwd !== confirmPwd) {
+        showPasswordMessage('新密碼與確認密碼不一致', 'error');
+        return;
+    }
+
+    if (newPwd === currentPwd) {
+        showPasswordMessage('新密碼不能與目前密碼相同', 'error');
+        return;
+    }
+
+    // 發送 API 請求
+    btn.disabled = true;
+    btn.textContent = '變更中...';
+
+    // 使用輸入的當前密碼進行驗證 (而非 sessionStorage 的密碼)
+    fetch(GAS_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({
+            action: 'adminAction',
+            subAction: 'changePassword',
+            password: currentPwd,  // 使用輸入的當前密碼驗證
+            newPassword: newPwd
+        })
+    })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                showPasswordMessage('✅ 密碼變更成功！下次登入請使用新密碼。', 'success');
+                // 更新 sessionStorage 的密碼
+                currentPassword = newPwd;
+                sessionStorage.setItem('adminPassword', newPwd);
+                // 清空輸入欄
+                document.getElementById('currentPasswordInput').value = '';
+                document.getElementById('newPasswordInput').value = '';
+                document.getElementById('confirmPasswordInput').value = '';
+                showToast('密碼已變更', 'success');
+            } else {
+                showPasswordMessage('❌ ' + (data.error || '密碼變更失敗'), 'error');
+            }
+        })
+        .catch(err => {
+            showPasswordMessage('❌ 連線錯誤: ' + err.message, 'error');
+        })
+        .finally(() => {
+            btn.disabled = false;
+            btn.textContent = '變更密碼';
+        });
+}
+
+/**
+ * 顯示密碼變更訊息
+ */
+function showPasswordMessage(message, type) {
+    const messageDiv = document.getElementById('passwordChangeMessage');
+    if (!messageDiv) return;
+
+    messageDiv.style.display = 'block';
+    messageDiv.style.padding = '10px 15px';
+    messageDiv.style.borderRadius = '6px';
+    messageDiv.style.fontSize = '0.9rem';
+
+    if (type === 'error') {
+        messageDiv.style.background = '#fee2e2';
+        messageDiv.style.color = '#dc2626';
+        messageDiv.style.border = '1px solid #fecaca';
+    } else {
+        messageDiv.style.background = '#dcfce7';
+        messageDiv.style.color = '#16a34a';
+        messageDiv.style.border = '1px solid #bbf7d0';
+    }
+
+    messageDiv.innerHTML = message;
+}

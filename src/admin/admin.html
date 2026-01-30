@@ -501,8 +501,43 @@
                         </button>
                     </div>
                 </div>
-            </div>
 
+                <!-- 密碼設定卡片 -->
+                <div class="card" style="margin-top: 1.5rem;">
+                    <h3 style="margin-bottom: 1.5rem;">🔐 修改管理密碼</h3>
+
+                    <div class="form-group">
+                        <label style="font-weight: 500; margin-bottom: 6px; display: block;">目前密碼</label>
+                        <input type="password" id="currentPasswordInput" placeholder="請輸入目前的密碼"
+                            style="width: 100%; max-width: 300px;">
+                    </div>
+
+                    <div
+                        style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; max-width: 620px;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label style="font-weight: 500; margin-bottom: 6px; display: block;">新密碼</label>
+                            <input type="password" id="newPasswordInput" placeholder="至少 4 個字元" style="width: 100%;">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label style="font-weight: 500; margin-bottom: 6px; display: block;">確認新密碼</label>
+                            <input type="password" id="confirmPasswordInput" placeholder="再次輸入新密碼" style="width: 100%;">
+                        </div>
+                    </div>
+
+                    <div id="passwordChangeMessage" style="margin-bottom: 1rem; display: none;"></div>
+
+                    <div class="form-actions">
+                        <button class="btn-secondary" onclick="changePassword()"
+                            style="padding: 10px 24px; font-size: 0.95rem;" id="changePasswordBtn">
+                            變更密碼
+                        </button>
+                    </div>
+
+                    <small style="color: #888; display: block; margin-top: 1rem;">
+                        💡 變更密碼後，下次登入請使用新密碼。忘記密碼時可直接查看 Google Sheet「網站設定」分頁。
+                    </small>
+                </div>
+            </div>
 
 
             <!-- 首頁排版編輯器 (升級版) -->
