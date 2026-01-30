@@ -8,7 +8,7 @@ const Checkout = {
     // 運送方式設定 - 預設值（會被動態載入覆蓋）
     SHIPPING_METHODS: {
         'pickup': { name: '限台中市面交', fee: 0 },
-        '711': { name: '7-11 店到店', fee: 60 }
+        '711': { name: '7-11 店到店', fee: 30 }
     },
 
     // 目前選擇的運送方式

@@ -3639,7 +3639,7 @@ function loadSettings() {
                 if (shippingOption1Name) shippingOption1Name.value = s.shippingOption1Name || '限台中市面交';
                 if (shippingOption1Fee) shippingOption1Fee.value = s.shippingOption1Fee || '0';
                 if (shippingOption2Name) shippingOption2Name.value = s.shippingOption2Name || '7-11店到店';
-                if (shippingOption2Fee) shippingOption2Fee.value = s.shippingOption2Fee || '60';
+                if (shippingOption2Fee) shippingOption2Fee.value = s.shippingOption2Fee || '30';
 
                 // 處理 Logo 顯示
                 const logoPreview = document.getElementById('currentLogoPreview');
