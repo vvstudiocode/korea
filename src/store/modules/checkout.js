@@ -33,10 +33,46 @@ const Checkout = {
                     }
                 };
                 console.log('運送選項已載入:', this.SHIPPING_METHODS);
+
+                // 3. 強制更新介面上的運送選項文字 (即使是靜態 HTML)
+                this.updateShippingUI();
             }
         } catch (error) {
             console.error('載入運送選項失敗，使用預設值:', error);
         }
+    },
+
+    /**
+     * 更新介面上的運送選項文字 (覆蓋靜態 HTML)
+     */
+    updateShippingUI() {
+        // 1. 更新購物車側邊欄的選項
+        const shippingOptionsDiv = document.querySelector('.shipping-options');
+        if (shippingOptionsDiv) {
+            // 尋找對應的選項並更新
+            const pickupOption = shippingOptionsDiv.querySelector('input[value="pickup"]');
+            if (pickupOption) {
+                const labelSpan = pickupOption.nextElementSibling;
+                if (labelSpan) {
+                    const feeText = this.SHIPPING_METHODS.pickup.fee === 0 ? '免運' : `NT$ ${this.SHIPPING_METHODS.pickup.fee}`;
+                    labelSpan.innerHTML = `${this.SHIPPING_METHODS.pickup.name} <strong>${feeText}</strong>`;
+                }
+            }
+
+            const storeOption = shippingOptionsDiv.querySelector('input[value="711"]');
+            if (storeOption) {
+                const labelSpan = storeOption.nextElementSibling;
+                if (labelSpan) {
+                    labelSpan.innerHTML = `${this.SHIPPING_METHODS['711'].name} <strong>NT$ ${this.SHIPPING_METHODS['711'].fee}</strong>`;
+                }
+            }
+
+            // 重新計算總金額顯示
+            Cart.updateUI();
+        }
+
+        // 2. 更新結帳彈窗中的摘要 (如果有打開)
+        this.updateSummary();
     },
 
     /**
@@ -146,6 +182,9 @@ const Checkout = {
             Toast.warning('購物車是空的');
             return;
         }
+
+        // 確保使用最新的運送選項文字
+        this.updateShippingUI();
 
         // 更新結帳表單的設定（匯款資訊、提示）
         this._applySettings();
