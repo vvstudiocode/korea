@@ -97,6 +97,14 @@ const API = {
     },
 
     /**
+     * 取得運送選項設定
+     * @returns {Promise<Object>}
+     */
+    async getShippingOptions() {
+        return this.call('getShippingOptions');
+    },
+
+    /**
      * 取得訂單列表 (管理員用)
      * @param {string} password - 管理員密碼
      * @param {Object} filters - 篩選條件

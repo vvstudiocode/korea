@@ -5,7 +5,7 @@
  */
 
 const Checkout = {
-    // 運送方式設定
+    // 運送方式設定 - 預設值（會被動態載入覆蓋）
     SHIPPING_METHODS: {
         'pickup': { name: '限台中市面交', fee: 0 },
         '711': { name: '7-11 店到店', fee: 60 }
@@ -13,6 +13,31 @@ const Checkout = {
 
     // 目前選擇的運送方式
     selectedMethod: '711',
+
+    /**
+     * 初始化運送選項（從後端載入）
+     */
+    async init() {
+        try {
+            const result = await API.getShippingOptions();
+            if (result.success && result.shippingOptions) {
+                // 更新運送方式設定
+                this.SHIPPING_METHODS = {
+                    'pickup': {
+                        name: result.shippingOptions.option1.name,
+                        fee: result.shippingOptions.option1.fee
+                    },
+                    '711': {
+                        name: result.shippingOptions.option2.name,
+                        fee: result.shippingOptions.option2.fee
+                    }
+                };
+                console.log('運送選項已載入:', this.SHIPPING_METHODS);
+            }
+        } catch (error) {
+            console.error('載入運送選項失敗，使用預設值:', error);
+        }
+    },
 
     /**
      * 將網站設定套用到結帳表單（匯款資訊、提示）

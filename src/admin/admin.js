@@ -17,6 +17,7 @@ const GAS_API_URL = (typeof window !== 'undefined' && window.SITE_CONFIG?.apiUrl
 let currentPassword = '';
 let currentOrders = [];
 let currentProducts = [];
+let shippingOptions = null; // 運送選項設定
 
 // Debug: Check which API is being used
 if (typeof window !== 'undefined') {
@@ -43,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const savedPassword = sessionStorage.getItem('adminPassword');
     if (savedPassword) {
         currentPassword = savedPassword;
+        loadShippingOptions(); // 載入運送選項
         showDashboard();
     }
 
@@ -724,6 +726,9 @@ function openOrderDetail(orderId) {
         saveBtn.textContent = '確認修改 (暫存)';
         saveBtn.onclick = () => saveOrderDetailToBatch(orderId);
     }
+
+    // 更新運送方式下拉選單（使用動態設定）
+    updateShippingDropdown();
 
     openModal('orderDetailModal');
 }
@@ -1925,15 +1930,22 @@ function updateShippingFee() {
     const shippingMethod = document.getElementById('detailShipping').value;
     const feeInput = document.getElementById('detailShippingFee');
 
-    // 如果是手動修改過的，也許我們不該覆蓋？
-    // 但如果使用者切換運送方式，通常期望運費跟著變。
-    // 所以策略是：切換運送方式時，總是更新為該方式的預設值。
-
-    if (shippingMethod === '7-11店到店') {
-        feeInput.value = 60;
+    // 使用動態運送選項設定
+    if (shippingOptions) {
+        if (shippingMethod === shippingOptions.option2.name) {
+            feeInput.value = shippingOptions.option2.fee;
+        } else if (shippingMethod === shippingOptions.option1.name) {
+            feeInput.value = shippingOptions.option1.fee;
+        } else {
+            feeInput.value = 0;
+        }
     } else {
-        // 限台中市面交 或其他
-        feeInput.value = 0;
+        // 預設值（向後相容）
+        if (shippingMethod === '7-11店到店') {
+            feeInput.value = 60;
+        } else {
+            feeInput.value = 0;
+        }
     }
 
     updateTotal();
@@ -3618,6 +3630,17 @@ function loadSettings() {
                 if (siteDescInput) siteDescInput.value = s.siteDescription || '';
                 if (siteSuffixInput) siteSuffixInput.value = s.siteSuffix || '';
 
+                // 載入運送選項設定
+                const shippingOption1Name = document.getElementById('settingShippingOption1Name');
+                const shippingOption1Fee = document.getElementById('settingShippingOption1Fee');
+                const shippingOption2Name = document.getElementById('settingShippingOption2Name');
+                const shippingOption2Fee = document.getElementById('settingShippingOption2Fee');
+
+                if (shippingOption1Name) shippingOption1Name.value = s.shippingOption1Name || '限台中市面交';
+                if (shippingOption1Fee) shippingOption1Fee.value = s.shippingOption1Fee || '0';
+                if (shippingOption2Name) shippingOption2Name.value = s.shippingOption2Name || '7-11店到店';
+                if (shippingOption2Fee) shippingOption2Fee.value = s.shippingOption2Fee || '60';
+
                 // 處理 Logo 顯示
                 const logoPreview = document.getElementById('currentLogoPreview');
                 const noLogoText = document.getElementById('noLogoText');
@@ -3755,7 +3778,13 @@ function saveSettings() {
         bankCode: document.getElementById('settingBankCode').value.trim(),
         bankAccount: document.getElementById('settingBankAccount').value.trim(),
         bankNote: document.getElementById('settingBankNote').value.trim(),
-        paymentNote: document.getElementById('settingPaymentNote').value.trim()
+        paymentNote: document.getElementById('settingPaymentNote').value.trim(),
+
+        // 運送選項設定
+        shippingOption1Name: document.getElementById('settingShippingOption1Name').value.trim(),
+        shippingOption1Fee: document.getElementById('settingShippingOption1Fee').value.trim(),
+        shippingOption2Name: document.getElementById('settingShippingOption2Name').value.trim(),
+        shippingOption2Fee: document.getElementById('settingShippingOption2Fee').value.trim()
     };
 
     // 處理 Logo URL
@@ -3803,6 +3832,49 @@ function saveSettings() {
                 btn.textContent = '💾 儲存設定';
             }
         });
+}
+
+/**
+ * 載入運送選項設定
+ */
+function loadShippingOptions() {
+    callApi('getShippingOptions')
+        .then(data => {
+            if (data.success && data.data.shippingOptions) {
+                shippingOptions = data.data.shippingOptions;
+                console.log('運送選項已載入:', shippingOptions);
+                // 更新訂單編輯的下拉選單
+                updateShippingDropdown();
+            }
+        })
+        .catch(err => {
+            console.error('載入運送選項失敗:', err);
+        });
+}
+
+/**
+ * 更新訂單編輯的運送方式下拉選單
+ */
+function updateShippingDropdown() {
+    if (!shippingOptions) return;
+
+    const shipSelect = document.getElementById('detailShipping');
+    if (!shipSelect) return;
+
+    // 保存目前選擇的值
+    const currentValue = shipSelect.value;
+
+    // 清空並重建選項
+    shipSelect.innerHTML = `
+        <option value="" disabled ${!currentValue ? 'selected' : ''}>-- 請選擇運送方式 --</option>
+        <option value="${shippingOptions.option2.name}">${shippingOptions.option2.name} (+${shippingOptions.option2.fee})</option>
+        <option value="${shippingOptions.option1.name}">${shippingOptions.option1.name} (${shippingOptions.option1.fee === 0 ? '免運' : '+' + shippingOptions.option1.fee})</option>
+    `;
+
+    // 恢復之前的選擇（如果存在於選項中）
+    if (currentValue) {
+        shipSelect.value = currentValue;
+    }
 }
 
 /**

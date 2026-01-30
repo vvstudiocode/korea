@@ -125,6 +125,11 @@ const App = {
         // 3. 初始化購物車
         Cart.init();
 
+        // 3.1 初始化結帳模組 (載入運送選項)
+        if (typeof Checkout !== 'undefined') {
+            Checkout.init();
+        }
+
         // 4. 設定事件監聯器
         this.setupEventListeners();
 

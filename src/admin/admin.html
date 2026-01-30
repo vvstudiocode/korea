@@ -493,6 +493,46 @@
                         </small>
                     </div>
 
+                    <hr style="border: none; border-top: 1px solid #eee; margin: 1.5rem 0;">
+
+                    <!-- 運送選項設定 -->
+                    <h4 style="margin-bottom: 1rem; color: #2C3E50;">運送方式設定</h4>
+                    <small style="color: #666; display: block; margin-bottom: 1rem;">
+                        💡 設定網站前台的運送選項，客戶在結帳時可以選擇。
+                    </small>
+
+                    <!-- 運送選項 1 -->
+                    <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem;">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label style="font-weight: 500; margin-bottom: 6px; display: block;">運送選項 1 名稱</label>
+                                <input type="text" id="settingShippingOption1Name" placeholder="例如：限台中市面交"
+                                    style="width: 100%;">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label style="font-weight: 500; margin-bottom: 6px; display: block;">運費（元）</label>
+                                <input type="number" id="settingShippingOption1Fee" placeholder="0" min="0"
+                                    style="width: 100%;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 運送選項 2 -->
+                    <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem;">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label style="font-weight: 500; margin-bottom: 6px; display: block;">運送選項 2 名稱</label>
+                                <input type="text" id="settingShippingOption2Name" placeholder="例如：7-11店到店"
+                                    style="width: 100%;">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label style="font-weight: 500; margin-bottom: 6px; display: block;">運費（元）</label>
+                                <input type="number" id="settingShippingOption2Fee" placeholder="60" min="0"
+                                    style="width: 100%;">
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="form-actions"
                         style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #eee;">
                         <button class="accent-btn" onclick="saveSettings()"
