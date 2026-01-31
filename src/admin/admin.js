@@ -1467,6 +1467,92 @@ function formatCurrency(num) {
     return 'NT$ ' + (Number(num) || 0).toLocaleString();
 }
 
+/**
+ * 匯出 CSV 輔助函數
+ */
+function downloadCSV(csvContent, fileName) {
+    const BOM = '\uFEFF'; // Add BOM for Excel utf-8 support
+    const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', fileName);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+}
+
+/**
+ * 匯出商品 CSV
+ */
+function exportProductsToCSV() {
+    if (!currentProducts || currentProducts.length === 0) {
+        alert('目前沒有商品資料可匯出');
+        return;
+    }
+
+    const headers = ['編號', '名稱', '分類', '品牌', '售價', '成本', '利潤', '原價(KRW)', '庫存', '狀態'];
+
+    // 構建 CSV 內容
+    const rows = currentProducts.map(p => {
+        const profit = (p.price || 0) - (p.cost || 0);
+        return [
+            p.id,
+            `"${(p.name || '').replace(/"/g, '""')}"`, // Handle quotes in fields
+            p.category || '',
+            p.brand || '',
+            p.price || 0,
+            p.cost || 0,
+            profit,
+            p.priceKrw || 0,
+            p.stock || 0,
+            p.status || ''
+        ].join(',');
+    });
+
+    const csvContent = headers.join(',') + '\n' + rows.join('\n');
+    const fileName = `products_export_${new Date().toISOString().slice(0, 10)}.csv`;
+    downloadCSV(csvContent, fileName);
+}
+
+/**
+ * 匯出訂單 CSV
+ */
+function exportOrdersToCSV() {
+    if (!currentOrders || currentOrders.length === 0) {
+        alert('目前沒有訂單資料可匯出');
+        return;
+    }
+
+    const headers = ['訂單編號', '日期', '客戶姓名', '電話', '商品明細', '總金額', '狀態', '運送方式', '備註'];
+
+    const rows = currentOrders.map(order => {
+        // Format items as a readable string
+        const itemsStr = (order.items || []).map(item =>
+            `${item.name} ${item.spec ? `(${item.spec})` : ''} x${item.qty}`
+        ).join('; ');
+
+        return [
+            order.orderId || order.id,
+            order.date || '',
+            `"${(order.customerName || '').replace(/"/g, '""')}"`,
+            `'${order.customerPhone || ''}`, // Prepend ' to force string in Excel for phone numbers
+            `"${itemsStr.replace(/"/g, '""')}"`,
+            order.total || 0,
+            order.status || '',
+            order.shippingMethod || '',
+            `"${(order.note || '').replace(/"/g, '""')}"`
+        ].join(',');
+    });
+
+    const csvContent = headers.join(',') + '\n' + rows.join('\n');
+    const fileName = `orders_export_${new Date().toISOString().slice(0, 10)}.csv`;
+    downloadCSV(csvContent, fileName);
+}
+
 function openModal(id) {
     const modal = document.getElementById(id);
     modal.style.display = 'flex';

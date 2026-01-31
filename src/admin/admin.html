@@ -151,6 +151,7 @@
             <div id="ordersView" class="view-section" style="display: none;">
                 <div class="toolbar" style="margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
                     <button class="add-btn" onclick="openCreateOrderModal()">+ 新增訂單</button>
+                    <button class="btn-outline" onclick="exportOrdersToCSV()" style="margin-left: 5px;">匯出 CSV</button>
                     <!-- 訂單搜尋 -->
                     <div style="display: flex; gap: 0.5rem; flex: 2; min-width: 250px;">
                         <input type="text" id="orderSearchInput" placeholder="🔍 搜尋訂單編號、客戶姓名、電話..."
@@ -195,6 +196,8 @@
             <div id="productsView" class="view-section" style="display: none;">
                 <div class="toolbar">
                     <button class="add-btn" onclick="openProductModal()">+ 新增商品</button>
+                    <button class="btn-outline" onclick="exportProductsToCSV()" style="margin-left: 5px;">匯出
+                        CSV</button>
                     <!-- 商品搜尋 -->
                     <div style="display: flex; gap: 0.5rem; flex: 2; margin: 0 1rem;">
                         <input type="text" id="productSearchInput" placeholder="🔍 搜尋商品名稱、分類、品牌..."
