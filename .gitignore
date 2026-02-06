@@ -1,5 +1,6 @@
 .DS_Store
 .vscode/
+.agent/skills/
 
 # Layout 設定檔（動態生成）
 layout.json
@@ -22,5 +23,9 @@ _legacy/
 .env.local
 *.secret
 
+
 # API 金鑰和設定
 config/*.secret.json
+
+# 新版平台專案 (獨立 Git Repo)
+platform/
