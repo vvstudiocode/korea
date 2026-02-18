@@ -305,12 +305,12 @@
                     </div>
                 </div>
 
-                <button class="add-to-cart-btn" id="addToCartBtn" onclick="addToCart()" disabled style="background:#ccc; cursor:not-allowed;">
-                    已售完
+                <button class="add-to-cart-btn" id="addToCartBtn" onclick="addToCart()"  style="">
+                    加入購物車
                 </button>
 
                 <div class="stock-info">
-                    庫存：<span id="stockDisplay">0</span> 件
+                    庫存：<span id="stockDisplay">100</span> 件
                 </div>
 
                 <div class="product-description">
@@ -333,7 +333,7 @@
     <script src="/korea/src/store/app.js"></script>
 
     <script>
-        const PRODUCT = {"id":"P1771431707784552","name":"薄荷綠蒙奇奇","price":550,"image":"https://via.placeholder.com/600x600?text=No+Image","stock":0,"variants":[]};
+        const PRODUCT = {"id":"P1771431707784552","name":"薄荷綠蒙奇奇","price":550,"image":"https://via.placeholder.com/600x600?text=No+Image","stock":100,"variants":[]};
         
         let selectedSpec = null;
         let currentPrice = PRODUCT.price;
@@ -349,7 +349,7 @@
         if (storeId) {
             window.STORE_CONFIG = {
                 storeId: storeId,
-                paymentNote: ``,
+                paymentNote: `匯款完成後請至官方賴回覆`,
                 logoUrl: '', // Will be updated by App.js if API succeeds, but let's try to inject if possible? No, static page doesn't know dynamic sub-site config.
                 apiUrl: SITES_MAP[storeId] || ''
             };
