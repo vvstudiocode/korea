@@ -295,6 +295,17 @@
                 <div class="product-price-display" id="priceDisplay">NT$ 550</div>
                 
                 
+                <div class="variant-group">
+                    <span class="variant-label">規格：</span>
+                    <div class="variant-options">
+                        <button class="variant-btn " 
+                                   data-spec="薄荷綠" 
+                                   data-price="550" 
+                                   data-stock="100"
+                                   onclick="selectVariant(this)"
+                                   >薄荷綠</button>
+                    </div>
+                </div>
 
                 <div class="qty-row">
                     <span>數量：</span>
@@ -333,7 +344,7 @@
     <script src="/korea/src/store/app.js"></script>
 
     <script>
-        const PRODUCT = {"id":"P1771431707784552","name":"蒙奇奇","price":550,"image":"https://via.placeholder.com/600x600?text=No+Image","stock":100,"variants":[]};
+        const PRODUCT = {"id":"P1771431707784552","name":"蒙奇奇","price":550,"image":"https://via.placeholder.com/600x600?text=No+Image","stock":100,"variants":[{"spec":"薄荷綠","price":550,"cost":377,"stock":100,"image":"temp_1771432865149_ep6n6f5r9"}]};
         
         let selectedSpec = null;
         let currentPrice = PRODUCT.price;
