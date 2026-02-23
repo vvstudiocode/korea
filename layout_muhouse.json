@@ -1,10 +1,10 @@
 {
   "version": "1.0",
-  "lastUpdated": "2026-02-23T05:14:20.610Z",
+  "lastUpdated": "2026-02-23T05:15:09.785Z",
   "sections": [
     {
       "type": "hero",
-      "title": "Welcome to MUHOUS",
+      "title": "Welcome to MUHOUSE",
       "subtitle": "",
       "image": "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1200&q=80"
     },
@@ -18,6 +18,13 @@
       "title": "",
       "category": "全部",
       "limit": "999"
+    },
+    {
+      "type": "announcement",
+      "marginTop": 0,
+      "marginBottom": 20,
+      "text": "新公告內容",
+      "bgColor": "#f3f4f6"
     }
   ],
   "footer": {
