@@ -299,11 +299,77 @@
                     <span class="variant-label">規格：</span>
                     <div class="variant-options">
                         <button class="variant-btn " 
-                                   data-spec="熊熊奶油，粉紅玫瑰，紅底小花，藍熊熊，咖熊熊，粉底小花/M衣長44-47 胸寬39-42，L衣長52.5-54 胸寬42.5-46" 
+                                   data-spec="熊熊奶油/M衣長44-47 胸寬39-42" 
                                    data-price="350" 
-                                   data-stock="100"
+                                   data-stock="3"
                                    onclick="selectVariant(this)"
-                                   >熊熊奶油，粉紅玫瑰，紅底小花，藍熊熊，咖熊熊，粉底小花/M衣長44-47 胸寬39-42，L衣長52.5-54 胸寬42.5-46</button>
+                                   >熊熊奶油/M衣長44-47 胸寬39-42</button>
+                        <button class="variant-btn out-of-stock" 
+                                   data-spec="熊熊奶油/L衣長52.5-54 胸寬42.5-46" 
+                                   data-price="350" 
+                                   data-stock="0"
+                                   onclick="selectVariant(this)"
+                                   disabled>熊熊奶油/L衣長52.5-54 胸寬42.5-46</button>
+                        <button class="variant-btn " 
+                                   data-spec="粉紅玫瑰/M衣長44-47 胸寬39-42" 
+                                   data-price="350" 
+                                   data-stock="1"
+                                   onclick="selectVariant(this)"
+                                   >粉紅玫瑰/M衣長44-47 胸寬39-42</button>
+                        <button class="variant-btn out-of-stock" 
+                                   data-spec="粉紅玫瑰/L衣長52.5-54 胸寬42.5-46" 
+                                   data-price="350" 
+                                   data-stock="0"
+                                   onclick="selectVariant(this)"
+                                   disabled>粉紅玫瑰/L衣長52.5-54 胸寬42.5-46</button>
+                        <button class="variant-btn out-of-stock" 
+                                   data-spec="紅底小花/M衣長44-47 胸寬39-42" 
+                                   data-price="350" 
+                                   data-stock="0"
+                                   onclick="selectVariant(this)"
+                                   disabled>紅底小花/M衣長44-47 胸寬39-42</button>
+                        <button class="variant-btn " 
+                                   data-spec="紅底小花/L衣長52.5-54 胸寬42.5-46" 
+                                   data-price="350" 
+                                   data-stock="3"
+                                   onclick="selectVariant(this)"
+                                   >紅底小花/L衣長52.5-54 胸寬42.5-46</button>
+                        <button class="variant-btn " 
+                                   data-spec="藍熊熊/M衣長44-47 胸寬39-42" 
+                                   data-price="350" 
+                                   data-stock="2"
+                                   onclick="selectVariant(this)"
+                                   >藍熊熊/M衣長44-47 胸寬39-42</button>
+                        <button class="variant-btn " 
+                                   data-spec="藍熊熊/L衣長52.5-54 胸寬42.5-46" 
+                                   data-price="350" 
+                                   data-stock="1"
+                                   onclick="selectVariant(this)"
+                                   >藍熊熊/L衣長52.5-54 胸寬42.5-46</button>
+                        <button class="variant-btn " 
+                                   data-spec="咖熊熊/M衣長44-47 胸寬39-42" 
+                                   data-price="350" 
+                                   data-stock="2"
+                                   onclick="selectVariant(this)"
+                                   >咖熊熊/M衣長44-47 胸寬39-42</button>
+                        <button class="variant-btn out-of-stock" 
+                                   data-spec="咖熊熊/L衣長52.5-54 胸寬42.5-46" 
+                                   data-price="350" 
+                                   data-stock="0"
+                                   onclick="selectVariant(this)"
+                                   disabled>咖熊熊/L衣長52.5-54 胸寬42.5-46</button>
+                        <button class="variant-btn out-of-stock" 
+                                   data-spec="粉底小花/M衣長44-47 胸寬39-42" 
+                                   data-price="350" 
+                                   data-stock="0"
+                                   onclick="selectVariant(this)"
+                                   disabled>粉底小花/M衣長44-47 胸寬39-42</button>
+                        <button class="variant-btn " 
+                                   data-spec="粉底小花/L衣長52.5-54 胸寬42.5-46" 
+                                   data-price="350" 
+                                   data-stock="2"
+                                   onclick="selectVariant(this)"
+                                   >粉底小花/L衣長52.5-54 胸寬42.5-46</button>
                     </div>
                 </div>
 
@@ -321,7 +387,7 @@
                 </button>
 
                 <div class="stock-info">
-                    庫存：<span id="stockDisplay">100</span> 件
+                    庫存：<span id="stockDisplay">14</span> 件
                 </div>
 
                 <div class="product-description">
@@ -344,7 +410,7 @@
     <script src="/korea/src/store/app.js"></script>
 
     <script>
-        const PRODUCT = {"id":"P1772352884922665","name":"阿珠嬤背心","price":350,"image":"https://via.placeholder.com/600x600?text=No+Image","stock":100,"variants":[{"spec":"熊熊奶油，粉紅玫瑰，紅底小花，藍熊熊，咖熊熊，粉底小花/M衣長44-47 胸寬39-42，L衣長52.5-54 胸寬42.5-46","price":350,"cost":220,"stock":100,"image":""}]};
+        const PRODUCT = {"id":"P1772352884922665","name":"阿珠嬤背心","price":350,"image":"https://via.placeholder.com/600x600?text=No+Image","stock":14,"variants":[{"spec":"熊熊奶油/M衣長44-47 胸寬39-42","price":350,"cost":220,"stock":3,"image":""},{"spec":"熊熊奶油/L衣長52.5-54 胸寬42.5-46","price":350,"cost":220,"stock":0,"image":""},{"spec":"粉紅玫瑰/M衣長44-47 胸寬39-42","price":350,"cost":220,"stock":1,"image":""},{"spec":"粉紅玫瑰/L衣長52.5-54 胸寬42.5-46","price":350,"cost":220,"stock":0,"image":""},{"spec":"紅底小花/M衣長44-47 胸寬39-42","price":350,"cost":220,"stock":0,"image":""},{"spec":"紅底小花/L衣長52.5-54 胸寬42.5-46","price":350,"cost":220,"stock":3,"image":""},{"spec":"藍熊熊/M衣長44-47 胸寬39-42","price":350,"cost":220,"stock":2,"image":""},{"spec":"藍熊熊/L衣長52.5-54 胸寬42.5-46","price":350,"cost":220,"stock":1,"image":""},{"spec":"咖熊熊/M衣長44-47 胸寬39-42","price":350,"cost":220,"stock":2,"image":""},{"spec":"咖熊熊/L衣長52.5-54 胸寬42.5-46","price":350,"cost":220,"stock":0,"image":""},{"spec":"粉底小花/M衣長44-47 胸寬39-42","price":350,"cost":220,"stock":0,"image":""},{"spec":"粉底小花/L衣長52.5-54 胸寬42.5-46","price":350,"cost":220,"stock":2,"image":""}]};
         
         let selectedSpec = null;
         let currentPrice = PRODUCT.price;
