@@ -295,6 +295,41 @@
                 <div class="product-price-display" id="priceDisplay">NT$ 553</div>
                 
                 
+                <div class="variant-group">
+                    <span class="variant-label">規格：</span>
+                    <div class="variant-options">
+                        <button class="variant-btn " 
+                                   data-spec="XXS" 
+                                   data-price="553" 
+                                   data-stock="99"
+                                   onclick="selectVariant(this)"
+                                   >XXS</button>
+                        <button class="variant-btn " 
+                                   data-spec="XS" 
+                                   data-price="553" 
+                                   data-stock="99"
+                                   onclick="selectVariant(this)"
+                                   >XS</button>
+                        <button class="variant-btn " 
+                                   data-spec="S" 
+                                   data-price="553" 
+                                   data-stock="99"
+                                   onclick="selectVariant(this)"
+                                   >S</button>
+                        <button class="variant-btn " 
+                                   data-spec="M" 
+                                   data-price="553" 
+                                   data-stock="99"
+                                   onclick="selectVariant(this)"
+                                   >M</button>
+                        <button class="variant-btn " 
+                                   data-spec="L" 
+                                   data-price="553" 
+                                   data-stock="99"
+                                   onclick="selectVariant(this)"
+                                   >L</button>
+                    </div>
+                </div>
 
                 <div class="qty-row">
                     <span>數量：</span>
@@ -305,12 +340,12 @@
                     </div>
                 </div>
 
-                <button class="add-to-cart-btn" id="addToCartBtn" onclick="addToCart()" disabled style="background:#ccc; cursor:not-allowed;">
-                    已售完
+                <button class="add-to-cart-btn" id="addToCartBtn" onclick="addToCart()"  style="">
+                    加入購物車
                 </button>
 
                 <div class="stock-info">
-                    庫存：<span id="stockDisplay">0</span> 件
+                    庫存：<span id="stockDisplay">495</span> 件
                 </div>
 
                 <div class="product-description">
@@ -333,7 +368,7 @@
     <script src="/korea/src/store/app.js"></script>
 
     <script>
-        const PRODUCT = {"id":"P1777198787947651","name":"爆乳U領Bra Top / 短版","price":553,"image":"https://raw.githubusercontent.com/vvstudiocode/korea/main/stores/wangbai/images/products/BEIGY/eyJidWNrZXQiOiJzZi1lYy1zdGF0aWMiLCJrZXkiOiJiZWlneV9mMzVjN2U4NC91cGxvYWRzL3Byb2R1Y3QvQkUyMi0wNTA1MDMvMjEwNmQzMmFlZGVjYjljNjQ1YzY5ZmQxNmNkZWViZjcuanBnIiwiZWRpdHMiOnsicmVzaXplIjp7IndpZHRoIjoxMDI0LCJoZWlnaHQiOjE1ODY.webp","stock":0,"variants":[]};
+        const PRODUCT = {"id":"P1777198787947651","name":"爆乳U領Bra Top / 短版","price":553,"image":"https://raw.githubusercontent.com/vvstudiocode/korea/main/stores/wangbai/images/products/BEIGY/eyJidWNrZXQiOiJzZi1lYy1zdGF0aWMiLCJrZXkiOiJiZWlneV9mMzVjN2U4NC91cGxvYWRzL3Byb2R1Y3QvQkUyMi0wNTA1MDMvMjEwNmQzMmFlZGVjYjljNjQ1YzY5ZmQxNmNkZWViZjcuanBnIiwiZWRpdHMiOnsicmVzaXplIjp7IndpZHRoIjoxMDI0LCJoZWlnaHQiOjE1ODY.webp","stock":495,"variants":[{"spec":"XXS","price":553,"cost":0,"stock":99,"image":""},{"spec":"XS","price":553,"cost":0,"stock":99,"image":""},{"spec":"S","price":553,"cost":0,"stock":99,"image":""},{"spec":"M","price":553,"cost":0,"stock":99,"image":""},{"spec":"L","price":553,"cost":0,"stock":99,"image":""}]};
         
         let selectedSpec = null;
         let currentPrice = PRODUCT.price;
