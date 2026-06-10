@@ -297,6 +297,17 @@
                 <div class="product-price-display" id="priceDisplay">NT$ 870</div>
                 
                 
+                <div class="variant-group">
+                    <span class="variant-label">規格：</span>
+                    <div class="variant-options">
+                        <button class="variant-btn " 
+                                   data-spec="葡萄口味" 
+                                   data-price="870" 
+                                   data-stock="10"
+                                   onclick="selectVariant(this)"
+                                   >葡萄口味</button>
+                    </div>
+                </div>
 
                 <div class="qty-row">
                     <span>數量：</span>
@@ -307,12 +318,12 @@
                     </div>
                 </div>
 
-                <button class="add-to-cart-btn" id="addToCartBtn" onclick="addToCart()" disabled style="background:#ccc; cursor:not-allowed;">
-                    已售完
+                <button class="add-to-cart-btn" id="addToCartBtn" onclick="addToCart()"  style="">
+                    加入購物車
                 </button>
 
                 <div class="stock-info">
-                    庫存：<span id="stockDisplay">0</span> 件
+                    庫存：<span id="stockDisplay">10</span> 件
                 </div>
 
                 <div class="product-description">
@@ -335,7 +346,7 @@
     <script src="/korea/src/store/app.js"></script>
 
     <script>
-        const PRODUCT = {"id":"P1781074134382160","name":"膠原蛋白飲","price":870,"image":"https://raw.githubusercontent.com/vvstudiocode/korea/main/stores/oniselect/images/products/RE4DY/IMG_1303.jpeg","stock":0,"variants":[]};
+        const PRODUCT = {"id":"P1781074134382160","name":"膠原蛋白飲","price":870,"image":"https://raw.githubusercontent.com/vvstudiocode/korea/main/stores/oniselect/images/products/RE4DY/IMG_1303.jpeg","stock":10,"variants":[{"spec":"葡萄口味","price":870,"cost":700,"stock":10,"image":"https://raw.githubusercontent.com/vvstudiocode/korea/main/stores/oniselect/images/products/RE4DY/IMG_1303.jpeg"}]};
         
         let selectedSpec = null;
         let currentPrice = PRODUCT.price;
