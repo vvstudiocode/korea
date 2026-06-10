@@ -3,21 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>膠原蛋白 | oniselect 選品店</title>
+    <title>膠原蛋白果凍 | oniselect 選品店</title>
     <meta name="description" content="">
     
     <!-- Open Graph -->
     <meta property="og:type" content="product">
     <meta property="og:url" content="https://vvstudiocode.github.io/korea/p/P1781073770780898/">
-    <meta property="og:title" content="膠原蛋白 | oniselect">
+    <meta property="og:title" content="膠原蛋白果凍 | oniselect">
     <meta property="og:description" content="">
     <meta property="og:image" content="https://raw.githubusercontent.com/vvstudiocode/korea/main/stores/oniselect/images/products/RE4DY/IMG_2601.jpeg">
-    <meta property="product:price:amount" content="920">
+    <meta property="product:price:amount" content="900">
     <meta property="product:price:currency" content="TWD">
     
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="膠原蛋白">
+    <meta name="twitter:title" content="膠原蛋白果凍">
     <meta name="twitter:image" content="https://raw.githubusercontent.com/vvstudiocode/korea/main/stores/oniselect/images/products/RE4DY/IMG_2601.jpeg">
 
     <link rel="stylesheet" href="/korea/src/store/styles/styles.css">
@@ -281,23 +281,32 @@
                 <div class="gallery-main">
                     <button class="gallery-nav prev" onclick="slideImage(-1)">❮</button>
                     <div class="gallery-slider" id="gallerySlider">
-                        <img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/stores/oniselect/images/products/RE4DY/IMG_2601.jpeg" alt="膠原蛋白"><img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/stores/oniselect/images/products/RE4DY/IMG_2602.jpeg" alt="膠原蛋白"><img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/stores/oniselect/images/products/RE4DY/IMG_1303.jpeg" alt="膠原蛋白"><img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/stores/oniselect/images/products/RE4DY/IMG_2604.jpeg" alt="膠原蛋白">
+                        <img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/stores/oniselect/images/products/RE4DY/IMG_2601.jpeg" alt="膠原蛋白果凍"><img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/stores/oniselect/images/products/RE4DY/IMG_2602.jpeg" alt="膠原蛋白果凍">
                     </div>
                     <button class="gallery-nav next" onclick="slideImage(1)">❯</button>
                 </div>
                 <div class="product-thumbnails">
-                    <img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/stores/oniselect/images/products/RE4DY/IMG_2601.jpeg" alt="膠原蛋白 - 1" class="active" onclick="changeMainImage(this)">
-                    <img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/stores/oniselect/images/products/RE4DY/IMG_2602.jpeg" alt="膠原蛋白 - 2" class="" onclick="changeMainImage(this)">
-                    <img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/stores/oniselect/images/products/RE4DY/IMG_1303.jpeg" alt="膠原蛋白 - 3" class="" onclick="changeMainImage(this)">
-                    <img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/stores/oniselect/images/products/RE4DY/IMG_2604.jpeg" alt="膠原蛋白 - 4" class="" onclick="changeMainImage(this)">
+                    <img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/stores/oniselect/images/products/RE4DY/IMG_2601.jpeg" alt="膠原蛋白果凍 - 1" class="active" onclick="changeMainImage(this)">
+                    <img src="https://raw.githubusercontent.com/vvstudiocode/korea/main/stores/oniselect/images/products/RE4DY/IMG_2602.jpeg" alt="膠原蛋白果凍 - 2" class="" onclick="changeMainImage(this)">
                 </div>
             </div>
 
             <div class="product-info">
-                <h1>膠原蛋白</h1>
-                <div class="product-price-display" id="priceDisplay">NT$ 920</div>
+                <h1>膠原蛋白果凍</h1>
+                <div class="product-price-display" id="priceDisplay">NT$ 900</div>
                 
                 
+                <div class="variant-group">
+                    <span class="variant-label">規格：</span>
+                    <div class="variant-options">
+                        <button class="variant-btn " 
+                                   data-spec="膠原蛋白果凍-蘋果口味/膠原蛋白飲-葡萄口味" 
+                                   data-price="900" 
+                                   data-stock="10"
+                                   onclick="selectVariant(this)"
+                                   >膠原蛋白果凍-蘋果口味/膠原蛋白飲-葡萄口味</button>
+                    </div>
+                </div>
 
                 <div class="qty-row">
                     <span>數量：</span>
@@ -308,12 +317,12 @@
                     </div>
                 </div>
 
-                <button class="add-to-cart-btn" id="addToCartBtn" onclick="addToCart()" disabled style="background:#ccc; cursor:not-allowed;">
-                    已售完
+                <button class="add-to-cart-btn" id="addToCartBtn" onclick="addToCart()"  style="">
+                    加入購物車
                 </button>
 
                 <div class="stock-info">
-                    庫存：<span id="stockDisplay">0</span> 件
+                    庫存：<span id="stockDisplay">10</span> 件
                 </div>
 
                 <div class="product-description">
@@ -336,13 +345,13 @@
     <script src="/korea/src/store/app.js"></script>
 
     <script>
-        const PRODUCT = {"id":"P1781073770780898","name":"膠原蛋白","price":920,"image":"https://raw.githubusercontent.com/vvstudiocode/korea/main/stores/oniselect/images/products/RE4DY/IMG_2601.jpeg","stock":0,"variants":[]};
+        const PRODUCT = {"id":"P1781073770780898","name":"膠原蛋白果凍","price":900,"image":"https://raw.githubusercontent.com/vvstudiocode/korea/main/stores/oniselect/images/products/RE4DY/IMG_2601.jpeg","stock":10,"variants":[{"spec":"膠原蛋白果凍-蘋果口味/膠原蛋白飲-葡萄口味","price":900,"cost":770,"stock":10,"image":"https://raw.githubusercontent.com/vvstudiocode/korea/main/stores/oniselect/images/products/RE4DY/IMG_2601.jpeg"}]};
         
         let selectedSpec = null;
         let currentPrice = PRODUCT.price;
         let currentStock = PRODUCT.stock;
         let currentSlide = 0;
-        const totalSlides = 4;
+        const totalSlides = 2;
         
         // Parse Store ID and setup config
         const params = new URLSearchParams(window.location.search);
